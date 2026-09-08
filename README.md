@@ -40,6 +40,32 @@ npm run dev
 
 Acesse a URL impressa pelo Vite (por padrão `http://localhost:5173`, ou a próxima porta livre). As chamadas para `/api/*` são redirecionadas automaticamente para o backend.
 
+## App desktop (Windows)
+
+Existe uma versão empacotada como um único `.exe` do Windows, sem Docker/terminal/instalação de nada — é o que se manda para quem só vai usar o programa (ex: o dono dos pombos). Detalhes em [`backend/desktop/`](backend/desktop).
+
+- Banco: SQLite, guardado em `%APPDATA%\PedigreeColombofilico\pedigree.db` no computador de quem usa. Na primeira abertura, se esse arquivo ainda não existe, é copiado de `backend/desktop/pedigree-inicial.db` (banco "semente", já com os dados cadastrados até o momento do build).
+- Certificado de pedigree: como não dá para embutir o WeasyPrint de forma confiável num `.exe` Windows (depende de bibliotecas nativas GTK), o desktop abre o certificado como página e usa a impressão nativa do Windows (Ctrl+P → "Microsoft Print to PDF") em vez de gerar o PDF direto.
+- O `.exe` é gerado automaticamente pelo GitHub Actions (`.github/workflows/build-windows.yml`) a cada push em `main` — baixe o artefato mais recente na aba **Actions** do repositório.
+
+Para atualizar o banco semente com dados mais recentes do Postgres de desenvolvimento:
+
+```bash
+cd backend
+source .venv/bin/activate
+python -m desktop.export_sqlite
+git add desktop/pedigree-inicial.db
+```
+
+Para testar a lógica do app desktop localmente (sem gerar o `.exe`, sem abrir a janela nativa):
+
+```bash
+cd backend
+source .venv/bin/activate
+pip install -r requirements-desktop.txt
+python -m desktop.desktop_main
+```
+
 ## Estrutura
 
 - `backend/app/models.py` — modelos (Proprietario, Pombo, Resultado); `Pombo` referencia `pai_id`/`mae_id` (self-relation).
