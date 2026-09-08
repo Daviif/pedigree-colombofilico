@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<style>
+  @page {
+    size: A4 landscape;
+    margin: 12mm;
+  }
+  body {
+    font-family: "DejaVu Sans", Arial, sans-serif;
+    color: #1a1a1a;
+  }
+  .barra-acoes {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .barra-acoes button {
+    cursor: pointer;
+    padding: 6px 14px;
+    border-radius: 4px;
+    border: 1px solid #2f5fa8;
+    background: #2f5fa8;
+    color: #fff;
+    font-size: 12px;
+    font-family: inherit;
+  }
+  .barra-acoes a {
+    font-size: 12px;
+    color: #2f5fa8;
+    text-decoration: none;
+  }
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+  }
+  h1 {
+    font-size: 16px;
+    margin: 0 0 2px 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .cabecalho {
+    border-bottom: 2px solid #2f5fa8;
+    padding-bottom: 6px;
+    margin-bottom: 10px;
+  }
+  .cabecalho-titulo {
+    font-size: 13px;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  .cabecalho-obs {
+    font-size: 9px;
+    color: #333;
+    margin-top: 1px;
+    white-space: pre-line;
+  }
+  .cabecalho-contato {
+    font-size: 8.5px;
+    color: #555;
+    margin-top: 1px;
+  }
+  .subtitulo {
+    font-size: 10px;
+    color: #555;
+    margin-bottom: 10px;
+  }
+  .pair {
+    display: flex;
+    align-items: center;
+  }
+  .children {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    border-left: 2px solid #94a3b8;
+  }
+  .stub-h {
+    width: 16px;
+    height: 2px;
+    background: #94a3b8;
+    flex-shrink: 0;
+  }
+  .branch {
+    display: flex;
+    align-items: center;
+    padding: 4px 0;
+  }
+  .branch .stub {
+    width: 12px;
+    height: 2px;
+    background: #94a3b8;
+    flex-shrink: 0;
+  }
+  .box {
+    border: 1px solid #333;
+    border-radius: 3px;
+    padding: 4px 7px;
+    font-size: 7.5px;
+    line-height: 1.35;
+    min-width: 130px;
+    margin: 2px 6px;
+    background: #ffffff;
+  }
+  .box.principal {
+    min-width: 170px;
+    font-size: 9px;
+    background: #eef4ff;
+    border-color: #2f5fa8;
+  }
+  .box.duplicado {
+    background: #fff1cf;
+    border-color: #b5750a;
+  }
+  .box .anilha {
+    font-weight: bold;
+    display: block;
+  }
+  .box .grau {
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #888;
+    font-size: 6.5px;
+  }
+  .box em {
+    color: #888;
+  }
+  .titulos {
+    margin-top: 3px;
+    padding-top: 3px;
+    border-top: 1px dotted #bbb;
+    color: #2f5fa8;
+  }
+  .box.principal .titulos {
+    color: #1a3d7a;
+  }
+  .rodape {
+    margin-top: 14px;
+    font-size: 8px;
+    color: #777;
+  }
+  .aviso {
+    margin-top: 6px;
+    font-size: 8px;
+    color: #b5750a;
+  }
+</style>
+</head>
+<body>
+
+  <div class="barra-acoes no-print">
+    <button onclick="window.print()">🖨 Imprimir / Salvar PDF</button>
+    <a href="javascript:history.back()">← Voltar</a>
+  </div>
+
+  {% macro lista_resultados(resultados) %}
+    {% if resultados %}
+    <div class="titulos">
+      {% for r in resultados %}
+        <div>{% if r.ano %}{{ r.ano }} &mdash; {% endif %}{{ r.competicao }}{% if r.colocacao %} ({{ r.colocacao }}){% endif %}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  {% endmacro %}
+
+  {% macro render_no(no) %}
+    <div class="pair">
+      <div class="box{{ ' duplicado' if no and no.duplicado else '' }}">
+        {% if no %}
+          {% if no.grau_parentesco %}<div class="grau">{{ no.grau_parentesco }}</div>{% endif %}
+          <span class="anilha">{{ no.anilha }}</span>
+          {{ no.sexo.value if no.sexo else '' }} &mdash; {{ no.cor or '' }}<br>
+          {% if no.proprietario_nome %}Dono: {{ no.proprietario_nome }}{% endif %}
+          {{ lista_resultados(no.resultados) }}
+        {% else %}
+          <em>Desconhecido</em>
+        {% endif %}
+      </div>
+      {% if no and (no.pai or no.mae) %}
+      <div class="stub-h"></div>
+      <div class="children">
+        <div class="branch"><div class="stub"></div>{{ render_no(no.pai) }}</div>
+        <div class="branch"><div class="stub"></div>{{ render_no(no.mae) }}</div>
+      </div>
+      {% endif %}
+    </div>
+  {% endmacro %}
+
+  {% if pombo.proprietario %}
+  <div class="cabecalho">
+    <div class="cabecalho-titulo">
+      {% if pombo.proprietario.colombodromo %}Pombal {{ pombo.proprietario.colombodromo }} &mdash; {% endif %}Propriedade de {{ pombo.proprietario.nome }}
+    </div>
+    {% if pombo.proprietario.observacoes %}<div class="cabecalho-obs">{{ pombo.proprietario.observacoes }}</div>{% endif %}
+    {% if pombo.proprietario.endereco or pombo.proprietario.telefone or pombo.proprietario.email %}
+    <div class="cabecalho-contato">
+      {{ [pombo.proprietario.endereco, pombo.proprietario.telefone, pombo.proprietario.email] | select | join(' &middot; ') }}
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <h1>Certificado de Pedigree</h1>
+  <div class="subtitulo">Anilha {{ pombo.anilha }} &mdash; gerado em {{ gerado_em.strftime('%d/%m/%Y %H:%M') }}</div>
+
+  <div class="pair">
+    <div class="box principal">
+      <span class="anilha">{{ pombo.anilha }}</span>
+      {{ pombo.sexo.value if pombo.sexo else '' }} &mdash; {{ pombo.cor or '' }}<br>
+      {% if pombo.proprietario %}Proprietário: {{ pombo.proprietario.nome }}<br>{% endif %}
+      {% if pombo.observacoes %}<div style="white-space: pre-line">{{ pombo.observacoes }}</div>{% endif %}
+      {{ lista_resultados(arvore.resultados) }}
+    </div>
+
+    {% if arvore.pai or arvore.mae %}
+    <div class="stub-h"></div>
+    <div class="children">
+      <div class="branch"><div class="stub"></div>{{ render_no(arvore.pai) }}</div>
+      <div class="branch"><div class="stub"></div>{{ render_no(arvore.mae) }}</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="aviso">As caixas em destaque (amarelo) indicam anilhas que aparecem mais de uma vez na árvore, um indício de consanguinidade.</div>
+  <div class="rodape">Documento gerado automaticamente pelo Sistema de Pedigree Colombófilo.</div>
+
+</body>
+</html>

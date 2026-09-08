@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: pedigree
+      POSTGRES_PASSWORD: pedigree
+      POSTGRES_DB: pedigree
+    ports:
+      - "5436:5432"
+    volumes:
+      - pedigree_pgdata:/var/lib/postgresql/data
+
+volumes:
+  pedigree_pgdata:
