@@ -15,6 +15,16 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
+# Com console=False (build --windowed do PyInstaller), o Windows não aloca
+# console pro processo e sys.stdout/sys.stderr ficam None — não "escondidos",
+# None mesmo. Várias libs (incluindo o logging padrão do uvicorn) assumem que
+# eles sempre existem e quebram com AttributeError ao tentar usá-los. Blinda
+# aqui antes de qualquer import que possa logar.
+if sys.stdout is None:
+    sys.stdout = open(os.devnull, "w")
+if sys.stderr is None:
+    sys.stderr = open(os.devnull, "w")
+
 PORTA = 8734
 
 
@@ -71,7 +81,9 @@ def main() -> None:
 
     def rodar_servidor() -> None:
         try:
-            uvicorn.run(app, host="127.0.0.1", port=PORTA, log_level="warning")
+            # log_config=None: evita o AttributeError do formatter padrão do
+            # uvicorn (chama stream.isatty(), e aqui não tem stream real).
+            uvicorn.run(app, host="127.0.0.1", port=PORTA, log_config=None)
         except Exception:
             import traceback
 
