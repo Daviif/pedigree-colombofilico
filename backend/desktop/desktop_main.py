@@ -67,22 +67,42 @@ def main() -> None:
             return FileResponse(arquivo)
         return FileResponse(frontend_dist / "index.html")
 
+    log_path = pasta_dados_usuario() / "backend.log"
+
     def rodar_servidor() -> None:
-        uvicorn.run(app, host="127.0.0.1", port=PORTA, log_level="warning")
+        try:
+            uvicorn.run(app, host="127.0.0.1", port=PORTA, log_level="warning")
+        except Exception:
+            import traceback
+
+            log_path.write_text(traceback.format_exc(), encoding="utf-8")
 
     threading.Thread(target=rodar_servidor, daemon=True).start()
 
     url = f"http://127.0.0.1:{PORTA}/"
-    for _ in range(100):
+    servidor_no_ar = False
+    for _ in range(300):  # até 30s: onefile do PyInstaller pode demorar pra extrair/subir
         try:
             urllib.request.urlopen(f"{url}api/health", timeout=0.5)
+            servidor_no_ar = True
             break
         except (urllib.error.URLError, ConnectionError):
             time.sleep(0.1)
 
     import webview
 
-    webview.create_window("Pedigree Colombófilo", url, width=1300, height=860, min_size=(900, 600))
+    if servidor_no_ar:
+        webview.create_window("Pedigree Colombófilo", url, width=1300, height=860, min_size=(900, 600))
+    else:
+        detalhe = log_path.read_text(encoding="utf-8") if log_path.exists() else "Sem detalhes registrados."
+        erro_html = (
+            "<html><body style='font-family:sans-serif;padding:2rem'>"
+            "<h2>Não foi possível iniciar o programa</h2>"
+            "<p>O backend não respondeu a tempo. Detalhes técnicos:</p>"
+            f"<pre>{detalhe}</pre></body></html>"
+        )
+        webview.create_window("Pedigree Colombófilo - Erro", html=erro_html, width=900, height=600)
+
     webview.start()
 
 
