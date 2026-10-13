@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { isAxiosError } from 'axios'
 
 import { api } from './client'
 import type {
@@ -12,7 +13,47 @@ import type {
   ProprietarioInput,
   Resultado,
   ResultadoInput,
+  Usuario,
 } from './types'
+
+// ---------- Autenticação ----------
+
+export function useUsuarioAtual() {
+  return useQuery({
+    queryKey: ['usuario-atual'],
+    queryFn: async () => {
+      try {
+        return (await api.get<Usuario>('/auth/me')).data
+      } catch (erro) {
+        if (isAxiosError(erro) && erro.response?.status === 401) return null
+        throw erro
+      }
+    },
+    staleTime: Infinity,
+  })
+}
+
+export function useLogin() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (dados: { login: string; senha: string }) =>
+      (await api.post<Usuario>('/auth/login', dados)).data,
+    onSuccess: (usuario) => qc.setQueryData(['usuario-atual'], usuario),
+  })
+}
+
+export function useLogout() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async () => api.post('/auth/logout'),
+    onSuccess: () => {
+      // Primeiro some com o usuário (o App troca para a tela de login), depois
+      // descarta os dados em cache para não sobrarem para o próximo login.
+      qc.setQueryData(['usuario-atual'], null)
+      qc.removeQueries({ predicate: (q) => q.queryKey[0] !== 'usuario-atual' })
+    },
+  })
+}
 
 // ---------- Proprietarios ----------
 

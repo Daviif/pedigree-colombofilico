@@ -1,7 +1,9 @@
 import { Route, Routes } from 'react-router-dom'
 
+import { useUsuarioAtual } from './api/hooks'
 import { Layout } from './components/Layout'
 import { Dashboard } from './pages/Dashboard'
+import { Login } from './pages/Login'
 import { PomboDetail } from './pages/pombos/PomboDetail'
 import { PomboForm } from './pages/pombos/PomboForm'
 import { PombosList } from './pages/pombos/PombosList'
@@ -9,6 +11,11 @@ import { Proprietarios } from './pages/Proprietarios'
 import { Reprodutores } from './pages/Reprodutores'
 
 function App() {
+  const { data: usuario, isPending } = useUsuarioAtual()
+
+  if (isPending) return null
+  if (!usuario) return <Login />
+
   return (
     <Layout>
       <Routes>

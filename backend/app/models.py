@@ -1,6 +1,6 @@
 import enum
 
-from sqlalchemy import Enum, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Enum, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -83,3 +83,14 @@ class Resultado(Base):
     observacao: Mapped[str | None] = mapped_column(Text)
 
     pombo: Mapped[Pombo] = relationship(back_populates="resultados")
+
+
+class Usuario(Base):
+    __tablename__ = "usuarios"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    login: Mapped[str] = mapped_column(String(50), nullable=False, unique=True, index=True)
+    nome: Mapped[str] = mapped_column(String(200), nullable=False)
+    senha_hash: Mapped[str] = mapped_column(String(200), nullable=False)
+    admin: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    ativo: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true")

@@ -23,6 +23,7 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 alembic upgrade head
+python -m app.criar_usuario admin --admin   # só na primeira vez: usuário para entrar no sistema
 uvicorn app.main:app --reload --port 8010
 ```
 
@@ -42,7 +43,7 @@ Acesse a URL impressa pelo Vite (por padrão `http://localhost:5173`, ou a próx
 
 ## Deploy (VPS Oracle Cloud Free Tier)
 
-Produção roda tudo em Docker numa VPS só: Postgres + backend (FastAPI/WeasyPrint) + Caddy (serve o front-end, faz proxy de `/api`, emite HTTPS automático via Let's Encrypt e exige usuário/senha em todo o site). Arquivos em [`deploy/`](deploy). Funciona tanto na instância ARM (Ampere A1) quanto na AMD micro.
+Produção roda tudo em Docker numa VPS só: Postgres + backend (FastAPI/WeasyPrint) + Caddy (serve o front-end, faz proxy de `/api` e emite HTTPS automático via Let's Encrypt). O acesso é pela tela de login do próprio sistema (sessão em cookie `httpOnly`, válida por 30 dias). Arquivos em [`deploy/`](deploy). Funciona tanto na instância ARM (Ampere A1) quanto na AMD micro.
 
 ### 1. Preparar a VPS (uma vez)
 
@@ -62,12 +63,23 @@ Produção roda tudo em Docker numa VPS só: Postgres + backend (FastAPI/WeasyPr
 ```bash
 git clone <url-do-repo> pedigree && cd pedigree/deploy
 cp .env.example .env
-docker run --rm caddy:2-alpine caddy hash-password --plaintext 'SUA-SENHA'   # cole o hash no .env
-nano .env                                                                     # DOMAIN, AUTH_*, POSTGRES_PASSWORD
+openssl rand -hex 32        # cole como SECRET_KEY no .env
+nano .env                   # DOMAIN, POSTGRES_PASSWORD, SECRET_KEY
 docker compose up -d --build
+docker compose exec backend python -m app.criar_usuario admin --nome "Seu Nome" --admin
 ```
 
-As migrações (`alembic upgrade head`) rodam sozinhas a cada início do backend. Acesse `https://SEU-DOMINIO` (no celular também) e entre com o usuário/senha do `.env`.
+As migrações (`alembic upgrade head`) rodam sozinhas a cada início do backend. Acesse `https://SEU-DOMINIO` (no celular também) e entre com o usuário criado.
+
+### Usuários
+
+```bash
+cd ~/pedigree/deploy
+docker compose exec backend python -m app.criar_usuario LOGIN --nome "Nome Exibido"   # cria
+docker compose exec backend python -m app.criar_usuario LOGIN                         # troca a senha
+```
+
+Hoje todo usuário logado vê todos os pombos. A tabela `usuarios` já tem o campo `admin` como base para, no futuro, cada usuário ver só os próprios pombos.
 
 ### Atualizar depois de um `git push`
 
@@ -79,7 +91,7 @@ cd pedigree && git pull && cd deploy && docker compose up -d --build
 
 ```bash
 # na máquina de desenvolvimento
-docker compose -f backend/docker-compose.yml exec -T db pg_dump -U pedigree --data-only --exclude-table=alembic_version pedigree > dados.sql
+docker compose -f backend/docker-compose.yml exec -T db pg_dump -U pedigree --data-only --exclude-table=alembic_version --exclude-table=usuarios pedigree > dados.sql
 scp dados.sql ubuntu@IP-DA-VPS:~/
 # na VPS (com o sistema já no ar, tabelas vazias)
 cd pedigree/deploy && docker compose exec -T db psql -U pedigree pedigree < ~/dados.sql
@@ -87,12 +99,27 @@ cd pedigree/deploy && docker compose exec -T db psql -U pedigree pedigree < ~/da
 
 ### Backup
 
-```bash
-cd pedigree/deploy && mkdir -p backups
-docker compose exec -T db pg_dump -U pedigree pedigree | gzip > backups/pedigree-$(date +%F).sql.gz
+`deploy/backup.sh` gera `deploy/backups/pedigree-AAAA-MM-DD-HHMM.sql.gz` e apaga os com mais de 30 dias. Na VPS está agendado todo dia às 3h (`crontab -l`):
+
+```
+0 3 * * * /home/ubuntu/pedigree/deploy/backup.sh >> /home/ubuntu/pedigree/deploy/backups/backup.log 2>&1
 ```
 
-Vale agendar no `crontab -e` da VPS e copiar os arquivos para fora dela de tempos em tempos.
+Os backups ficam no disco da própria VPS. Para ter uma cópia fora dela, baixe de tempos em tempos para o seu computador:
+
+```bash
+scp -i ~/.ssh/oracle-pedigree.key 'ubuntu@IP-DA-VPS:pedigree/deploy/backups/*.sql.gz' ~/backups-pedigree/
+```
+
+Restaurar um backup (substitui todo o conteúdo atual do banco):
+
+```bash
+cd ~/pedigree/deploy
+docker compose stop backend
+docker compose exec -T db psql -U pedigree -d postgres -c "DROP DATABASE pedigree" -c "CREATE DATABASE pedigree OWNER pedigree"
+gunzip -c backups/ARQUIVO.sql.gz | docker compose exec -T db psql -U pedigree pedigree
+docker compose start backend
+```
 
 ## Estrutura
 

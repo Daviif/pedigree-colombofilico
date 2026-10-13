@@ -1,6 +1,8 @@
 import { type ReactNode, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 
+import { useLogout, useUsuarioAtual } from '../api/hooks'
+
 const links = [
   { to: '/', label: 'Início', end: true },
   { to: '/pombos', label: 'Pombos' },
@@ -10,6 +12,8 @@ const links = [
 
 export function Layout({ children }: { children: ReactNode }) {
   const [menuAberto, setMenuAberto] = useState(false)
+  const { data: usuario } = useUsuarioAtual()
+  const logout = useLogout()
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -30,6 +34,16 @@ export function Layout({ children }: { children: ReactNode }) {
               </NavLink>
             ))}
           </nav>
+          <div className="ml-auto hidden items-center gap-3 text-sm sm:flex">
+            <span className="text-slate-500">{usuario?.nome}</span>
+            <button
+              type="button"
+              onClick={() => logout.mutate()}
+              className="rounded-md border border-slate-300 px-3 py-1 font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Sair
+            </button>
+          </div>
           <button
             type="button"
             onClick={() => setMenuAberto((v) => !v)}
@@ -57,6 +71,16 @@ export function Layout({ children }: { children: ReactNode }) {
                 {link.label}
               </NavLink>
             ))}
+            <div className="mt-1 flex items-center justify-between border-t border-slate-100 px-3 pt-3">
+              <span className="text-sm text-slate-500">{usuario?.nome}</span>
+              <button
+                type="button"
+                onClick={() => logout.mutate()}
+                className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700"
+              >
+                Sair
+              </button>
+            </div>
           </nav>
         )}
       </header>

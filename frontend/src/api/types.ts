@@ -95,3 +95,10 @@ export interface PombosFiltro {
   status?: StatusPombo
   proprietario_id?: number
 }
+
+export interface Usuario {
+  id: number
+  login: string
+  nome: string
+  admin: boolean
+}

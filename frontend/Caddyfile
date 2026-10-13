@@ -1,11 +1,6 @@
 {$DOMAIN} {
 	encode zstd gzip
 
-	# O sistema fica na internet aberta: tudo (site e API) exige usuário/senha.
-	basic_auth {
-		{$AUTH_USER} {$AUTH_HASH}
-	}
-
 	handle /api/* {
 		reverse_proxy backend:8000
 	}

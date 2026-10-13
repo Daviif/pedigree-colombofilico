@@ -1,8 +1,9 @@
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.auth import usuario_atual
 from app.config import settings
-from app.routers import certificado, pombos, proprietarios, resultados
+from app.routers import auth, certificado, pombos, proprietarios, resultados
 
 
 app = FastAPI(title="Sistema de Pedigree Colombófilo")
@@ -15,10 +16,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(proprietarios.router, prefix="/api")
-app.include_router(pombos.router, prefix="/api")
-app.include_router(resultados.router, prefix="/api")
-app.include_router(certificado.router, prefix="/api")
+app.include_router(auth.router, prefix="/api")
+
+# Todo o resto da API exige usuário logado.
+protegido = [Depends(usuario_atual)]
+app.include_router(proprietarios.router, prefix="/api", dependencies=protegido)
+app.include_router(pombos.router, prefix="/api", dependencies=protegido)
+app.include_router(resultados.router, prefix="/api", dependencies=protegido)
+app.include_router(certificado.router, prefix="/api", dependencies=protegido)
 
 
 @app.get("/api/health")

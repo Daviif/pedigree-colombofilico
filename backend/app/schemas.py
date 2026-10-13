@@ -127,3 +127,15 @@ class ArvoreNo(BaseModel):
     resultados: list[ResultadoBase] = []
     pai: "ArvoreNo | None" = None
     mae: "ArvoreNo | None" = None
+
+
+# ---------- Usuario ----------
+
+
+class UsuarioRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    login: str
+    nome: str
+    admin: bool
