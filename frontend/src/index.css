@@ -3,3 +3,12 @@
 body {
   @apply bg-slate-50 text-slate-900;
 }
+
+/* No celular, campos com fonte < 16px fazem o iOS dar zoom ao focar. */
+@media (max-width: 639px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}

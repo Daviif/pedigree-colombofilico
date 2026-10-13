@@ -32,7 +32,7 @@ function Campo({ label, children }: { label: string; children: ReactNode }) {
   )
 }
 
-const inputClass = 'w-full rounded border border-slate-300 px-2 py-1 text-sm'
+const inputClass = 'w-full rounded border border-slate-300 px-2 py-2 text-sm sm:py-1'
 
 export function PomboForm() {
   const params = useParams()
@@ -97,10 +97,10 @@ export function PomboForm() {
         {editandoId ? `Editar pombo ${pomboAtual?.anilha ?? ''}` : 'Novo pombo'}
       </h1>
 
-      <form onSubmit={salvar} className="space-y-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <form onSubmit={salvar} className="space-y-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
         {erro && <div className="rounded bg-red-50 px-3 py-2 text-sm text-red-700">{erro}</div>}
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid gap-4 sm:grid-cols-2">
           <Campo label="Anilha *">
             <input
               required
@@ -151,7 +151,7 @@ export function PomboForm() {
           </Campo>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid gap-4 sm:grid-cols-2">
           <Campo label="Pai">
             <PomboSelect
               pombos={todosPombos ?? []}

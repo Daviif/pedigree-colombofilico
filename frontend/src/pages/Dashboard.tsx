@@ -6,10 +6,10 @@ function Cartao({ titulo, valor, to }: { titulo: string; valor: number | string;
   return (
     <Link
       to={to}
-      className="flex-1 rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:border-blue-300 hover:shadow"
+      className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition sm:p-5 hover:border-blue-300 hover:shadow"
     >
       <div className="text-sm text-slate-500">{titulo}</div>
-      <div className="mt-1 text-3xl font-semibold text-slate-800">{valor}</div>
+      <div className="mt-1 text-2xl font-semibold sm:text-3xl text-slate-800">{valor}</div>
     </Link>
   )
 }
@@ -25,24 +25,24 @@ export function Dashboard() {
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold text-slate-800">Painel</h1>
 
-      <div className="flex gap-4">
+      <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
         <Cartao titulo="Pombos cadastrados" valor={pombos?.length ?? '—'} to="/pombos" />
         <Cartao titulo="Reprodutores ativos" valor={reprodutores.length} to="/reprodutores" />
         <Cartao titulo="Proprietários" valor={proprietarios?.length ?? '—'} to="/proprietarios" />
       </div>
 
-      <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
         <h2 className="mb-3 text-lg font-medium text-slate-800">Últimos cadastrados</h2>
         {ultimos.length === 0 && (
           <p className="text-sm text-slate-500">Nenhum pombo cadastrado ainda.</p>
         )}
         <ul className="divide-y divide-slate-100">
           {ultimos.map((pombo) => (
-            <li key={pombo.id} className="flex items-center justify-between py-2 text-sm">
+            <li key={pombo.id} className="flex items-center justify-between gap-3 py-2 text-sm">
               <Link to={`/pombos/${pombo.id}`} className="font-medium text-blue-700 hover:underline">
                 {pombo.anilha}
               </Link>
-              <span className="text-slate-500">
+              <span className="text-right text-slate-500">
                 {pombo.cor ?? '—'} · {pombo.sexo}
               </span>
             </li>

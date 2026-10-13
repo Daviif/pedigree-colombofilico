@@ -119,18 +119,6 @@ def test_gerar_certificado_pdf(client):
     assert resposta.content.startswith(b"%PDF")
 
 
-def test_gerar_certificado_html(client):
-    pai = _criar_pombo(client, "PAI-1", sexo="M")
-    mae = _criar_pombo(client, "MAE-1", sexo="F")
-    filho = _criar_pombo(client, "FILHO-1", pai_id=pai["id"], mae_id=mae["id"])
-
-    resposta = client.get(f"/pombos/{filho['id']}/certificado-html")
-    assert resposta.status_code == 200
-    assert "text/html" in resposta.headers["content-type"]
-    assert "FILHO-1" in resposta.text
-    assert "window.print()" in resposta.text
-
-
 def test_arvore_inclui_grau_de_parentesco(client):
     bisavo_paterno = _criar_pombo(client, "BISAVO-PAT")
     avo_paterno = _criar_pombo(client, "AVO-PAT", pai_id=bisavo_paterno["id"])

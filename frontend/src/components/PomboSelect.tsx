@@ -101,7 +101,7 @@ export function PomboSelect({
           setQuery('')
         }}
         onChange={(e) => setQuery(e.target.value)}
-        className="w-full rounded border border-slate-300 px-2 py-1 text-sm"
+        className="w-full rounded border border-slate-300 px-2 py-2 text-sm sm:py-1"
       />
       {aberto && !modoCriar && (
         <div className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded border border-slate-300 bg-white shadow-lg">
@@ -111,7 +111,7 @@ export function PomboSelect({
               e.preventDefault()
               selecionar(undefined)
             }}
-            className="block w-full px-2 py-1 text-left text-sm text-slate-500 hover:bg-slate-100"
+            className="block w-full px-2 py-2 text-left sm:py-1 text-sm text-slate-500 hover:bg-slate-100"
           >
             Não cadastrado(a) no sistema
           </button>
@@ -123,7 +123,7 @@ export function PomboSelect({
                 e.preventDefault()
                 selecionar(p.id)
               }}
-              className="block w-full px-2 py-1 text-left text-sm hover:bg-slate-100"
+              className="block w-full px-2 py-2 text-left sm:py-1 text-sm hover:bg-slate-100"
             >
               {p.anilha} {p.cor ? `— ${p.cor}` : ''}
             </button>
@@ -161,7 +161,7 @@ export function PomboSelect({
             }}
             className="w-full rounded border border-slate-300 px-2 py-1 text-sm"
           />
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <select
               value={novoSexo}
               onChange={(e) => setNovoSexo(e.target.value as Sexo)}

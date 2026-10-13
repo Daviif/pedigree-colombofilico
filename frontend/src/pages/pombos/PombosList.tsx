@@ -15,7 +15,7 @@ export function PombosList() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold text-slate-800">Pombos</h1>
         <Link
           to="/pombos/novo"
@@ -25,7 +25,7 @@ export function PombosList() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-5">
+      <div className="grid grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:grid-cols-5 sm:gap-3 sm:p-4">
         <input
           placeholder="Anilha"
           className="rounded border border-slate-300 px-2 py-1 text-sm"
@@ -56,7 +56,7 @@ export function PombosList() {
           <option value="FALECIDO">Falecido</option>
         </select>
         <select
-          className="rounded border border-slate-300 px-2 py-1 text-sm"
+          className="col-span-2 rounded border border-slate-300 px-2 py-1 text-sm sm:col-span-1"
           onChange={(e) => atualizarFiltro('proprietario_id', e.target.value)}
         >
           <option value="">Proprietário (todos)</option>
@@ -68,7 +68,33 @@ export function PombosList() {
         </select>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+      {/* Celular: lista de cartões */}
+      <ul className="divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white shadow-sm sm:hidden">
+        {isLoading && <li className="px-4 py-4 text-sm text-slate-500">Carregando...</li>}
+        {!isLoading && pombos?.length === 0 && (
+          <li className="px-4 py-4 text-sm text-slate-500">Nenhum pombo encontrado.</li>
+        )}
+        {pombos?.map((pombo) => (
+          <li key={pombo.id}>
+            <Link to={`/pombos/${pombo.id}`} className="block px-4 py-3 text-sm active:bg-slate-50">
+              <div className="flex items-baseline justify-between gap-3">
+                <span className="break-all font-medium text-blue-700">{pombo.anilha}</span>
+                <span className="shrink-0 text-xs text-slate-500">{pombo.status}</span>
+              </div>
+              <div className="text-slate-600">
+                {pombo.sexo} · {pombo.cor ?? '—'}
+                {pombo.proprietario ? ` · ${pombo.proprietario.nome}` : ''}
+              </div>
+              <div className="text-xs text-slate-400">
+                Pai: {pombo.pai?.anilha ?? '—'} · Mãe: {pombo.mae?.anilha ?? '—'}
+              </div>
+            </Link>
+          </li>
+        ))}
+      </ul>
+
+      {/* Telas maiores: tabela */}
+      <div className="hidden overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm sm:block">
         <table className="w-full text-sm">
           <thead className="bg-slate-100 text-left text-slate-600">
             <tr>

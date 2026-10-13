@@ -2,9 +2,10 @@ from datetime import datetime
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, Query
-from fastapi.responses import HTMLResponse, Response
+from fastapi.responses import Response
 from jinja2 import Environment, FileSystemLoader
 from sqlalchemy.orm import Session
+from weasyprint import HTML
 
 from app.database import get_db
 from app.pedigree import montar_arvore
@@ -28,11 +29,6 @@ def _renderizar_html(pombo_id: int, geracoes: int, db: Session) -> tuple[str, st
 def gerar_certificado(
     pombo_id: int, geracoes: int = Query(default=4, ge=1, le=6), db: Session = Depends(get_db)
 ):
-    # Import tardio: WeasyPrint depende de bibliotecas nativas (GTK/Pango/Cairo)
-    # que não fazem parte do build desktop (PyInstaller); mantendo o import
-    # aqui dentro, o módulo continua importável mesmo sem essa dependência.
-    from weasyprint import HTML
-
     html_str, anilha = _renderizar_html(pombo_id, geracoes, db)
     pdf_bytes = HTML(string=html_str, base_url=str(TEMPLATES_DIR)).write_pdf()
 
@@ -43,13 +39,3 @@ def gerar_certificado(
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 
-
-@router.get("/{pombo_id}/certificado-html", response_class=HTMLResponse)
-def gerar_certificado_html(
-    pombo_id: int, geracoes: int = Query(default=4, ge=1, le=6), db: Session = Depends(get_db)
-):
-    """Mesma árvore do certificado, como página HTML pronta para impressão
-    (usada pelo app desktop, que não tem o WeasyPrint disponível: o usuário
-    imprime com Ctrl+P / "Microsoft Print to PDF")."""
-    html_str, _ = _renderizar_html(pombo_id, geracoes, db)
-    return HTMLResponse(content=html_str)

@@ -10,11 +10,11 @@ function Grupo({ titulo, lista }: { titulo: string; lista: PomboSummary[] }) {
       <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">{titulo}</div>
       <ul className="mt-1 divide-y divide-slate-100">
         {lista.map((p) => (
-          <li key={p.id} className="flex items-center justify-between py-1.5 text-sm">
+          <li key={p.id} className="flex items-center justify-between gap-3 py-1.5 text-sm">
             <Link to={`/pombos/${p.id}`} className="font-medium text-blue-700 hover:underline">
               {p.anilha}
             </Link>
-            <span className="text-slate-500">
+            <span className="text-right text-slate-500">
               {p.sexo} {p.cor ? `— ${p.cor}` : ''}
             </span>
           </li>
@@ -33,7 +33,7 @@ export function IrmaosSection({ pomboId }: { pomboId: number }) {
   if (total === 0) return null
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
       <h2 className="mb-3 text-lg font-medium text-slate-800">Irmãos</h2>
       <div className="space-y-4">
         <Grupo titulo="Irmãos completos (mesmo pai e mãe)" lista={irmaos.completos} />

@@ -64,7 +64,7 @@ export function Proprietarios() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold text-slate-800">Proprietários</h1>
         <button
           onClick={novo}
@@ -77,7 +77,7 @@ export function Proprietarios() {
       {mostrarForm && (
         <form
           onSubmit={salvar}
-          className="grid grid-cols-2 gap-3 rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
+          className="grid gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-2 sm:p-5"
         >
           <input
             required
@@ -94,7 +94,7 @@ export function Proprietarios() {
           />
           <input
             placeholder="Endereço"
-            className="col-span-2 rounded border border-slate-300 px-2 py-1 text-sm"
+            className="rounded border border-slate-300 px-2 py-1 text-sm sm:col-span-2"
             value={dados.endereco ?? ''}
             onChange={(e) => setDados((d) => ({ ...d, endereco: e.target.value }))}
           />
@@ -112,12 +112,12 @@ export function Proprietarios() {
           />
           <textarea
             placeholder="Títulos / observações do pombal (aparecem no cabeçalho do certificado)"
-            className="col-span-2 rounded border border-slate-300 px-2 py-1 text-sm"
+            className="rounded border border-slate-300 px-2 py-1 text-sm sm:col-span-2"
             rows={2}
             value={dados.observacoes ?? ''}
             onChange={(e) => setDados((d) => ({ ...d, observacoes: e.target.value }))}
           />
-          <div className="col-span-2 flex gap-2">
+          <div className="flex gap-2 sm:col-span-2">
             <button
               type="submit"
               className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
@@ -135,7 +135,29 @@ export function Proprietarios() {
         </form>
       )}
 
-      <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+      {/* Celular: lista de cartões */}
+      <ul className="divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white shadow-sm sm:hidden">
+        {proprietarios?.map((p) => (
+          <li key={p.id} className="px-4 py-3 text-sm">
+            <div className="font-medium">{p.nome}</div>
+            {p.colombodromo && <div className="text-slate-600">Pombal {p.colombodromo}</div>}
+            {(p.telefone || p.email) && (
+              <div className="break-all text-slate-500">{[p.telefone, p.email].filter(Boolean).join(' · ')}</div>
+            )}
+            <div className="mt-2 flex gap-4">
+              <button onClick={() => editar(p.id, p)} className="py-1 text-blue-700 hover:underline">
+                editar
+              </button>
+              <button onClick={() => excluir(p.id, p.nome)} className="py-1 text-red-600 hover:underline">
+                remover
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      {/* Telas maiores: tabela */}
+      <div className="hidden overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm sm:block">
         <table className="w-full text-sm">
           <thead className="bg-slate-100 text-left text-slate-600">
             <tr>

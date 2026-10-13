@@ -1,23 +1,11 @@
-from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.database import Base, engine
 from app.routers import certificado, pombos, proprietarios, resultados
 
 
-@asynccontextmanager
-async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-    # Idempotente: no Postgres (dev) as tabelas já existem, isso é um no-op.
-    # No SQLite do app desktop, cria o schema do zero no primeiro uso.
-    Base.metadata.create_all(bind=engine)
-    yield
-
-
-app = FastAPI(title="Sistema de Pedigree Colombófilo", lifespan=lifespan)
+app = FastAPI(title="Sistema de Pedigree Colombófilo")
 
 app.add_middleware(
     CORSMiddleware,

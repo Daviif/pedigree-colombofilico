@@ -31,9 +31,9 @@ export function PomboDetail() {
     <div className="space-y-6">
       {pombo.proprietario && <ProprietarioHeader proprietario={pombo.proprietario} />}
 
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-800">{pombo.anilha}</h1>
+          <h1 className="break-all text-2xl font-semibold text-slate-800">{pombo.anilha}</h1>
           <p className="text-sm text-slate-500">
             {pombo.sexo} · {pombo.cor ?? '—'} · {pombo.status}
           </p>
@@ -41,11 +41,9 @@ export function PomboDetail() {
             <p className="mt-1 whitespace-pre-line text-sm text-slate-600">{pombo.observacoes}</p>
           )}
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <a
-            href={`/api/pombos/${pomboId}/${
-              import.meta.env.VITE_DESKTOP ? 'certificado-html' : 'certificado'
-            }?geracoes=${geracoes}`}
+            href={`/api/pombos/${pomboId}/certificado?geracoes=${geracoes}`}
             className="rounded-md bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
           >
             Gerar certificado PDF
@@ -65,8 +63,8 @@ export function PomboDetail() {
         </div>
       </div>
 
-      <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="mb-3 flex items-center justify-between">
+      <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-lg font-medium text-slate-800">Árvore genealógica</h2>
           <label className="text-sm text-slate-600">
             Gerações:{' '}

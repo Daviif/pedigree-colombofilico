@@ -11,32 +11,6 @@
     font-family: "DejaVu Sans", Arial, sans-serif;
     color: #1a1a1a;
   }
-  .barra-acoes {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-  .barra-acoes button {
-    cursor: pointer;
-    padding: 6px 14px;
-    border-radius: 4px;
-    border: 1px solid #2f5fa8;
-    background: #2f5fa8;
-    color: #fff;
-    font-size: 12px;
-    font-family: inherit;
-  }
-  .barra-acoes a {
-    font-size: 12px;
-    color: #2f5fa8;
-    text-decoration: none;
-  }
-  @media print {
-    .no-print {
-      display: none !important;
-    }
-  }
   h1 {
     font-size: 16px;
     margin: 0 0 2px 0;
@@ -151,11 +125,6 @@
 </style>
 </head>
 <body>
-
-  <div class="barra-acoes no-print">
-    <button onclick="window.print()">🖨 Imprimir / Salvar PDF</button>
-    <a href="javascript:history.back()">← Voltar</a>
-  </div>
 
   {% macro lista_resultados(resultados) %}
     {% if resultados %}

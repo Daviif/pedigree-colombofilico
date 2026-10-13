@@ -5,7 +5,7 @@ import type { ArvoreNo } from '../api/types'
 function No({ no }: { no: ArvoreNo | null | undefined }) {
   if (!no) {
     return (
-      <div className="m-1 min-w-[150px] rounded border border-dashed border-slate-300 px-3 py-2 text-xs text-slate-400">
+      <div className="m-1 min-w-[120px] sm:min-w-[150px] rounded border border-dashed border-slate-300 px-3 py-2 text-xs text-slate-400">
         Desconhecido
       </div>
     )
@@ -16,7 +16,7 @@ function No({ no }: { no: ArvoreNo | null | undefined }) {
   return (
     <div className="flex items-center">
       <div
-        className={`m-1 min-w-[150px] rounded border px-3 py-2 text-xs ${
+        className={`m-1 min-w-[120px] sm:min-w-[150px] rounded border px-3 py-2 text-xs ${
           no.duplicado ? 'border-amber-500 bg-amber-50' : 'border-slate-300 bg-white'
         }`}
       >

@@ -40,35 +40,64 @@ npm run dev
 
 Acesse a URL impressa pelo Vite (por padrão `http://localhost:5173`, ou a próxima porta livre). As chamadas para `/api/*` são redirecionadas automaticamente para o backend.
 
-## App desktop (Windows)
+## Deploy (VPS Oracle Cloud Free Tier)
 
-Existe uma versão empacotada como um único `.exe` do Windows, sem Docker/terminal/instalação de nada — é o que se manda para quem só vai usar o programa (ex: o dono dos pombos). Detalhes em [`backend/desktop/`](backend/desktop).
+Produção roda tudo em Docker numa VPS só: Postgres + backend (FastAPI/WeasyPrint) + Caddy (serve o front-end, faz proxy de `/api`, emite HTTPS automático via Let's Encrypt e exige usuário/senha em todo o site). Arquivos em [`deploy/`](deploy). Funciona tanto na instância ARM (Ampere A1) quanto na AMD micro.
 
-- Banco: SQLite, guardado em `%APPDATA%\PedigreeColombofilico\pedigree.db` no computador de quem usa. Na primeira abertura, se esse arquivo ainda não existe, é copiado de `backend/desktop/pedigree-inicial.db` (banco "semente", já com os dados cadastrados até o momento do build).
-- Certificado de pedigree: como não dá para embutir o WeasyPrint de forma confiável num `.exe` Windows (depende de bibliotecas nativas GTK), o desktop abre o certificado como página e usa a impressão nativa do Windows (Ctrl+P → "Microsoft Print to PDF") em vez de gerar o PDF direto.
-- O `.exe` é gerado automaticamente pelo GitHub Actions (`.github/workflows/build-windows.yml`) a cada push em `main` — baixe o artefato mais recente na aba **Actions** do repositório.
+### 1. Preparar a VPS (uma vez)
 
-Para atualizar o banco semente com dados mais recentes do Postgres de desenvolvimento:
+1. Crie a instância (Ubuntu 22.04/24.04) e anote o IP público.
+2. Na Oracle Cloud, em **Networking → VCN → Security List**, adicione regras de entrada (ingress) TCP para as portas **80** e **443** (origem `0.0.0.0/0`).
+3. As imagens Ubuntu da Oracle também bloqueiam essas portas no firewall interno. Na VPS:
+   ```bash
+   sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80 -j ACCEPT
+   sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 443 -j ACCEPT
+   sudo netfilter-persistent save
+   ```
+4. Instale Docker: `curl -fsSL https://get.docker.com | sudo sh && sudo usermod -aG docker $USER` (saia e entre de novo na sessão SSH).
+5. Domínio: aponte um registro DNS `A` para o IP da VPS. Sem domínio próprio, use `<ip-com-hífens>.sslip.io` (ex: `129-151-10-20.sslip.io`), que já resolve para o IP sem configurar nada.
+
+### 2. Subir o sistema
 
 ```bash
-cd backend
-source .venv/bin/activate
-python -m desktop.export_sqlite
-git add desktop/pedigree-inicial.db
+git clone <url-do-repo> pedigree && cd pedigree/deploy
+cp .env.example .env
+docker run --rm caddy:2-alpine caddy hash-password --plaintext 'SUA-SENHA'   # cole o hash no .env
+nano .env                                                                     # DOMAIN, AUTH_*, POSTGRES_PASSWORD
+docker compose up -d --build
 ```
 
-Para testar a lógica do app desktop localmente (sem gerar o `.exe`, sem abrir a janela nativa):
+As migrações (`alembic upgrade head`) rodam sozinhas a cada início do backend. Acesse `https://SEU-DOMINIO` (no celular também) e entre com o usuário/senha do `.env`.
+
+### Atualizar depois de um `git push`
 
 ```bash
-cd backend
-source .venv/bin/activate
-pip install -r requirements-desktop.txt
-python -m desktop.desktop_main
+cd pedigree && git pull && cd deploy && docker compose up -d --build
 ```
+
+### Migrar os dados do Postgres local para a VPS
+
+```bash
+# na máquina de desenvolvimento
+docker compose -f backend/docker-compose.yml exec -T db pg_dump -U pedigree --data-only --exclude-table=alembic_version pedigree > dados.sql
+scp dados.sql ubuntu@IP-DA-VPS:~/
+# na VPS (com o sistema já no ar, tabelas vazias)
+cd pedigree/deploy && docker compose exec -T db psql -U pedigree pedigree < ~/dados.sql
+```
+
+### Backup
+
+```bash
+cd pedigree/deploy && mkdir -p backups
+docker compose exec -T db pg_dump -U pedigree pedigree | gzip > backups/pedigree-$(date +%F).sql.gz
+```
+
+Vale agendar no `crontab -e` da VPS e copiar os arquivos para fora dela de tempos em tempos.
 
 ## Estrutura
 
 - `backend/app/models.py` — modelos (Proprietario, Pombo, Resultado); `Pombo` referencia `pai_id`/`mae_id` (self-relation).
 - `backend/app/pedigree.py` — monta a árvore genealógica recursivamente e sinaliza anilhas repetidas entre ancestrais (indício de consanguinidade).
 - `backend/app/routers/certificado.py` + `backend/app/pdf/templates/certificado.html` — geração do certificado de pedigree em PDF (WeasyPrint).
+- `deploy/docker-compose.yml`, `backend/Dockerfile`, `frontend/Dockerfile` + `frontend/Caddyfile` — stack de produção.
 - `frontend/src/pages/pombos/` — listagem, formulário e detalhe (com árvore genealógica) de cada pombo.
