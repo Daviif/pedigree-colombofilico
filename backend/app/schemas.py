@@ -74,6 +74,11 @@ class PomboBase(BaseModel):
     pai_id: int | None = None
     mae_id: int | None = None
 
+
+class PomboInput(PomboBase):
+    """Regras aplicadas só no que entra pela API; pombos antigos fora do
+    padrão continuam sendo listados normalmente."""
+
     @field_validator("anilha")
     @classmethod
     def validar_anilha(cls, valor: str) -> str:
@@ -90,11 +95,11 @@ class PomboBase(BaseModel):
         return valor or None
 
 
-class PomboCreate(PomboBase):
+class PomboCreate(PomboInput):
     pass
 
 
-class PomboUpdate(PomboBase):
+class PomboUpdate(PomboInput):
     pass
 
 

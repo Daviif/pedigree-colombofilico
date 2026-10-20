@@ -165,3 +165,16 @@ def test_anilha_aceita_apenas_numeros_e_barra(client):
 def test_cor_tem_primeira_letra_maiuscula(client):
     pombo = _criar_pombo(client, "8001", cor="azul barrado")
     assert pombo["cor"] == "Azul barrado"
+
+
+def test_lista_pombo_antigo_com_anilha_fora_do_padrao(client):
+    from app.models import Pombo
+    from tests.conftest import TestingSessionLocal
+
+    with TestingSessionLocal() as db:
+        db.add(Pombo(anilha="BR 123-A", cor="azul"))
+        db.commit()
+
+    resposta = client.get("/pombos")
+    assert resposta.status_code == 200
+    assert [p["anilha"] for p in resposta.json()] == ["BR 123-A"]
