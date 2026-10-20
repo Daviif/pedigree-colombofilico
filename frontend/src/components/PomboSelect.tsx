@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { useCriarPombo, useProprietarios } from '../api/hooks'
 import type { Pombo, Sexo } from '../api/types'
+import { capitalizarPrimeira, limparAnilha } from '../formatadores'
 
 export function PomboSelect({
   pombos,
@@ -55,7 +56,7 @@ export function PomboSelect({
 
   function abrirCriacao() {
     setErroCriar(null)
-    setNovaAnilha(query)
+    setNovaAnilha(limparAnilha(query))
     setNovaCor('')
     setNovoSexo(sexoPadrao ?? 'DESCONHECIDO')
     setNovoProprietarioId(undefined)
@@ -151,8 +152,9 @@ export function PomboSelect({
           <input
             autoFocus
             placeholder="Anilha *"
+            inputMode="numeric"
             value={novaAnilha}
-            onChange={(e) => setNovaAnilha(e.target.value)}
+            onChange={(e) => setNovaAnilha(limparAnilha(e.target.value))}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 e.preventDefault()
@@ -174,7 +176,7 @@ export function PomboSelect({
             <input
               placeholder="Cor"
               value={novaCor}
-              onChange={(e) => setNovaCor(e.target.value)}
+              onChange={(e) => setNovaCor(capitalizarPrimeira(e.target.value))}
               className="min-w-0 flex-1 rounded border border-slate-300 px-2 py-1 text-sm"
             />
           </div>

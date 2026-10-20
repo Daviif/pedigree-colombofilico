@@ -19,78 +19,78 @@ def test_nao_permite_anilha_duplicada(client):
 
 
 def test_vincula_pai_e_mae(client):
-    pai = _criar_pombo(client, "PAI-1", sexo="M")
-    mae = _criar_pombo(client, "MAE-1", sexo="F")
-    filho = _criar_pombo(client, "FILHO-1", pai_id=pai["id"], mae_id=mae["id"])
+    pai = _criar_pombo(client, "1001", sexo="M")
+    mae = _criar_pombo(client, "2001", sexo="F")
+    filho = _criar_pombo(client, "3001", pai_id=pai["id"], mae_id=mae["id"])
 
-    assert filho["pai"]["anilha"] == "PAI-1"
-    assert filho["mae"]["anilha"] == "MAE-1"
+    assert filho["pai"]["anilha"] == "1001"
+    assert filho["mae"]["anilha"] == "2001"
 
 
 def test_pai_inexistente_retorna_erro(client):
-    resposta = client.post("/pombos", json={"anilha": "X", "pai_id": 9999})
+    resposta = client.post("/pombos", json={"anilha": "7001", "pai_id": 9999})
     assert resposta.status_code == 400
 
 
 def test_arvore_recursiva_com_deteccao_de_duplicata(client):
-    avo = _criar_pombo(client, "AVO-1", sexo="M")
-    ava = _criar_pombo(client, "AVA-1", sexo="F")
-    pai = _criar_pombo(client, "PAI-1", sexo="M", pai_id=avo["id"], mae_id=ava["id"])
+    avo = _criar_pombo(client, "4001", sexo="M")
+    ava = _criar_pombo(client, "4002", sexo="F")
+    pai = _criar_pombo(client, "1001", sexo="M", pai_id=avo["id"], mae_id=ava["id"])
     # mãe compartilha o mesmo avô paterno (consanguinidade proposital)
-    mae = _criar_pombo(client, "MAE-1", sexo="F", pai_id=avo["id"])
-    filho = _criar_pombo(client, "FILHO-1", pai_id=pai["id"], mae_id=mae["id"])
+    mae = _criar_pombo(client, "2001", sexo="F", pai_id=avo["id"])
+    filho = _criar_pombo(client, "3001", pai_id=pai["id"], mae_id=mae["id"])
 
     resposta = client.get(f"/pombos/{filho['id']}/arvore?geracoes=4")
     assert resposta.status_code == 200
     arvore = resposta.json()
 
-    assert arvore["anilha"] == "FILHO-1"
-    assert arvore["pai"]["anilha"] == "PAI-1"
-    assert arvore["pai"]["pai"]["anilha"] == "AVO-1"
-    assert arvore["mae"]["pai"]["anilha"] == "AVO-1"
+    assert arvore["anilha"] == "3001"
+    assert arvore["pai"]["anilha"] == "1001"
+    assert arvore["pai"]["pai"]["anilha"] == "4001"
+    assert arvore["mae"]["pai"]["anilha"] == "4001"
     # o avô paterno aparece duas vezes na árvore -> sinalizado como duplicado
     assert arvore["pai"]["pai"]["duplicado"] is True
     assert arvore["mae"]["pai"]["duplicado"] is True
 
 
 def test_listar_pombos_filtra_por_status(client):
-    _criar_pombo(client, "A1", status="ATIVO")
-    _criar_pombo(client, "R1", status="REPRODUTOR")
+    _criar_pombo(client, "6001", status="ATIVO")
+    _criar_pombo(client, "6002", status="REPRODUTOR")
 
     resposta = client.get("/pombos?status=REPRODUTOR")
     assert resposta.status_code == 200
     anilhas = [p["anilha"] for p in resposta.json()]
-    assert anilhas == ["R1"]
+    assert anilhas == ["6002"]
 
 
 def test_irmaos_completos_e_meios_irmaos(client):
-    pai = _criar_pombo(client, "PAI-1", sexo="M")
-    mae = _criar_pombo(client, "MAE-1", sexo="F")
-    outra_mae = _criar_pombo(client, "MAE-2", sexo="F")
-    outro_pai = _criar_pombo(client, "PAI-2", sexo="M")
+    pai = _criar_pombo(client, "1001", sexo="M")
+    mae = _criar_pombo(client, "2001", sexo="F")
+    outra_mae = _criar_pombo(client, "2002", sexo="F")
+    outro_pai = _criar_pombo(client, "1002", sexo="M")
 
-    filho = _criar_pombo(client, "FILHO-1", pai_id=pai["id"], mae_id=mae["id"])
-    irmao_completo = _criar_pombo(client, "FILHO-2", pai_id=pai["id"], mae_id=mae["id"])
-    meio_irmao_paterno = _criar_pombo(client, "FILHO-3", pai_id=pai["id"], mae_id=outra_mae["id"])
-    meio_irmao_materno = _criar_pombo(client, "FILHO-4", pai_id=outro_pai["id"], mae_id=mae["id"])
-    sem_parentesco = _criar_pombo(client, "FILHO-5", pai_id=outro_pai["id"], mae_id=outra_mae["id"])
+    filho = _criar_pombo(client, "3001", pai_id=pai["id"], mae_id=mae["id"])
+    irmao_completo = _criar_pombo(client, "3002", pai_id=pai["id"], mae_id=mae["id"])
+    meio_irmao_paterno = _criar_pombo(client, "3003", pai_id=pai["id"], mae_id=outra_mae["id"])
+    meio_irmao_materno = _criar_pombo(client, "3004", pai_id=outro_pai["id"], mae_id=mae["id"])
+    sem_parentesco = _criar_pombo(client, "3005", pai_id=outro_pai["id"], mae_id=outra_mae["id"])
 
     resposta = client.get(f"/pombos/{filho['id']}/irmaos")
     assert resposta.status_code == 200
     dados = resposta.json()
 
-    assert [p["anilha"] for p in dados["completos"]] == ["FILHO-2"]
-    assert [p["anilha"] for p in dados["meios_paternos"]] == ["FILHO-3"]
-    assert [p["anilha"] for p in dados["meios_maternos"]] == ["FILHO-4"]
+    assert [p["anilha"] for p in dados["completos"]] == ["3002"]
+    assert [p["anilha"] for p in dados["meios_paternos"]] == ["3003"]
+    assert [p["anilha"] for p in dados["meios_maternos"]] == ["3004"]
 
     todas_anilhas = {p["anilha"] for grupo in dados.values() for p in grupo}
-    assert "FILHO-5" not in todas_anilhas
+    assert "3005" not in todas_anilhas
     assert irmao_completo["anilha"] not in dados["meios_paternos"]
     assert meio_irmao_paterno and meio_irmao_materno and sem_parentesco  # usados acima
 
 
 def test_irmaos_vazio_quando_sem_pai_e_mae(client):
-    pombo = _criar_pombo(client, "SOLO-1")
+    pombo = _criar_pombo(client, "5001")
     resposta = client.get(f"/pombos/{pombo['id']}/irmaos")
     assert resposta.json() == {"completos": [], "meios_paternos": [], "meios_maternos": []}
 
@@ -109,9 +109,9 @@ def test_resultados_do_pombo(client):
 
 
 def test_gerar_certificado_pdf(client):
-    pai = _criar_pombo(client, "PAI-1", sexo="M")
-    mae = _criar_pombo(client, "MAE-1", sexo="F")
-    filho = _criar_pombo(client, "FILHO-1", pai_id=pai["id"], mae_id=mae["id"])
+    pai = _criar_pombo(client, "1001", sexo="M")
+    mae = _criar_pombo(client, "2001", sexo="F")
+    filho = _criar_pombo(client, "3001", pai_id=pai["id"], mae_id=mae["id"])
 
     resposta = client.get(f"/pombos/{filho['id']}/certificado")
     assert resposta.status_code == 200
@@ -120,11 +120,11 @@ def test_gerar_certificado_pdf(client):
 
 
 def test_arvore_inclui_grau_de_parentesco(client):
-    bisavo_paterno = _criar_pombo(client, "BISAVO-PAT")
-    avo_paterno = _criar_pombo(client, "AVO-PAT", pai_id=bisavo_paterno["id"])
-    pai = _criar_pombo(client, "PAI-1", pai_id=avo_paterno["id"])
-    mae = _criar_pombo(client, "MAE-1", sexo="F")
-    filho = _criar_pombo(client, "FILHO-1", pai_id=pai["id"], mae_id=mae["id"])
+    bisavo_paterno = _criar_pombo(client, "9001")
+    avo_paterno = _criar_pombo(client, "9002", pai_id=bisavo_paterno["id"])
+    pai = _criar_pombo(client, "1001", pai_id=avo_paterno["id"])
+    mae = _criar_pombo(client, "2001", sexo="F")
+    filho = _criar_pombo(client, "3001", pai_id=pai["id"], mae_id=mae["id"])
 
     arvore = client.get(f"/pombos/{filho['id']}/arvore?geracoes=4").json()
 
@@ -136,8 +136,8 @@ def test_arvore_inclui_grau_de_parentesco(client):
 
 
 def test_arvore_inclui_resultados_dos_ancestrais(client):
-    pai = _criar_pombo(client, "PAI-1", sexo="M")
-    filho = _criar_pombo(client, "FILHO-1", pai_id=pai["id"])
+    pai = _criar_pombo(client, "1001", sexo="M")
+    filho = _criar_pombo(client, "3001", pai_id=pai["id"])
 
     client.post(
         f"/pombos/{pai['id']}/resultados",
@@ -154,3 +154,14 @@ def test_arvore_inclui_resultados_dos_ancestrais(client):
     assert arvore["resultados"] == []
     resultados_pai = arvore["pai"]["resultados"]
     assert [r["ano"] for r in resultados_pai] == [2021, 2019]
+
+
+def test_anilha_aceita_apenas_numeros_e_barra(client):
+    assert client.post("/pombos", json={"anilha": "12345/2024"}).status_code == 201
+    for invalida in ["ABC123", "123 45", "12-34", ""]:
+        assert client.post("/pombos", json={"anilha": invalida}).status_code == 422
+
+
+def test_cor_tem_primeira_letra_maiuscula(client):
+    pombo = _criar_pombo(client, "8001", cor="azul barrado")
+    assert pombo["cor"] == "Azul barrado"

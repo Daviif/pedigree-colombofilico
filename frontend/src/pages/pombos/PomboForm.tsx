@@ -10,6 +10,7 @@ import {
 } from '../../api/hooks'
 import type { PomboInput, Sexo, StatusPombo } from '../../api/types'
 import { PomboSelect } from '../../components/PomboSelect'
+import { capitalizarPrimeira, limparAnilha } from '../../formatadores'
 
 const VAZIO: PomboInput = {
   anilha: '',
@@ -104,9 +105,10 @@ export function PomboForm() {
           <Campo label="Anilha *">
             <input
               required
+              inputMode="numeric"
               className={inputClass}
               value={dados.anilha}
-              onChange={(e) => campo('anilha', e.target.value)}
+              onChange={(e) => campo('anilha', limparAnilha(e.target.value))}
             />
           </Campo>
           <Campo label="Sexo">
@@ -121,7 +123,7 @@ export function PomboForm() {
             </select>
           </Campo>
           <Campo label="Cor / característica">
-            <input className={inputClass} value={dados.cor ?? ''} onChange={(e) => campo('cor', e.target.value)} />
+            <input className={inputClass} value={dados.cor ?? ''} onChange={(e) => campo('cor', capitalizarPrimeira(e.target.value))} />
           </Campo>
           <Campo label="Status">
             <select

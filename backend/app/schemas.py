@@ -1,4 +1,6 @@
-from pydantic import BaseModel, ConfigDict
+import re
+
+from pydantic import BaseModel, ConfigDict, field_validator
 
 from app.models import Sexo, StatusPombo
 
@@ -71,6 +73,21 @@ class PomboBase(BaseModel):
     proprietario_id: int | None = None
     pai_id: int | None = None
     mae_id: int | None = None
+
+    @field_validator("anilha")
+    @classmethod
+    def validar_anilha(cls, valor: str) -> str:
+        if not re.fullmatch(r"[0-9/]+", valor):
+            raise ValueError("A anilha deve conter apenas números e /")
+        return valor
+
+    @field_validator("cor")
+    @classmethod
+    def capitalizar_cor(cls, valor: str | None) -> str | None:
+        if valor:
+            valor = valor.strip()
+            valor = valor[:1].upper() + valor[1:]
+        return valor or None
 
 
 class PomboCreate(PomboBase):
