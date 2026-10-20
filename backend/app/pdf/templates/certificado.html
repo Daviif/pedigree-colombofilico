@@ -43,33 +43,23 @@
     color: #555;
     margin-bottom: 10px;
   }
-  .pair {
-    display: flex;
-    align-items: center;
+  .arvore {
+    border-collapse: separate;
+    border-spacing: 0;
   }
-  .children {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    border-left: 2px solid #94a3b8;
+  .arvore td {
+    padding: 0;
+    vertical-align: middle;
   }
-  .stub-h {
-    width: 16px;
-    height: 2px;
-    background: #94a3b8;
-    flex-shrink: 0;
+  .arvore td.espaco {
+    width: 0;
   }
-  .branch {
-    display: flex;
-    align-items: center;
-    padding: 4px 0;
+  .arvore td.linha {
+    width: 10px;
   }
-  .branch .stub {
-    width: 12px;
-    height: 2px;
-    background: #94a3b8;
-    flex-shrink: 0;
-  }
+  .linha-cima { border-top: 2px solid #94a3b8; }
+  .linha-baixo { border-bottom: 2px solid #94a3b8; }
+  .linha-esq { border-left: 2px solid #94a3b8; }
   .box {
     border: 1px solid #333;
     border-radius: 3px;
@@ -77,8 +67,20 @@
     font-size: 7.5px;
     line-height: 1.35;
     min-width: 130px;
-    margin: 2px 6px;
+    margin: 2px 0;
     background: #ffffff;
+  }
+  .box.resumido {
+    min-width: 95px;
+    padding: 2px 5px;
+    line-height: 1.25;
+  }
+  .box.minimo {
+    min-width: 0;
+    padding: 0 4px;
+    margin: 0;
+    font-size: 6.5px;
+    line-height: 1.2;
   }
   .box.principal {
     min-width: 170px;
@@ -136,26 +138,29 @@
     {% endif %}
   {% endmacro %}
 
-  {% macro render_no(no) %}
-    <div class="pair">
-      <div class="box{{ ' duplicado' if no and no.duplicado else '' }}">
-        {% if no %}
-          {% if no.grau_parentesco %}<div class="grau">{{ no.grau_parentesco }}</div>{% endif %}
-          <span class="anilha">{{ no.anilha }}</span>
-          {{ no.sexo.value if no.sexo else '' }} &mdash; {{ no.cor or '' }}<br>
-          {% if no.proprietario_nome %}Dono: {{ no.proprietario_nome }}{% endif %}
+  {% macro render_no(no, detalhe) %}
+    <div class="box {{ detalhe }}{{ ' duplicado' if no and no.duplicado else '' }}">
+      {% if no %}
+        {% if detalhe == 'completo' and no.grau_parentesco %}<div class="grau">{{ no.grau_parentesco }}</div>{% endif %}
+        <span class="anilha">{{ no.anilha }}</span>
+        {% if detalhe != 'minimo' %}{{ no.sexo.value if no.sexo else '' }} &mdash; {{ no.cor or '' }}{% endif %}
+        {% if detalhe == 'completo' %}
+          {% if no.proprietario_nome %}<br>Dono: {{ no.proprietario_nome }}{% endif %}
           {{ lista_resultados(no.resultados) }}
-        {% else %}
-          <em>Desconhecido</em>
         {% endif %}
-      </div>
-      {% if no and (no.pai or no.mae) %}
-      <div class="stub-h"></div>
-      <div class="children">
-        <div class="branch"><div class="stub"></div>{{ render_no(no.pai) }}</div>
-        <div class="branch"><div class="stub"></div>{{ render_no(no.mae) }}</div>
-      </div>
+      {% else %}
+        <em>Desconhecido</em>
       {% endif %}
+    </div>
+  {% endmacro %}
+
+  {% macro render_principal() %}
+    <div class="box principal">
+      <span class="anilha">{{ pombo.anilha }}</span>
+      {{ pombo.sexo.value if pombo.sexo else '' }} &mdash; {{ pombo.cor or '' }}<br>
+      {% if pombo.proprietario %}Proprietário: {{ pombo.proprietario.nome }}<br>{% endif %}
+      {% if pombo.observacoes %}<div style="white-space: pre-line">{{ pombo.observacoes }}</div>{% endif %}
+      {{ lista_resultados(arvore.resultados) }}
     </div>
   {% endmacro %}
 
@@ -176,23 +181,22 @@
   <h1>Certificado de Pedigree</h1>
   <div class="subtitulo">Anilha {{ pombo.anilha }} &mdash; gerado em {{ gerado_em.strftime('%d/%m/%Y %H:%M') }}</div>
 
-  <div class="pair">
-    <div class="box principal">
-      <span class="anilha">{{ pombo.anilha }}</span>
-      {{ pombo.sexo.value if pombo.sexo else '' }} &mdash; {{ pombo.cor or '' }}<br>
-      {% if pombo.proprietario %}Proprietário: {{ pombo.proprietario.nome }}<br>{% endif %}
-      {% if pombo.observacoes %}<div style="white-space: pre-line">{{ pombo.observacoes }}</div>{% endif %}
-      {{ lista_resultados(arvore.resultados) }}
-    </div>
-
-    {% if arvore.pai or arvore.mae %}
-    <div class="stub-h"></div>
-    <div class="children">
-      <div class="branch"><div class="stub"></div>{{ render_no(arvore.pai) }}</div>
-      <div class="branch"><div class="stub"></div>{{ render_no(arvore.mae) }}</div>
-    </div>
-    {% endif %}
-  </div>
+  {# altura fixa por linha para que pai e mãe fiquem centralizados nas chaves #}
+  <table class="arvore">
+    {% for linha in grade %}
+    <tr>
+      {# toda linha precisa começar uma célula, senão o WeasyPrint a achata #}
+      <td class="espaco" style="height: {{ '%.2f' | format(altura_linha) }}mm"></td>
+      {% for c in linha %}
+        {% if c.tipo == 'no' %}
+        <td rowspan="{{ c.rowspan }}">{{ render_principal() if c.principal else render_no(c.no, c.detalhe) }}</td>
+        {% else %}
+        <td class="linha {{ c.classes }}" rowspan="{{ c.rowspan }}" colspan="{{ c.colspan }}"></td>
+        {% endif %}
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </table>
 
   <div class="aviso">As caixas em destaque (amarelo) indicam anilhas que aparecem mais de uma vez na árvore, um indício de consanguinidade.</div>
   <div class="rodape">Documento gerado automaticamente pelo Sistema de Pedigree Colombófilo.</div>
