@@ -143,6 +143,7 @@ class ArvoreNo(BaseModel):
     sexo: Sexo | None = None
     cor: str | None = None
     origem: str | None = None
+    observacoes: str | None = None
     proprietario_nome: str | None = None
     duplicado: bool = False
     grau_parentesco: str | None = None

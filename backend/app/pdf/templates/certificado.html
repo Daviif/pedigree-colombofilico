@@ -67,6 +67,7 @@
     font-size: 7.5px;
     line-height: 1.35;
     min-width: 130px;
+    max-width: 190px;
     margin: 2px 0;
     background: #ffffff;
   }
@@ -84,6 +85,7 @@
   }
   .box.principal {
     min-width: 170px;
+    max-width: 230px;
     font-size: 9px;
     background: #eef4ff;
     border-color: #2f5fa8;
@@ -110,6 +112,11 @@
     padding-top: 3px;
     border-top: 1px dotted #bbb;
     color: #2f5fa8;
+  }
+  .obs {
+    margin-top: 2px;
+    color: #444;
+    white-space: pre-line;
   }
   .box.principal .titulos {
     color: #1a3d7a;
@@ -148,6 +155,7 @@
           {% if no.proprietario_nome %}<br>Dono: {{ no.proprietario_nome }}{% endif %}
           {{ lista_resultados(no.resultados) }}
         {% endif %}
+        {% if no.observacoes and no.observacoes.strip() %}<div class="obs">{{ no.observacoes.strip() }}</div>{% endif %}
       {% else %}
         <em>Desconhecido</em>
       {% endif %}
@@ -159,7 +167,7 @@
       <span class="anilha">{{ pombo.anilha }}</span>
       {{ pombo.sexo.value if pombo.sexo else '' }} &mdash; {{ pombo.cor or '' }}<br>
       {% if pombo.proprietario %}Proprietário: {{ pombo.proprietario.nome }}<br>{% endif %}
-      {% if pombo.observacoes %}<div style="white-space: pre-line">{{ pombo.observacoes }}</div>{% endif %}
+      {% if pombo.observacoes and pombo.observacoes.strip() %}<div class="obs">{{ pombo.observacoes.strip() }}</div>{% endif %}
       {{ lista_resultados(arvore.resultados) }}
     </div>
   {% endmacro %}

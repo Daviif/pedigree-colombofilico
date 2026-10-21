@@ -152,7 +152,6 @@ export function PomboSelect({
           <input
             autoFocus
             placeholder="Anilha *"
-            inputMode="numeric"
             value={novaAnilha}
             onChange={(e) => setNovaAnilha(limparAnilha(e.target.value))}
             onKeyDown={(e) => {

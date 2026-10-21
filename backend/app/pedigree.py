@@ -50,6 +50,7 @@ def _montar_no(
         sexo=pombo.sexo,
         cor=pombo.cor,
         origem=pombo.origem,
+        observacoes=pombo.observacoes,
         proprietario_nome=pombo.proprietario.nome if pombo.proprietario else None,
         grau_parentesco=_grau_parentesco(geracao, via),
         resultados=resultados,

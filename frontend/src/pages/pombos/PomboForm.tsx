@@ -105,7 +105,6 @@ export function PomboForm() {
           <Campo label="Anilha *">
             <input
               required
-              inputMode="numeric"
               className={inputClass}
               value={dados.anilha}
               onChange={(e) => campo('anilha', limparAnilha(e.target.value))}
