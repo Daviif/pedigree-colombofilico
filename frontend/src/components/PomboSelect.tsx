@@ -11,6 +11,7 @@ export function PomboSelect({
   excludeId,
   label,
   sexoPadrao,
+  permitirCriar = true,
 }: {
   pombos: Pombo[]
   value: number | null | undefined
@@ -18,6 +19,8 @@ export function PomboSelect({
   excludeId?: number
   label: string
   sexoPadrao?: Sexo
+  // O cadastro rápido sempre cria no plantel do usuário logado.
+  permitirCriar?: boolean
 }) {
   const selecionado = pombos.find((p) => p.id === value)
   const [query, setQuery] = useState('')
@@ -132,16 +135,18 @@ export function PomboSelect({
           {opcoes.length === 0 && (
             <div className="px-2 py-1 text-sm text-slate-400">Nenhum pombo encontrado</div>
           )}
-          <button
-            type="button"
-            onMouseDown={(e) => {
-              e.preventDefault()
-              abrirCriacao()
-            }}
-            className="block w-full border-t border-slate-100 px-2 py-1.5 text-left text-sm font-medium text-blue-700 hover:bg-blue-50"
-          >
-            + Cadastrar {label.toLowerCase()} agora
-          </button>
+          {permitirCriar && (
+            <button
+              type="button"
+              onMouseDown={(e) => {
+                e.preventDefault()
+                abrirCriacao()
+              }}
+              className="block w-full border-t border-slate-100 px-2 py-1.5 text-left text-sm font-medium text-blue-700 hover:bg-blue-50"
+            >
+              + Cadastrar {label.toLowerCase()} agora
+            </button>
+          )}
         </div>
       )}
       {aberto && modoCriar && (

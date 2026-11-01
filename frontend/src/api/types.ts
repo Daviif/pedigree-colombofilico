@@ -21,8 +21,15 @@ export interface PomboSummary {
   cor?: string | null
 }
 
+export interface UsuarioResumo {
+  id: number
+  nome: string
+}
+
 export interface Pombo {
   id: number
+  usuario_id: number
+  dono: UsuarioResumo
   anilha: string
   sexo: Sexo
   cor?: string | null
@@ -56,7 +63,7 @@ export interface PomboDetail extends Pombo {
 
 export type PomboInput = Omit<
   Pombo,
-  'id' | 'proprietario' | 'pai' | 'mae'
+  'id' | 'usuario_id' | 'dono' | 'proprietario' | 'pai' | 'mae'
 >
 
 export interface ArvoreResultado {
@@ -94,6 +101,7 @@ export interface PombosFiltro {
   sexo?: Sexo
   status?: StatusPombo
   proprietario_id?: number
+  usuario_id?: number
 }
 
 export interface Usuario {
@@ -101,4 +109,11 @@ export interface Usuario {
   login: string
   nome: string
   admin: boolean
+}
+
+export interface Compartilhamentos {
+  // usuários que veem o meu plantel
+  concedidos: UsuarioResumo[]
+  // usuários cujo plantel eu vejo
+  recebidos: UsuarioResumo[]
 }

@@ -8,6 +8,7 @@ const links = [
   { to: '/pombos', label: 'Pombos' },
   { to: '/reprodutores', label: 'Reprodutores' },
   { to: '/proprietarios', label: 'Proprietários' },
+  { to: '/compartilhar', label: 'Compartilhar' },
 ]
 
 export function Layout({ children }: { children: ReactNode }) {

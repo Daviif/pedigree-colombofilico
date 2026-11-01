@@ -8,7 +8,9 @@ from jinja2 import Environment, FileSystemLoader
 from sqlalchemy.orm import Session
 from weasyprint import HTML
 
+from app.auth import usuario_atual
 from app.database import get_db
+from app.models import Usuario
 from app.pedigree import montar_arvore
 from app.schemas import ArvoreNo
 from app.routers.pombos import buscar_pombo_ou_404
@@ -85,8 +87,10 @@ def _montar_grade(arvore: ArvoreNo) -> tuple[list[list[Celula]], float]:
     return linhas, altura_linha
 
 
-def _renderizar_html(pombo_id: int, geracoes: int, db: Session) -> tuple[str, str]:
-    pombo = buscar_pombo_ou_404(pombo_id, db)
+def _renderizar_html(
+    pombo_id: int, geracoes: int, db: Session, usuario: Usuario
+) -> tuple[str, str]:
+    pombo = buscar_pombo_ou_404(pombo_id, db, usuario)
     arvore = montar_arvore(pombo, geracoes)
     template = _env.get_template("certificado.html")
     grade, altura_linha = _montar_grade(arvore)
@@ -98,9 +102,12 @@ def _renderizar_html(pombo_id: int, geracoes: int, db: Session) -> tuple[str, st
 
 @router.get("/{pombo_id}/certificado")
 def gerar_certificado(
-    pombo_id: int, geracoes: int = Query(default=4, ge=1, le=6), db: Session = Depends(get_db)
+    pombo_id: int,
+    geracoes: int = Query(default=4, ge=1, le=6),
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(usuario_atual),
 ):
-    html_str, anilha = _renderizar_html(pombo_id, geracoes, db)
+    html_str, anilha = _renderizar_html(pombo_id, geracoes, db, usuario)
     pdf_bytes = HTML(string=html_str, base_url=str(TEMPLATES_DIR)).write_pdf()
 
     filename = f"pedigree-{anilha.replace('/', '-')}.pdf"

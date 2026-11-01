@@ -1,12 +1,25 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 
-import { usePombos, useProprietarios } from '../../api/hooks'
+import { useCompartilhamentos, usePombos, useProprietarios, useUsuarioAtual } from '../../api/hooks'
 import type { PombosFiltro, Sexo, StatusPombo } from '../../api/types'
 
 export function PombosList() {
+  const { data: usuario } = useUsuarioAtual()
+  const { data: compartilhamentos } = useCompartilhamentos()
+  // ?plantel=<id do dono> ou ?plantel=todos; sem nada, o plantel do próprio usuário.
+  const [searchParams, setSearchParams] = useSearchParams()
+  const plantel = searchParams.get('plantel') ?? String(usuario!.id)
+  const meuPlantel = plantel === String(usuario!.id)
+  const outrosPlanteis = compartilhamentos?.recebidos ?? []
+
   const [filtro, setFiltro] = useState<PombosFiltro>({})
-  const { data: pombos, isLoading } = usePombos(filtro)
+  const { data: pombos, isLoading } = usePombos({
+    ...filtro,
+    // proprietários são do próprio plantel: o filtro só vale nele
+    proprietario_id: meuPlantel ? filtro.proprietario_id : undefined,
+    usuario_id: plantel === 'todos' ? undefined : Number(plantel),
+  })
   const { data: proprietarios } = useProprietarios()
 
   function atualizarFiltro(campo: keyof PombosFiltro, valor: string) {
@@ -25,7 +38,22 @@ export function PombosList() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:grid-cols-5 sm:gap-3 sm:p-4">
+      <div className="grid grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:grid-cols-6 sm:gap-3 sm:p-4">
+        {(usuario!.admin || outrosPlanteis.length > 0) && (
+          <select
+            value={plantel}
+            className="col-span-2 rounded border border-slate-300 px-2 py-1 text-sm sm:col-span-6"
+            onChange={(e) => setSearchParams(e.target.value === String(usuario!.id) ? {} : { plantel: e.target.value })}
+          >
+            <option value={usuario!.id}>Meu plantel</option>
+            {outrosPlanteis.map((u) => (
+              <option key={u.id} value={u.id}>
+                Plantel de {u.nome}
+              </option>
+            ))}
+            <option value="todos">{usuario!.admin ? 'Todos os plantéis' : 'Todos os que vejo'}</option>
+          </select>
+        )}
         <input
           placeholder="Anilha"
           className="rounded border border-slate-300 px-2 py-1 text-sm"
@@ -56,7 +84,8 @@ export function PombosList() {
           <option value="FALECIDO">Falecido</option>
         </select>
         <select
-          className="col-span-2 rounded border border-slate-300 px-2 py-1 text-sm sm:col-span-1"
+          disabled={!meuPlantel}
+          className="col-span-2 rounded border border-slate-300 px-2 py-1 text-sm disabled:opacity-50 sm:col-span-2"
           onChange={(e) => atualizarFiltro('proprietario_id', e.target.value)}
         >
           <option value="">Proprietário (todos)</option>
@@ -85,6 +114,7 @@ export function PombosList() {
                 {pombo.sexo} · {pombo.cor ?? '—'}
                 {pombo.proprietario ? ` · ${pombo.proprietario.nome}` : ''}
               </div>
+              {!meuPlantel && <div className="text-xs text-amber-700">Plantel de {pombo.dono.nome}</div>}
               <div className="text-xs text-slate-400">
                 Pai: {pombo.pai?.anilha ?? '—'} · Mãe: {pombo.mae?.anilha ?? '—'}
               </div>
@@ -104,19 +134,20 @@ export function PombosList() {
               <th className="px-4 py-2">Status</th>
               <th className="px-4 py-2">Proprietário</th>
               <th className="px-4 py-2">Pai / Mãe</th>
+              {!meuPlantel && <th className="px-4 py-2">Plantel</th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {isLoading && (
               <tr>
-                <td className="px-4 py-4 text-slate-500" colSpan={6}>
+                <td className="px-4 py-4 text-slate-500" colSpan={meuPlantel ? 6 : 7}>
                   Carregando...
                 </td>
               </tr>
             )}
             {!isLoading && pombos?.length === 0 && (
               <tr>
-                <td className="px-4 py-4 text-slate-500" colSpan={6}>
+                <td className="px-4 py-4 text-slate-500" colSpan={meuPlantel ? 6 : 7}>
                   Nenhum pombo encontrado.
                 </td>
               </tr>
@@ -135,6 +166,7 @@ export function PombosList() {
                 <td className="px-4 py-2 text-slate-500">
                   {pombo.pai?.anilha ?? '—'} / {pombo.mae?.anilha ?? '—'}
                 </td>
+                {!meuPlantel && <td className="px-4 py-2 text-slate-500">{pombo.dono.nome}</td>}
               </tr>
             ))}
           </tbody>

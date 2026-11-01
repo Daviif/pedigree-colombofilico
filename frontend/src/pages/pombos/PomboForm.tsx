@@ -7,6 +7,7 @@ import {
   usePombo,
   usePombos,
   useProprietarios,
+  useUsuarioAtual,
 } from '../../api/hooks'
 import type { PomboInput, Sexo, StatusPombo } from '../../api/types'
 import { PomboSelect } from '../../components/PomboSelect'
@@ -40,9 +41,12 @@ export function PomboForm() {
   const editandoId = params.id ? Number(params.id) : undefined
   const navigate = useNavigate()
 
+  const { data: usuario } = useUsuarioAtual()
   const { data: pomboAtual } = usePombo(editandoId)
-  const { data: todosPombos } = usePombos({})
-  const { data: proprietarios } = useProprietarios()
+  // Pai, mãe e proprietário vêm do plantel do pombo (o admin pode editar pombos de outros).
+  const donoId = editandoId ? pomboAtual?.usuario_id : usuario!.id
+  const { data: todosPombos } = usePombos({ usuario_id: donoId }, donoId !== undefined)
+  const { data: proprietarios } = useProprietarios(donoId)
 
   const [dados, setDados] = useState<PomboInput>(VAZIO)
   const [erro, setErro] = useState<string | null>(null)
@@ -161,6 +165,7 @@ export function PomboForm() {
               excludeId={editandoId}
               label="pai"
               sexoPadrao="M"
+              permitirCriar={donoId === usuario!.id}
             />
           </Campo>
           <Campo label="Mãe">
@@ -171,6 +176,7 @@ export function PomboForm() {
               excludeId={editandoId}
               label="mãe"
               sexoPadrao="F"
+              permitirCriar={donoId === usuario!.id}
             />
           </Campo>
         </div>

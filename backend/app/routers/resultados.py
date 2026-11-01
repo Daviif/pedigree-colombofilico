@@ -2,8 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.auth import usuario_atual
 from app.database import get_db
-from app.models import Resultado
+from app.models import Resultado, Usuario
 from app.routers.pombos import buscar_pombo_ou_404
 from app.schemas import ResultadoCreate, ResultadoRead, ResultadoUpdate
 
@@ -11,8 +12,10 @@ router = APIRouter(prefix="/pombos/{pombo_id}/resultados", tags=["resultados"])
 
 
 @router.get("", response_model=list[ResultadoRead])
-def listar_resultados(pombo_id: int, db: Session = Depends(get_db)):
-    buscar_pombo_ou_404(pombo_id, db)
+def listar_resultados(
+    pombo_id: int, db: Session = Depends(get_db), usuario: Usuario = Depends(usuario_atual)
+):
+    buscar_pombo_ou_404(pombo_id, db, usuario)
     stmt = (
         select(Resultado)
         .where(Resultado.pombo_id == pombo_id)
@@ -22,8 +25,13 @@ def listar_resultados(pombo_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("", response_model=ResultadoRead, status_code=201)
-def criar_resultado(pombo_id: int, dados: ResultadoCreate, db: Session = Depends(get_db)):
-    buscar_pombo_ou_404(pombo_id, db)
+def criar_resultado(
+    pombo_id: int,
+    dados: ResultadoCreate,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(usuario_atual),
+):
+    buscar_pombo_ou_404(pombo_id, db, usuario, editar=True)
     resultado = Resultado(pombo_id=pombo_id, **dados.model_dump())
     db.add(resultado)
     db.commit()
@@ -31,7 +39,10 @@ def criar_resultado(pombo_id: int, dados: ResultadoCreate, db: Session = Depends
     return resultado
 
 
-def _buscar_resultado_ou_404(pombo_id: int, resultado_id: int, db: Session) -> Resultado:
+def _buscar_resultado_ou_404(
+    pombo_id: int, resultado_id: int, db: Session, usuario: Usuario
+) -> Resultado:
+    buscar_pombo_ou_404(pombo_id, db, usuario, editar=True)
     resultado = db.scalars(
         select(Resultado).where(Resultado.id == resultado_id, Resultado.pombo_id == pombo_id)
     ).first()
@@ -42,9 +53,13 @@ def _buscar_resultado_ou_404(pombo_id: int, resultado_id: int, db: Session) -> R
 
 @router.put("/{resultado_id}", response_model=ResultadoRead)
 def atualizar_resultado(
-    pombo_id: int, resultado_id: int, dados: ResultadoUpdate, db: Session = Depends(get_db)
+    pombo_id: int,
+    resultado_id: int,
+    dados: ResultadoUpdate,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(usuario_atual),
 ):
-    resultado = _buscar_resultado_ou_404(pombo_id, resultado_id, db)
+    resultado = _buscar_resultado_ou_404(pombo_id, resultado_id, db, usuario)
     for campo, valor in dados.model_dump().items():
         setattr(resultado, campo, valor)
     db.commit()
@@ -53,7 +68,12 @@ def atualizar_resultado(
 
 
 @router.delete("/{resultado_id}", status_code=204)
-def remover_resultado(pombo_id: int, resultado_id: int, db: Session = Depends(get_db)):
-    resultado = _buscar_resultado_ou_404(pombo_id, resultado_id, db)
+def remover_resultado(
+    pombo_id: int,
+    resultado_id: int,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(usuario_atual),
+):
+    resultado = _buscar_resultado_ou_404(pombo_id, resultado_id, db, usuario)
     db.delete(resultado)
     db.commit()

@@ -40,15 +40,16 @@ def banco_limpo():
     Base.metadata.drop_all(engine)
 
 
+def _override_get_db():
+    db = TestingSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
 @pytest.fixture
 def client_anonimo():
-    def _override_get_db():
-        db = TestingSessionLocal()
-        try:
-            yield db
-        finally:
-            db.close()
-
     app.dependency_overrides[get_db] = _override_get_db
     with TestClient(app, base_url="http://testserver/api") as c:
         yield c
@@ -69,3 +70,23 @@ def client(client_anonimo, usuario):
     resposta = client_anonimo.post("/auth/login", json=usuario)
     assert resposta.status_code == 200
     return client_anonimo
+
+
+@pytest.fixture
+def cliente_de(client):
+    """Fábrica de clientes logados como outros usuários (não admin por padrão),
+    cada um com o próprio cookie de sessão: `cliente_de("joao")`."""
+    abertos = []
+
+    def _criar(login: str, admin: bool = False) -> TestClient:
+        with TestingSessionLocal() as db:
+            db.add(Usuario(login=login, nome=login.title(), senha_hash=hash_senha("senha-teste"), admin=admin))
+            db.commit()
+        c = TestClient(app, base_url="http://testserver/api")
+        abertos.append(c)
+        assert c.post("/auth/login", json={"login": login, "senha": "senha-teste"}).status_code == 200
+        return c
+
+    yield _criar
+    for c in abertos:
+        c.close()

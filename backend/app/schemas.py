@@ -116,6 +116,8 @@ class PomboRead(PomboBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    usuario_id: int
+    dono: "UsuarioResumo"
     proprietario: ProprietarioRead | None = None
     pai: PomboSummary | None = None
     mae: PomboSummary | None = None
@@ -155,6 +157,13 @@ class ArvoreNo(BaseModel):
 # ---------- Usuario ----------
 
 
+class UsuarioResumo(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    nome: str
+
+
 class UsuarioRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -162,3 +171,17 @@ class UsuarioRead(BaseModel):
     login: str
     nome: str
     admin: bool
+
+
+# ---------- Compartilhamento ----------
+
+
+class CompartilharInput(BaseModel):
+    login: str
+
+
+class CompartilhamentosResponse(BaseModel):
+    # usuários que veem o meu plantel
+    concedidos: list[UsuarioResumo] = []
+    # usuários cujo plantel eu vejo
+    recebidos: list[UsuarioResumo] = []

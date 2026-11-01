@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.auth import usuario_atual
 from app.config import settings
-from app.routers import auth, certificado, pombos, proprietarios, resultados
+from app.routers import auth, certificado, compartilhamentos, pombos, proprietarios, resultados
 
 
 app = FastAPI(title="Sistema de Pedigree Colombófilo")
@@ -24,6 +24,7 @@ app.include_router(proprietarios.router, prefix="/api", dependencies=protegido)
 app.include_router(pombos.router, prefix="/api", dependencies=protegido)
 app.include_router(resultados.router, prefix="/api", dependencies=protegido)
 app.include_router(certificado.router, prefix="/api", dependencies=protegido)
+app.include_router(compartilhamentos.router, prefix="/api", dependencies=protegido)
 
 
 @app.get("/api/health")

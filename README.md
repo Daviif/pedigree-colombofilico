@@ -79,7 +79,11 @@ docker compose exec backend python -m app.criar_usuario LOGIN --nome "Nome Exibi
 docker compose exec backend python -m app.criar_usuario LOGIN                         # troca a senha
 ```
 
-Hoje todo usuário logado vê todos os pombos. A tabela `usuarios` já tem o campo `admin` como base para, no futuro, cada usuário ver só os próprios pombos.
+Cada usuário tem o próprio plantel (pombos e proprietários) e só vê o dele. A mesma anilha pode existir em plantéis diferentes. O admin (`--admin`) vê e edita os pombos de todos.
+
+Para mostrar o plantel a outra pessoa, use a tela **Compartilhar**: quem recebe vê todos os pombos do dono, inclusive os cadastrados depois, mas só para leitura. No pombo, o botão **Copiar para meu plantel** traz uma cópia independente, com ancestrais e resultados. Se o destino já tiver um ancestral com a mesma anilha, ele é reaproveitado. Pai, mãe e proprietário de um pombo precisam ser do mesmo plantel.
+
+Na migração que criou os plantéis, os pombos e proprietários que já existiam foram para o primeiro admin.
 
 ### Atualizar depois de um `git push`
 

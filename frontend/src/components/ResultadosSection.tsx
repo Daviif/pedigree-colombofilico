@@ -2,7 +2,13 @@ import { useState } from 'react'
 
 import { useCriarResultado, useRemoverResultado, useResultados } from '../api/hooks'
 
-export function ResultadosSection({ pomboId }: { pomboId: number }) {
+export function ResultadosSection({
+  pomboId,
+  somenteLeitura = false,
+}: {
+  pomboId: number
+  somenteLeitura?: boolean
+}) {
   const { data: resultados } = useResultados(pomboId)
   const criar = useCriarResultado(pomboId)
   const remover = useRemoverResultado(pomboId)
@@ -26,22 +32,24 @@ export function ResultadosSection({ pomboId }: { pomboId: number }) {
     <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
       <h2 className="mb-3 text-lg font-medium text-slate-800">Resultados / títulos</h2>
 
-      <form onSubmit={adicionar} className="mb-4 flex flex-col gap-2 sm:flex-row">
-        <input
-          required
-          placeholder="ex: 2021 — Prova Navarro 438 Km — 1º lugar"
-          className="flex-1 rounded border border-slate-300 px-2 py-2 text-sm sm:py-1"
-          value={competicao}
-          onChange={(e) => setCompeticao(e.target.value)}
-        />
-        <button
-          type="submit"
-          disabled={criar.isPending}
-          className="rounded-md bg-blue-600 px-3 py-2 text-sm sm:py-1 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-        >
-          Adicionar
-        </button>
-      </form>
+      {!somenteLeitura && (
+        <form onSubmit={adicionar} className="mb-4 flex flex-col gap-2 sm:flex-row">
+          <input
+            required
+            placeholder="ex: 2021 — Prova Navarro 438 Km — 1º lugar"
+            className="flex-1 rounded border border-slate-300 px-2 py-2 text-sm sm:py-1"
+            value={competicao}
+            onChange={(e) => setCompeticao(e.target.value)}
+          />
+          <button
+            type="submit"
+            disabled={criar.isPending}
+            className="rounded-md bg-blue-600 px-3 py-2 text-sm sm:py-1 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          >
+            Adicionar
+          </button>
+        </form>
+      )}
 
       {resultados?.length === 0 && <p className="text-sm text-slate-500">Nenhum resultado registrado.</p>}
 
@@ -56,9 +64,11 @@ export function ResultadosSection({ pomboId }: { pomboId: number }) {
               {r.premio ? ` · ${r.premio}` : ''}
               {r.observacao && <div className="whitespace-pre-line text-slate-400">{r.observacao}</div>}
             </div>
-            <button onClick={() => remover.mutate(r.id)} className="shrink-0 py-1 text-xs text-red-600 hover:underline">
-              remover
-            </button>
+            {!somenteLeitura && (
+              <button onClick={() => remover.mutate(r.id)} className="shrink-0 py-1 text-xs text-red-600 hover:underline">
+                remover
+              </button>
+            )}
           </li>
         ))}
       </ul>

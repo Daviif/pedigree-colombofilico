@@ -4,6 +4,7 @@ import { isAxiosError } from 'axios'
 import { api } from './client'
 import type {
   ArvoreNo,
+  Compartilhamentos,
   IrmaosResponse,
   Pombo,
   PomboDetail,
@@ -57,10 +58,12 @@ export function useLogout() {
 
 // ---------- Proprietarios ----------
 
-export function useProprietarios() {
+// Sem `usuarioId`, os proprietários do próprio plantel; o admin pode pedir os de outro.
+export function useProprietarios(usuarioId?: number) {
   return useQuery({
-    queryKey: ['proprietarios'],
-    queryFn: async () => (await api.get<Proprietario[]>('/proprietarios')).data,
+    queryKey: ['proprietarios', usuarioId],
+    queryFn: async () =>
+      (await api.get<Proprietario[]>('/proprietarios', { params: { usuario_id: usuarioId } })).data,
   })
 }
 
@@ -92,10 +95,11 @@ export function useRemoverProprietario() {
 
 // ---------- Pombos ----------
 
-export function usePombos(filtro: PombosFiltro) {
+export function usePombos(filtro: PombosFiltro, enabled = true) {
   return useQuery({
     queryKey: ['pombos', filtro],
     queryFn: async () => (await api.get<Pombo[]>('/pombos', { params: filtro })).data,
+    enabled,
   })
 }
 
@@ -133,6 +137,17 @@ export function useRemoverPombo() {
   return useMutation({
     mutationFn: async (id: number) => api.delete(`/pombos/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['pombos'] }),
+  })
+}
+
+export function useCopiarPombo() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: number) => (await api.post<Pombo>(`/pombos/${id}/copiar`)).data,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['pombos'] })
+      qc.invalidateQueries({ queryKey: ['proprietarios'] })
+    },
   })
 }
 
@@ -186,5 +201,36 @@ export function useRemoverResultado(pomboId: number) {
   return useMutation({
     mutationFn: async (id: number) => api.delete(`/pombos/${pomboId}/resultados/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['resultados', pomboId] }),
+  })
+}
+
+// ---------- Compartilhamento de plantel ----------
+
+export function useCompartilhamentos() {
+  return useQuery({
+    queryKey: ['compartilhamentos'],
+    queryFn: async () => (await api.get<Compartilhamentos>('/compartilhamentos')).data,
+  })
+}
+
+export function useCompartilhar() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (login: string) =>
+      (await api.post<Compartilhamentos>('/compartilhamentos', { login })).data,
+    onSuccess: (dados) => qc.setQueryData(['compartilhamentos'], dados),
+  })
+}
+
+export function useRemoverCompartilhamento() {
+  const qc = useQueryClient()
+  return useMutation({
+    // "concedidos": deixo de compartilhar com o usuário; "recebidos": deixo de ver o plantel dele.
+    mutationFn: async ({ tipo, usuarioId }: { tipo: 'concedidos' | 'recebidos'; usuarioId: number }) =>
+      api.delete(`/compartilhamentos/${tipo}/${usuarioId}`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['compartilhamentos'] })
+      qc.invalidateQueries({ queryKey: ['pombos'] })
+    },
   })
 }

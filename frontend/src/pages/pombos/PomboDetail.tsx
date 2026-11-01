@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
-import { useArvore, usePombo, useRemoverPombo } from '../../api/hooks'
+import { useArvore, useCopiarPombo, usePombo, useRemoverPombo, useUsuarioAtual } from '../../api/hooks'
 import { IrmaosSection } from '../../components/IrmaosSection'
 import { PedigreeTree } from '../../components/PedigreeTree'
 import { ProprietarioHeader } from '../../components/ProprietarioHeader'
@@ -16,6 +16,8 @@ export function PomboDetail() {
   const { data: pombo, isLoading } = usePombo(pomboId)
   const { data: arvore } = useArvore(pomboId, geracoes)
   const remover = useRemoverPombo()
+  const copiar = useCopiarPombo()
+  const { data: usuario } = useUsuarioAtual()
 
   if (isLoading || !pombo) {
     return <p className="text-slate-500">Carregando...</p>
@@ -27,8 +29,28 @@ export function PomboDetail() {
     navigate('/pombos')
   }
 
+  const doMeuPlantel = pombo.usuario_id === usuario!.id
+  const podeEditar = doMeuPlantel || usuario!.admin
+
+  async function copiarParaMeuPlantel() {
+    if (!confirm(`Copiar o pombo ${pombo!.anilha}, com os ancestrais e resultados, para o seu plantel?`)) return
+    try {
+      const copia = await copiar.mutateAsync(pomboId)
+      navigate(`/pombos/${copia.id}`)
+    } catch (err: any) {
+      alert(err?.response?.data?.detail ?? 'Erro ao copiar o pombo.')
+    }
+  }
+
   return (
     <div className="space-y-6">
+      {!doMeuPlantel && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          Plantel de <strong>{pombo.dono.nome}</strong>
+          {podeEditar ? '.' : ': você pode ver este pombo, mas não alterá-lo.'}
+        </div>
+      )}
+
       {pombo.proprietario && <ProprietarioHeader proprietario={pombo.proprietario} />}
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -48,18 +70,31 @@ export function PomboDetail() {
           >
             Gerar certificado PDF
           </a>
-          <Link
-            to={`/pombos/${pomboId}/editar`}
-            className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
-            Editar
-          </Link>
-          <button
-            onClick={excluir}
-            className="rounded-md border border-red-300 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
-          >
-            Excluir
-          </button>
+          {!doMeuPlantel && (
+            <button
+              onClick={copiarParaMeuPlantel}
+              disabled={copiar.isPending}
+              className="rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            >
+              Copiar para meu plantel
+            </button>
+          )}
+          {podeEditar && (
+            <>
+              <Link
+                to={`/pombos/${pomboId}/editar`}
+                className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              >
+                Editar
+              </Link>
+              <button
+                onClick={excluir}
+                className="rounded-md border border-red-300 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
+              >
+                Excluir
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -86,7 +121,7 @@ export function PomboDetail() {
 
       <IrmaosSection pomboId={pomboId} />
 
-      <ResultadosSection pomboId={pomboId} />
+      <ResultadosSection pomboId={pomboId} somenteLeitura={!podeEditar} />
     </div>
   )
 }

@@ -172,7 +172,7 @@ def test_lista_pombo_antigo_com_anilha_fora_do_padrao(client):
     from tests.conftest import TestingSessionLocal
 
     with TestingSessionLocal() as db:
-        db.add(Pombo(anilha="BR 123-A", cor="azul"))
+        db.add(Pombo(anilha="BR 123-A", cor="azul", usuario_id=client.get("/auth/me").json()["id"]))
         db.commit()
 
     resposta = client.get("/pombos")

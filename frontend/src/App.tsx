@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router-dom'
 
 import { useUsuarioAtual } from './api/hooks'
 import { Layout } from './components/Layout'
+import { Compartilhar } from './pages/Compartilhar'
 import { Dashboard } from './pages/Dashboard'
 import { Login } from './pages/Login'
 import { PomboDetail } from './pages/pombos/PomboDetail'
@@ -26,6 +27,7 @@ function App() {
         <Route path="/pombos/:id/editar" element={<PomboForm />} />
         <Route path="/reprodutores" element={<Reprodutores />} />
         <Route path="/proprietarios" element={<Proprietarios />} />
+        <Route path="/compartilhar" element={<Compartilhar />} />
       </Routes>
     </Layout>
   )

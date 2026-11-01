@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 
-import { usePombos, useProprietarios } from '../api/hooks'
+import { usePombos, useProprietarios, useUsuarioAtual } from '../api/hooks'
 
 function Cartao({ titulo, valor, to }: { titulo: string; valor: number | string; to: string }) {
   return (
@@ -15,7 +15,8 @@ function Cartao({ titulo, valor, to }: { titulo: string; valor: number | string;
 }
 
 export function Dashboard() {
-  const { data: pombos } = usePombos({})
+  const { data: usuario } = useUsuarioAtual()
+  const { data: pombos } = usePombos({ usuario_id: usuario!.id })
   const { data: proprietarios } = useProprietarios()
 
   const reprodutores = pombos?.filter((p) => p.status === 'REPRODUTOR') ?? []

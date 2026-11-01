@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom'
 
-import { usePombos } from '../api/hooks'
+import { usePombos, useUsuarioAtual } from '../api/hooks'
 
 export function Reprodutores() {
-  const { data: pombos, isLoading } = usePombos({ status: 'REPRODUTOR' })
+  const { data: usuario } = useUsuarioAtual()
+  const { data: pombos, isLoading } = usePombos({ status: 'REPRODUTOR', usuario_id: usuario!.id })
 
   const machos = pombos?.filter((p) => p.sexo === 'M') ?? []
   const femeas = pombos?.filter((p) => p.sexo === 'F') ?? []
