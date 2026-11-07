@@ -1,0 +1,11 @@
+[Unit]
+Description=Backup do pedigree: 04h e 16h (a VPS gera às 03h), e 5 min depois de ligar
+
+[Timer]
+OnCalendar=*-*-* 04,16:00:00
+Persistent=true
+OnBootSec=5min
+RandomizedDelaySec=5min
+
+[Install]
+WantedBy=timers.target

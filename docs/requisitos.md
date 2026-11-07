@@ -12,6 +12,7 @@
 | D1 | Vínculo novo com sexo incompatível (pai fêmea, mãe macho) é **bloqueado**. "Desconhecido" sempre aceito. Os registros antigos inconsistentes (2 pais fêmea e 3 mães macho em produção) **ficam como estão** e recebem um aviso |
 | D2 | Excluir pombo que é pai ou mãe de outros é **bloqueado**, com a lista dos filhos |
 | D3 | Backup externo vai para o **PC do responsável** |
+| D5 | O responsável **não usa gerenciador de senhas**, e o PC fica ligado a maior parte do tempo (2026-11-07). Ajustes em RO-03, RO-04 e RO-10 |
 | D4 | Ninguém explorou a falha do PDF: a busca por HTML ou URL nos textos voltou vazia |
 
 ---
@@ -77,13 +78,14 @@ Teste geral: um teste parametrizado que manda o limite e o limite + 1 de cada ca
 |---|---|---|
 | RO-01 | O Postgres de dev publica só em `127.0.0.1:5436` | `ss -ltn` mostra `127.0.0.1:5436`; os testes continuam passando |
 | RO-02 | **Backup na VPS:** além do dump diário, o script falha alto (código ≠ 0 e linha `ERRO` no log) se o dump vier vazio ou o gzip estiver corrompido (`gzip -t`) | Teste local do script com um dump forçado a falhar |
-| RO-03 | **Cifra:** o backup é cifrado na VPS com **age** para uma chave pública. A chave privada fica só no PC do responsável (e numa cópia no gerenciador de senhas). Na VPS não há nada que decifre | Arquivo `.sql.gz.age`; tentar decifrar sem a chave falha |
-| RO-04 | **Cópia para o PC (D3):** o **PC puxa** os arquivos da VPS (`rsync` via SSH, com timer do systemd do usuário, diariamente e ao ligar). A VPS não tem credencial nenhuma para o PC, então se ela for invadida não consegue apagar as cópias | Timer ativo; arquivo do dia aparece no PC |
+| RO-03 | **Cifra:** a cópia que sai da VPS é cifrada lá com **age** para uma chave pública (`deploy/backup.pub`). Na VPS não há nada que decifre. Os backups **locais** da VPS continuam sem cifra (quem invade a VPS já lê o banco; assim, perder a chave privada não inutiliza os backups da VPS) | Arquivo `.sql.gz.age` em `backups/externo/`; tentar decifrar com outra chave falha |
+| RO-04 | **Cópia para o PC (D3):** o **PC puxa** os arquivos da VPS (`rsync` via SSH, com timer do systemd do usuário a cada 12 h e 5 min depois de ligar; execução perdida é feita na próxima). A VPS não tem credencial nenhuma para o PC. A chave SSH usada pelo PC é **exclusiva** e restrita na VPS a `rrsync -ro` da pasta `backups/externo`: só lê backups cifrados, sem shell | Timer ativo; arquivo do dia aparece no PC; `ssh` com essa chave não abre shell |
 | RO-05 | **Retenção no PC:** 14 diários + 8 semanais + 12 mensais. Na VPS: 30 dias (já é assim) | Script de rotação com teste usando datas simuladas |
 | RO-06 | **Alerta:** se a cópia mais recente no PC tiver mais de 48 h, o PC mostra uma notificação na área de trabalho ao ligar e a cada execução | Teste: mudar a data do arquivo → notificação |
 | RO-07 | **Restauração comprovada:** script que decifra e restaura num Postgres **descartável** local (nunca na produção) e confere as contagens (usuários, pombos, resultados, proprietários) e um login | Registro em `docs/operacao.md`: data, arquivo, tempo, contagens, problemas |
 | RO-08 | **Objetivos:** RPO ≤ 24 h **se o PC ligar todo dia**. Com o PC desligado por N dias, o RPO vira N dias (limitação aceita da D3; o backup local da VPS continua diário). RTO ≤ 4 h (VPS nova + deploy + restauração), medido no RO-07 | Valores registrados após o RO-07 |
-| RO-09 | Os segredos (`.env`) **não** vão no backup. Ficam no gerenciador de senhas do responsável, e o runbook diz como recriá-los | Revisão do script |
+| RO-10 | **Chave privada do age (D5):** gerada no PC (`~/.config/pedigree-backup/chave-age.txt`, permissão 600), **sem senha**: é uma linha só, que cabe num papel (uma chave com senha vira um bloco de texto que não dá para copiar à mão; e o PC já guarda os dados de dev). Cópias em **papel e pendrive**, guardadas longe do PC. O runbook diz onde estão e como testar a cópia | Teste de restauração usando a cópia do pendrive |
+| RO-09 | Os segredos (`.env`) **não** vão no backup e **não são necessários** para recuperar: numa VPS nova, geram-se segredos novos (todos fazem login de novo) e o dump é restaurado no banco novo. O runbook descreve o passo a passo | Revisão do script; ensaio no RO-07 |
 
 ## 6. Frontend mínimo desta etapa (RF)
 

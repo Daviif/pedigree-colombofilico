@@ -117,27 +117,9 @@ cd pedigree/deploy && docker compose exec -T db psql -U pedigree pedigree < ~/da
 
 ### Backup
 
-`deploy/backup.sh` gera `deploy/backups/pedigree-AAAA-MM-DD-HHMM.sql.gz` e apaga os com mais de 30 dias. Na VPS está agendado todo dia às 3h (`crontab -l`):
+Backup diário às 3h na VPS (local, 30 dias), com cópia **cifrada** puxada pelo PC do responsável (14 diários + 8 semanais + 12 mensais) e aviso se passar de 48 h sem cópia. Instalação: `backup-pc/instalar.sh`. Teste de restauração: `backup-pc/testar_restauracao.sh`. Restaurar numa VPS nova e lidar com incidentes: **`docs/operacao.md`**. Regras: RO-xx em `docs/requisitos.md`.
 
-```
-0 3 * * * /home/ubuntu/pedigree/deploy/backup.sh >> /home/ubuntu/pedigree/deploy/backups/backup.log 2>&1
-```
-
-Os backups ficam no disco da própria VPS. Para ter uma cópia fora dela, baixe de tempos em tempos para o seu computador:
-
-```bash
-scp -i ~/.ssh/oracle-pedigree.key 'ubuntu@IP-DA-VPS:pedigree/deploy/backups/*.sql.gz' ~/backups-pedigree/
-```
-
-Restaurar um backup (substitui todo o conteúdo atual do banco):
-
-```bash
-cd ~/pedigree/deploy
-docker compose stop backend
-docker compose exec -T db psql -U pedigree -d postgres -c "DROP DATABASE pedigree" -c "CREATE DATABASE pedigree OWNER pedigree"
-gunzip -c backups/ARQUIVO.sql.gz | docker compose exec -T db psql -U pedigree pedigree
-docker compose start backend
-```
+Testes dos scripts do PC: `backend/.venv/bin/python -m pytest backup-pc/`.
 
 ## Regras genealógicas
 

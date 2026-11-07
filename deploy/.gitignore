@@ -1,2 +1,4 @@
 .env
 backups/
+backup.pub
+backup-externo.sh
