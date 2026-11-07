@@ -30,17 +30,25 @@ trap limpar EXIT
 
 inicio=$(date +%s)
 docker run -d --name "$NOME" -e POSTGRES_USER=pedigree -e POSTGRES_PASSWORD=descartavel \
-    -e POSTGRES_DB=pedigree "$IMAGEM" > /dev/null
-for _ in $(seq 60); do
-    docker exec "$NOME" pg_isready -U pedigree -d pedigree -q 2> /dev/null && break
+    -e POSTGRES_DB=pedigree -e POSTGRES_HOST_AUTH_METHOD=trust "$IMAGEM" > /dev/null
+# A imagem sobe um servidor TEMPORÁRIO para o init (só socket local), desliga e sobe o
+# definitivo. Esperar por TCP (127.0.0.1) garante que é o definitivo: com o socket, o
+# teste pegava o temporário e a restauração caía com "the database system is shutting down".
+pronto=""
+for _ in $(seq 90); do
+    if docker exec "$NOME" pg_isready -h 127.0.0.1 -U pedigree -d pedigree -q 2> /dev/null \
+        && docker exec "$NOME" psql -h 127.0.0.1 -U pedigree -d pedigree -tAc "SELECT 1" > /dev/null 2>&1; then
+        pronto=1
+        break
+    fi
     sleep 1
 done
-sleep 2  # o entrypoint reinicia o servidor uma vez depois do init
+[ -n "$pronto" ] || { echo "O Postgres descartável não ficou pronto em 90 s"; exit 1; }
 
-age -d -i "$CHAVE" "$ARQUIVO" | gunzip | docker exec -i "$NOME" psql -q -v ON_ERROR_STOP=1 -U pedigree -d pedigree > /dev/null
+age -d -i "$CHAVE" "$ARQUIVO" | gunzip | docker exec -i "$NOME" psql -h 127.0.0.1 -q -v ON_ERROR_STOP=1 -U pedigree -d pedigree > /dev/null
 fim=$(date +%s)
 
-sql() { docker exec "$NOME" psql -U pedigree -d pedigree -tAc "$1"; }
+sql() { docker exec "$NOME" psql -h 127.0.0.1 -U pedigree -d pedigree -tAc "$1"; }
 contagens=$(sql "SELECT 'usuarios=' || (SELECT count(*) FROM usuarios) || ' pombos=' || (SELECT count(*) FROM pombos) || ' resultados=' || (SELECT count(*) FROM resultados) || ' proprietarios=' || (SELECT count(*) FROM proprietarios) || ' compartilhamentos=' || (SELECT count(*) FROM compartilhamentos)")
 versao=$(sql "SELECT version_num FROM alembic_version")
 admins=$(sql "SELECT count(*) FROM usuarios WHERE admin AND ativo")
