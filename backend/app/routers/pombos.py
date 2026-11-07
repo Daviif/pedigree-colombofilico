@@ -98,6 +98,16 @@ def _validar_vinculos(
             raise HTTPException(status_code=400, detail="Proprietário informado não existe")
 
 
+def _gravar(db: Session) -> None:
+    """RV-05: a verificação de anilha repetida acontece antes; se outro pedido gravou a
+    mesma anilha no meio tempo, a restrição única do banco responde 409 em vez de 500."""
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="Já existe um pombo com essa anilha")
+
+
 def _anilha_em_uso(anilha: str, dono_id: int, db: Session, exceto_id: int | None = None) -> bool:
     stmt = select(Pombo.id).where(Pombo.usuario_id == dono_id, Pombo.anilha == anilha)
     if exceto_id is not None:
@@ -115,7 +125,7 @@ def criar_pombo(
 
     pombo = Pombo(usuario_id=usuario.id, **dados.model_dump())
     db.add(pombo)
-    db.commit()
+    _gravar(db)
     return buscar_pombo_ou_404(pombo.id, db, usuario)
 
 
@@ -141,7 +151,7 @@ def atualizar_pombo(
 
     for campo, valor in dados.model_dump().items():
         setattr(pombo, campo, valor)
-    db.commit()
+    _gravar(db)
     return buscar_pombo_ou_404(pombo_id, db, usuario)
 
 

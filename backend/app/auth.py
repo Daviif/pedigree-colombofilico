@@ -24,6 +24,11 @@ def hash_senha(senha: str) -> str:
 
 
 def verificar_senha(senha: str, senha_hash: str | None) -> bool:
+    if len(senha.encode()) > 72:
+        # RV-06: o bcrypt 5 recusa mais de 72 bytes com erro. Nenhuma senha cadastrada é
+        # maior que isso, então é senha errada; gasta o mesmo tempo de um login normal.
+        bcrypt.checkpw(senha.encode()[:72], _HASH_FICTICIO.encode())
+        return False
     if senha_hash is None:
         bcrypt.checkpw(senha.encode(), _HASH_FICTICIO.encode())
         return False

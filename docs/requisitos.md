@@ -52,6 +52,8 @@ Nenhuma entrada do usuário pode gerar erro 500. Os limites acompanham as coluna
 | RV-02 | Pombo: cor ≤ 100, origem ≤ 200, observações ≤ 5.000 | 422 com a mensagem do campo |
 | RV-03 | Proprietário: nome obrigatório ≤ 200; colombódromo ≤ 200; endereço ≤ 300; telefone ≤ 50; e-mail ≤ 200; observações ≤ 5.000 | 422 |
 | RV-04 | Resultado: competição obrigatória ≤ 200; ano entre 1900 e o ano atual + 1; distância entre 0 e 5.000 km; colocação ≤ 100; prêmio ≤ 200; observação ≤ 5.000 | 422 |
+| RV-06 | Senha: no cadastro e na redefinição, de 8 a **72 bytes** (limite do bcrypt; o bcrypt 5 recusa senha maior com erro). No **login**, senha com mais de 72 bytes conta como senha errada (401), nunca 500. *Incluída em 2026-11-07, durante a implementação: o bcrypt 5.0 lança ValueError* | 422 / 401 |
+| RV-07 | Mensagens de validação em português e com o nome do campo (ex.: "Cor: no máximo 100 caracteres"), mantendo o formato 422 do FastAPI | Teste da mensagem |
 | RV-05 | Corrida no cadastro (duas anilhas iguais ao mesmo tempo, cópia simultânea): a violação de unicidade do banco vira **409**, não 500 | Teste com duas threads ou simulação do `IntegrityError` |
 
 Teste geral: um teste parametrizado que manda o limite e o limite + 1 de cada campo e verifica 2xx e 422.

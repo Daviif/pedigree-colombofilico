@@ -163,6 +163,15 @@ Detalhes e testes em `docs/requisitos.md` (RC-xx).
 - **RC-04:** um ancestral reaproveitado também precisa ter o sexo certo para o papel (pai macho, mãe fêmea, ou desconhecido). Ciclo não tem como surgir na cópia: os pombos novos só apontam para outros novos ou para os reaproveitados, nunca o contrário, e a origem não tem ciclos (RG-02).
 - **RC-05:** a cópia é atômica: ou copia tudo, ou nada.
 
+## Validação de entrada
+
+Detalhes e testes em `docs/requisitos.md` (RV-xx). Nenhuma entrada do usuário pode gerar erro 500.
+
+- **RV-01..04:** limites de tamanho iguais aos do banco. Anilha: 1 a 50 caracteres, só números e `/`. Cor ≤ 100; origem ≤ 200; observações ≤ 5.000. Proprietário: nome obrigatório ≤ 200; colombódromo ≤ 200; endereço ≤ 300; telefone ≤ 50; e-mail ≤ 200. Resultado: competição obrigatória ≤ 200; ano entre 1900 e o ano que vem; distância de 0 a 5.000 km; colocação ≤ 100; prêmio ≤ 200. Espaços nas pontas são removidos e texto opcional vazio vira vazio de verdade (`null`).
+- **RV-05:** duas gravações simultâneas da mesma anilha: a segunda recebe 409, não erro 500.
+- **RV-06:** senha de 8 a 72 bytes (limite do bcrypt). No login, senha maior conta como senha errada.
+- **RV-07:** mensagens de validação em português, com o nome do campo.
+
 ## Segurança do certificado PDF
 
 1. Todo texto digitado pelos usuários (anilha, cor, observações, nomes, resultados, dados do proprietário) aparece no PDF **como texto**, nunca como HTML: `<b>` aparece escrito, não em negrito.
