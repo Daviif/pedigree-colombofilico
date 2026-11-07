@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Protótipo — Pedigree (baixa fidelidade)</title>
+<style>
+  :root { --borda:#94a3b8; --suave:#64748b; --fundo:#f1f5f9; --azul:#2563eb; --nota:#fef08a; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.45 ui-sans-serif,system-ui,sans-serif; color:#0f172a; background:#e2e8f0; }
+  .barra { position:sticky; top:0; z-index:50; background:#0f172a; color:#fff; padding:10px 16px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  .barra b { margin-right:8px; }
+  .barra button { background:#334155; color:#fff; border:0; border-radius:6px; padding:6px 10px; cursor:pointer; font:inherit; }
+  .barra button[aria-pressed=true] { background:var(--azul); }
+  .barra .sep { width:1px; height:24px; background:#475569; margin:0 6px; }
+  .palco { padding:24px 16px 80px; display:flex; justify-content:center; }
+  .moldura { background:#fff; border:2px solid #0f172a; border-radius:10px; overflow:hidden; width:1280px; max-width:100%; min-height:640px; position:relative; }
+  .moldura.celular { width:390px; border-radius:28px; border-width:10px; }
+  .nota { background:var(--nota); border:1px dashed #a16207; color:#713f12; font-size:12px; padding:4px 8px; border-radius:4px; display:inline-block; margin:4px 0; }
+  body.sem-notas .nota { display:none; }
+  /* wireframe */
+  header.app { display:flex; align-items:center; gap:16px; padding:10px 20px; border-bottom:1px solid var(--borda); }
+  header.app .busca { flex:1; max-width:340px; border:1.5px solid var(--borda); border-radius:6px; padding:6px 10px; color:var(--suave); }
+  header.app nav { display:flex; gap:14px; color:var(--suave); }
+  header.app nav .ativo { color:var(--azul); font-weight:600; }
+  .celular header.app nav, .celular header.app .busca, .celular .so-desktop { display:none; }
+  .so-celular { display:none; }
+  .celular .so-celular { display:initial; }
+  main { padding:20px; }
+  .celular main { padding:14px; }
+  h1 { font-size:22px; margin:0 0 4px; } h2 { font-size:16px; margin:0 0 10px; }
+  .caixa { border:1.5px solid var(--borda); border-radius:8px; padding:14px; background:#fff; margin-bottom:16px; }
+  .linha { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .entre { justify-content:space-between; }
+  .btn { border:1.5px solid var(--borda); background:#fff; border-radius:6px; padding:7px 12px; font:inherit; cursor:pointer; min-height:36px; }
+  .btn.pri { background:var(--azul); border-color:var(--azul); color:#fff; font-weight:600; }
+  .btn.perigo { color:#b91c1c; border-color:#fca5a5; }
+  .btn:focus-visible, .vaga:focus-visible, .no:focus-visible { outline:2px solid var(--azul); outline-offset:2px; }
+  .campo { display:flex; flex-direction:column; gap:4px; flex:1; min-width:150px; }
+  .campo span { font-size:12px; font-weight:600; color:#334155; }
+  .input { border:1.5px solid var(--borda); border-radius:6px; padding:7px 10px; color:var(--suave); background:#fff; min-height:36px; }
+  .input.erro { border-color:#dc2626; }
+  .msg-erro, .campo span.msg-erro { color:#b91c1c; font-size:12px; font-weight:500; }
+  .selo { display:inline-block; border:1px solid var(--borda); border-radius:999px; padding:0 8px; font-size:12px; }
+  .selo.rep { border-color:var(--azul); color:var(--azul); }
+  table { width:100%; border-collapse:collapse; } th, td { text-align:left; padding:7px 8px; border-bottom:1px solid #e2e8f0; } th { font-size:12px; color:var(--suave); }
+  a { color:var(--azul); }
+  .grade2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .celular .grade2 { grid-template-columns:1fr; }
+  /* árvore desktop */
+  .arvore { display:grid; grid-template-columns:repeat(5, minmax(150px,1fr)); gap:0 22px; overflow-x:auto; }
+  .col { display:flex; flex-direction:column; justify-content:space-around; gap:6px; }
+  .no, .vaga { border:1.5px solid var(--borda); border-radius:6px; padding:6px 8px; height:64px; font-size:12px; background:#fff; text-align:left; font:inherit; font-size:12px; width:100%; cursor:pointer; position:relative; }
+  .no::before { content:""; position:absolute; left:-2px; top:-2px; bottom:-2px; width:4px; border-radius:6px 0 0 6px; }
+  .no.m::before { background:#0284c7; } .no.f::before { background:#e11d48; }
+  .no .rot { font-size:10px; text-transform:uppercase; color:var(--suave); letter-spacing:.03em; }
+  .no .an { font-weight:700; }
+  .no.principal { border-width:3px; height:auto; min-height:90px; }
+  .no.rep { background:#fffbeb; border-color:#d97706; }
+  .vaga { border-style:dashed; color:var(--azul); font-weight:600; display:flex; align-items:center; justify-content:center; background:#f8fafc; }
+  .vaga.leitura { color:var(--suave); font-weight:400; cursor:default; }
+  .col.g4 .no, .col.g4 .vaga { height:30px; padding:4px 8px; }
+  .col.g4 .no .rot, .col.g4 .no .det { display:none; }
+  /* painel lateral e diálogo */
+  .fundo-escuro { position:absolute; inset:0; background:rgba(15,23,42,.45); display:none; z-index:20; }
+  .painel { position:absolute; top:0; right:0; bottom:0; width:420px; background:#fff; border-left:2px solid #0f172a; padding:18px; z-index:21; display:none; overflow:auto; }
+  .celular .painel { top:auto; left:0; width:auto; height:85%; border-left:0; border-top:2px solid #0f172a; border-radius:16px 16px 0 0; }
+  .aberto { display:block !important; }
+  .abas { display:flex; border-bottom:1.5px solid var(--borda); margin:10px 0; }
+  .abas button { border:0; background:none; padding:8px 12px; font:inherit; cursor:pointer; border-bottom:3px solid transparent; }
+  .abas button[aria-selected=true] { border-color:var(--azul); font-weight:600; }
+  .opcao { padding:8px; border:1px solid #e2e8f0; border-radius:6px; margin-bottom:6px; display:flex; justify-content:space-between; }
+  .dialogo { position:absolute; left:50%; top:30%; transform:translateX(-50%); width:min(420px, 92%); background:#fff; border:2px solid #0f172a; border-radius:10px; padding:18px; z-index:22; display:none; }
+  .menu-mais { position:relative; display:inline-block; }
+  .menu-mais .lista { position:absolute; right:0; top:110%; background:#fff; border:1.5px solid var(--borda); border-radius:6px; min-width:200px; display:none; z-index:5; }
+  .menu-mais .lista button { display:block; width:100%; text-align:left; background:none; border:0; padding:9px 12px; font:inherit; cursor:pointer; }
+  /* árvore celular */
+  .trilha { font-size:12px; color:var(--suave); margin-bottom:8px; }
+  .trilha a { cursor:pointer; }
+  .cel-arv .no { height:auto; min-height:72px; margin-bottom:8px; }
+  .cel-arv .seta { text-align:center; color:var(--suave); margin:2px 0 6px; }
+  section[data-tela] { display:none; } section[data-tela].visivel { display:block; }
+</style>
+</head>
+<body>
+<div class="barra" role="toolbar" aria-label="Controles do protótipo">
+  <b>Protótipo de baixa fidelidade</b>
+  <button data-ir="inicio">Início</button>
+  <button data-ir="lista">Lista</button>
+  <button data-ir="cadastro">Cadastro</button>
+  <button data-ir="detalhe">Detalhe + árvore</button>
+  <span class="sep"></span>
+  <button id="b-desktop" aria-pressed="true">Desktop</button>
+  <button id="b-celular" aria-pressed="false">Celular</button>
+  <span class="sep"></span>
+  <button id="b-notas" aria-pressed="true">Notas</button>
+</div>
+
+<div class="palco"><div class="moldura" id="moldura">
+  <header class="app">
+    <b>🐦 Pedigree</b>
+    <div class="busca">🔍 Buscar anilha…  <kbd>/</kbd></div>
+    <nav><a data-ir="lista" class="ativo">Pombos</a><a>Reprodutores</a><a>Mais ▾</a></nav>
+    <span class="so-desktop" style="margin-left:auto;color:var(--suave)">Davi ▾</span>
+    <span class="so-celular" style="margin-left:auto">🔍 &nbsp; ☰</span>
+  </header>
+
+  <!-- INÍCIO -->
+  <section data-tela="inicio"><main>
+    <span class="nota">UX-07 / UX-13: a página inicial leva às duas tarefas mais comuns — achar e cadastrar.</span>
+    <div class="caixa" style="text-align:center;padding:28px">
+      <h1>Encontrar um pombo</h1>
+      <div class="input" style="max-width:520px;margin:10px auto;font-size:16px">🔍 Digite a anilha… (ex.: 4272402)</div>
+      <button class="btn pri" data-ir="cadastro">+ Novo pombo</button>
+    </div>
+    <div class="caixa"><h2>Últimos cadastrados</h2>
+      <table><tr><td><a data-ir="detalhe">4272402/24</a></td><td>Macho · Escama</td><td><span class="selo">Ativo</span></td></tr>
+      <tr><td><a>440013/16</a></td><td>Fêmea · Escama</td><td><span class="selo rep">Reprodutora</span></td></tr></table>
+    </div>
+  </main></section>
+
+  <!-- LISTA -->
+  <section data-tela="lista"><main>
+    <div class="linha entre"><div><h1>Pombos</h1><span style="color:var(--suave)">24 pombos · Meu plantel</span></div><button class="btn pri" data-ir="cadastro">+ Novo pombo</button></div>
+    <span class="nota">UX-10: contagem, ordenação por coluna, pai/mãe clicáveis · UX-12: filtros com rótulo · UX-05: rótulos legíveis</span>
+    <div class="caixa linha">
+      <label class="campo"><span>Plantel</span><div class="input">Meu plantel ▾</div></label>
+      <label class="campo"><span>Anilha</span><div class="input">contém…</div></label>
+      <label class="campo"><span>Sexo</span><div class="input">Todos ▾</div></label>
+      <label class="campo"><span>Situação</span><div class="input">Todas ▾</div></label>
+      <label class="campo"><span>Proprietário</span><div class="input">Todos ▾</div></label>
+    </div>
+    <div class="caixa so-desktop"><table>
+      <tr><th>Anilha ▲</th><th>Sexo</th><th>Cor</th><th>Situação</th><th>Proprietário</th><th>Pai</th><th>Mãe</th></tr>
+      <tr><td><a data-ir="detalhe">4272402/24</a></td><td>Macho</td><td>Escama</td><td><span class="selo">Ativo</span></td><td>Anízio X. da Costa</td><td><a>1356642/22</a></td><td><a>440013/16</a></td></tr>
+      <tr><td><a>1397258/21</a></td><td>Fêmea</td><td>Escama</td><td><span class="selo rep">Reprodutora</span></td><td>Antônio Célio</td><td><a>440007/16</a></td><td><a>440012/16</a></td></tr>
+      <tr><td><a>1466412/14</a></td><td>Macho</td><td>Escama</td><td><span class="selo">Ativo</span></td><td>Anízio X. da Costa</td><td style="color:var(--suave)">desconhecido</td><td style="color:var(--suave)">desconhecida</td></tr>
+    </table></div>
+    <div class="so-celular">
+      <div class="caixa"><div class="linha entre"><a data-ir="detalhe"><b>4272402/24</b></a><span class="selo">Ativo</span></div>Macho · Escama · Anízio X. da Costa<br><small>Pai <a>1356642/22</a> · Mãe <a>440013/16</a></small></div>
+      <div class="caixa"><div class="linha entre"><b><a>1397258/21</a></b><span class="selo rep">Reprodutora</span></div>Fêmea · Escama · Antônio Célio</div>
+    </div>
+  </main></section>
+
+  <!-- CADASTRO -->
+  <section data-tela="cadastro"><main style="max-width:760px">
+    <h1>Novo pombo</h1>
+    <span class="nota">Preservado: formulário único e compacto (UX: não virar etapas). Novo: erro ao lado do campo, sugestões de cor (UX-11), "Salvar e cadastrar outro" (UX-08).</span>
+    <div class="caixa">
+      <div class="grade2">
+        <label class="campo"><span>Anilha *</span><div class="input erro">4272402/24</div><span class="msg-erro">⚠ Já existe um pombo com essa anilha no seu plantel</span></label>
+        <label class="campo"><span>Sexo</span><div class="input">Macho ▾</div></label>
+        <label class="campo"><span>Cor</span><div class="input">Esc|</div><small style="color:var(--suave)">Sugestões do seu plantel: <u>Escama</u> · <u>Escama clara</u></small></label>
+        <label class="campo"><span>Situação</span><div class="input">Ativo ▾</div></label>
+        <label class="campo"><span>Pai</span><div class="input">1356642/22 — Macho, Azul ✕</div></label>
+        <label class="campo"><span>Mãe</span><div class="input">🔍 Buscar mãe (só fêmeas)…</div></label>
+        <label class="campo"><span>Proprietário</span><div class="input">Anízio X. da Costa ▾</div></label>
+        <label class="campo"><span>Origem (se pai/mãe não estão no sistema)</span><div class="input">ex.: Comprado de terceiros</div></label>
+      </div>
+      <label class="campo" style="margin-top:12px"><span>Observações</span><div class="input" style="height:60px"></div></label>
+      <div class="linha" style="margin-top:14px"><button class="btn pri">Salvar</button><button class="btn">Salvar e cadastrar outro</button><button class="btn" style="border:0">Cancelar</button></div>
+      <span class="nota">"Salvar e cadastrar outro" mantém pai, mãe, proprietário e cor (irmãos de ninhada) e sugere a anilha seguinte (4272403/24), editável.</span>
+    </div>
+  </main></section>
+
+  <!-- DETALHE + ÁRVORE -->
+  <section data-tela="detalhe"><main>
+    <div class="trilha"><a data-ir="lista">‹ Pombos</a></div>
+    <span class="nota">UX-04: o pombo vem primeiro; o proprietário vira uma linha. UX-09: Excluir dentro de "Mais ações", com diálogo próprio.</span>
+    <div class="linha entre" style="align-items:flex-start">
+      <div><h1 style="font-size:28px">4272402/24</h1>
+        <div class="linha"><span>Macho · Escama</span><span class="selo">Ativo</span></div>
+        <div style="color:var(--suave);font-size:13px">Proprietário: Anízio Xavier da Costa — Pombal Bons Amigos</div></div>
+      <div class="linha">
+        <button class="btn pri">📄 PDF (4 gerações)</button>
+        <button class="btn">Editar</button>
+        <span class="menu-mais"><button class="btn" id="b-mais">Mais ações ▾</button>
+          <span class="lista" id="lista-mais"><button>Copiar anilha</button><button id="b-excluir" style="color:#b91c1c">Excluir pombo…</button></span></span>
+      </div>
+    </div>
+    <span class="nota">UX-15: o botão diz quantas gerações vão no PDF.</span>
+
+    <div class="caixa" style="margin-top:12px">
+      <div class="linha entre"><h2>Árvore genealógica</h2><label class="linha" style="font-size:13px">Gerações <span class="input" style="padding:3px 8px;min-height:0">4 ▾</span></label></div>
+      <span class="nota">UX-02: colunas por geração com altura fixa; 4 gerações cabem sem rolagem. UX-03: toda vaga desconhecida vira "+ Pai / + Mãe" (só para quem pode editar). Clique numa vaga →</span>
+      <div class="arvore so-desktop" id="arvore"></div>
+      <div class="so-celular cel-arv" id="arvore-celular"></div>
+    </div>
+
+    <div class="caixa">
+      <div class="linha entre"><h2>Resultados</h2><button class="btn">+ Resultado</button></div>
+      <span class="nota">UX-06: campos estruturados (o banco já tem); o PDF ordena por ano.</span>
+      <table><tr><th>Ano</th><th>Prova</th><th>Km</th><th>Colocação</th></tr><tr><td>2025</td><td>Prova Navarro</td><td>438</td><td>1º</td></tr></table>
+    </div>
+  </main></section>
+
+  <!-- painel lateral (vaga da árvore) -->
+  <div class="fundo-escuro" id="fundo"></div>
+  <aside class="painel" id="painel" role="dialog" aria-modal="true" aria-labelledby="t-painel">
+    <div class="linha entre"><h2 id="t-painel">Adicionar mãe</h2><button class="btn" data-fechar>✕</button></div>
+    <div style="color:var(--suave);font-size:13px" id="sub-painel"></div>
+    <div class="abas" role="tablist"><button role="tab" aria-selected="true" data-aba="buscar">Buscar no plantel</button><button role="tab" aria-selected="false" data-aba="novo">Cadastrar nova</button></div>
+    <div data-painel="buscar">
+      <div class="input" style="margin-bottom:10px">🔍 3348|</div>
+      <div class="opcao"><span><b>334815/15</b> · Fêmea · Escama</span><button class="btn pri" data-fechar>Escolher</button></div>
+      <div class="opcao"><span><b>334801/15</b> · Fêmea · Azul</span><button class="btn" data-fechar>Escolher</button></div>
+      <span class="nota">3 ações: vaga → digitar → Escolher. A árvore recarrega no mesmo lugar, sem sair da tela.</span>
+    </div>
+    <div data-painel="novo" style="display:none">
+      <label class="campo"><span>Anilha *</span><div class="input">|</div></label><br>
+      <label class="campo"><span>Sexo</span><div class="input">Fêmea (fixo pelo papel)</div></label><br>
+      <label class="campo"><span>Cor</span><div class="input"></div></label><br>
+      <button class="btn pri" data-fechar>Cadastrar e ligar</button>
+      <span class="nota">5 ações: vaga → aba → anilha → cor → Cadastrar. O servidor continua validando ciclo, plantel e sexo (RG-02/04/08).</span>
+    </div>
+  </aside>
+
+  <!-- diálogo de exclusão -->
+  <div class="dialogo" id="dialogo" role="alertdialog" aria-modal="true" aria-labelledby="t-dlg">
+    <h2 id="t-dlg">Excluir 4272402/24?</h2>
+    <p>Os resultados dele também serão apagados. <b>Não dá para desfazer.</b></p>
+    <p style="color:var(--suave);font-size:13px">Se ele for pai ou mãe de algum pombo, a exclusão é bloqueada e a lista dos filhos aparece aqui (RG-09).</p>
+    <div class="linha" style="justify-content:flex-end"><button class="btn" data-fechar>Cancelar</button><button class="btn perigo" data-fechar>Excluir</button></div>
+    <span class="nota">UX-09: no lugar do confirm() do navegador. Esc fecha; o foco volta ao botão de origem.</span>
+  </div>
+</div></div>
+
+<script>
+// Árvore de exemplo: [anilha, sexo, rótulo, repetido?]; null = desconhecido
+const A = {
+  "4272402/24": ["M","", "1356642/22","440013/16"],
+  "1356642/22": ["M","Pai","1397211/21","1397258/21"],
+  "440013/16":  ["F","Mãe","1466412/14","334815/15"],
+  "1397211/21": ["M","Avô paterno","1122415/11","7005227/17", "🏆 4 provas"],
+  "1397258/21": ["F","Avó paterna","440007/16","440012/16"],
+  "1466412/14": ["M","Avô materno",null,null],
+  "334815/15":  ["F","Avó materna",null,null],
+  "1122415/11": ["M","Bisavô",null,null], "7005227/17": ["F","Bisavó",null,null],
+  "440007/16":  ["M","Bisavô","1290708/12","1165603/11"], "440012/16": ["F","Bisavó",null,null],
+  "1290708/12": ["M","Tataravô",null,null], "1165603/11": ["F","Tataravó",null,null],
+};
+const RAIZ = "4272402/24", GER = 4;
+function caixa(anilha, papel, filho, g) {
+  if (!anilha && filho === "?") {  // acima de um desconhecido: lugar vazio, sem botão
+    const v = document.createElement("div"); v.className = "vaga"; v.style.visibility = "hidden"; return v;
+  }
+  if (!anilha) {
+    const b = document.createElement("button");
+    b.className = "vaga"; b.textContent = papel === "pai" ? "+ Pai" : "+ Mãe";
+    b.title = `Adicionar ${papel === "pai" ? "pai" : "mãe"} de ${filho}`;
+    b.onclick = () => abrirPainel(papel, filho);
+    return b;
+  }
+  const [sexo, rot, , , extra] = A[anilha] || ["M", ""];
+  const d = document.createElement("button");
+  d.className = `no ${sexo === "F" ? "f" : "m"}${g === 0 ? " principal" : ""}${anilha === "440007/16" ? " rep" : ""}`;
+  d.innerHTML = `<div class="rot">${rot || "Pombo principal"}</div><div class="an">${anilha}</div><div class="det">${sexo === "F" ? "Fêmea" : "Macho"} · Escama ${extra ? "· " + extra : ""}${anilha === "440007/16" ? " · ⚠ repetido" : ""}</div>`;
+  return d;
+}
+function montarDesktop() {
+  const el = document.getElementById("arvore"); el.innerHTML = "";
+  let nivel = [[RAIZ, null, null]];
+  for (let g = 0; g <= GER; g++) {
+    const col = document.createElement("div"); col.className = "col" + (g === GER ? " g4" : "");
+    const prox = [];
+    for (const [an, papel, filho] of nivel) {
+      col.appendChild(caixa(an, papel, filho, g));
+      const dados = an && A[an];
+      prox.push([dados ? dados[2] : null, "pai", an], [dados ? dados[3] : null, "mae", an]);
+    }
+    el.appendChild(col);
+    nivel = prox.map(([an, papel, filho]) => (filho === null ? [null, papel, "?"] : [an, papel, filho]));
+  }
+}
+let foco = [RAIZ];
+function montarCelular() {
+  const el = document.getElementById("arvore-celular"); el.innerHTML = "";
+  const atual = foco[foco.length - 1], [, , pai, mae] = A[atual];
+  const trilha = document.createElement("div"); trilha.className = "trilha";
+  trilha.innerHTML = foco.map((a, i) => `<a data-i="${i}">${i === 0 ? "Principal" : A[a][1]}</a>`).join(" › ");
+  trilha.onclick = (e) => { if (e.target.dataset.i) { foco = foco.slice(0, +e.target.dataset.i + 1); montarCelular(); } };
+  el.appendChild(trilha);
+  el.appendChild(caixa(atual, null, null, foco.length === 1 ? 0 : 1));
+  const s = document.createElement("div"); s.className = "seta"; s.textContent = "↓ pais (toque para subir uma geração)"; el.appendChild(s);
+  for (const [an, papel] of [[pai, "pai"], [mae, "mae"]]) {
+    const c = caixa(an, papel, atual, 1);
+    if (an) c.onclick = () => { foco.push(an); montarCelular(); };
+    el.appendChild(c);
+  }
+  const n = document.createElement("span"); n.className = "nota";
+  n.textContent = "UX-01: no celular, uma geração por vez. Toque num pai/mãe para subir; a trilha volta ao principal. As vagas '+ Pai/+ Mãe' abrem o painel de baixo para cima.";
+  el.appendChild(n);
+}
+function abrirPainel(papel, filho) {
+  document.getElementById("t-painel").textContent = `Adicionar ${papel === "pai" ? "pai" : "mãe"} de ${filho}`;
+  document.getElementById("sub-painel").textContent = papel === "pai"
+    ? "Mostra só machos ou de sexo desconhecido" : "Mostra só fêmeas ou de sexo desconhecido"; document.getElementById("painel").classList.add("aberto"); document.getElementById("fundo").classList.add("aberto"); }
+function fechar() { for (const id of ["painel", "fundo", "dialogo"]) document.getElementById(id).classList.remove("aberto"); }
+document.addEventListener("click", (e) => {
+  const ir = e.target.closest("[data-ir]"); if (ir) mostrar(ir.dataset.ir);
+  if (e.target.closest("[data-fechar]") || e.target.id === "fundo") fechar();
+  const aba = e.target.closest("[data-aba]");
+  if (aba) { document.querySelectorAll("[data-aba]").forEach(b => b.setAttribute("aria-selected", b === aba));
+             document.querySelectorAll("[data-painel]").forEach(p => p.style.display = p.dataset.painel === aba.dataset.aba ? "" : "none"); }
+  const lista = document.getElementById("lista-mais");
+  if (e.target.id === "b-mais") lista.style.display = lista.style.display === "block" ? "none" : "block"; else lista.style.display = "none";
+  if (e.target.id === "b-excluir") { document.getElementById("dialogo").classList.add("aberto"); document.getElementById("fundo").classList.add("aberto"); }
+});
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") fechar(); });
+function mostrar(t) {
+  document.querySelectorAll("section[data-tela]").forEach(s => s.classList.toggle("visivel", s.dataset.tela === t));
+  document.querySelectorAll(".barra [data-ir]").forEach(b => b.setAttribute("aria-pressed", b.dataset.ir === t));
+  location.hash = t;
+}
+function tamanho(cel) {
+  document.getElementById("moldura").classList.toggle("celular", cel);
+  document.getElementById("b-celular").setAttribute("aria-pressed", cel);
+  document.getElementById("b-desktop").setAttribute("aria-pressed", !cel);
+}
+document.getElementById("b-desktop").onclick = () => tamanho(false);
+document.getElementById("b-celular").onclick = () => tamanho(true);
+document.getElementById("b-notas").onclick = (e) => { const off = document.body.classList.toggle("sem-notas"); e.target.setAttribute("aria-pressed", !off); };
+montarDesktop(); montarCelular();
+const p = new URLSearchParams(location.search);
+if (p.get("tamanho") === "celular") tamanho(true);
+mostrar(location.hash.slice(1) || "detalhe");
+window.addEventListener("hashchange", () => mostrar(location.hash.slice(1) || "detalhe"));
+</script>
+</body>
+</html>
