@@ -139,6 +139,11 @@ gunzip -c backups/ARQUIVO.sql.gz | docker compose exec -T db psql -U pedigree pe
 docker compose start backend
 ```
 
+## Segurança do certificado PDF
+
+1. Todo texto digitado pelos usuários (anilha, cor, observações, nomes, resultados, dados do proprietário) aparece no PDF **como texto**, nunca como HTML: `<b>` aparece escrito, não em negrito.
+2. Ao gerar o PDF, o servidor **não busca nenhum arquivo nem endereço** (`file://`, `http://`, etc.). O certificado não usa recursos externos: as fontes vêm do sistema. Qualquer tentativa de busca é recusada, e o PDF sai sem aquele recurso.
+
 ## Estrutura
 
 - `backend/app/models.py` — modelos (Proprietario, Pombo, Resultado); `Pombo` referencia `pai_id`/`mae_id` (self-relation).

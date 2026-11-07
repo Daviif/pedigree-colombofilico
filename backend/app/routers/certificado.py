@@ -18,7 +18,16 @@ from app.routers.pombos import buscar_pombo_ou_404
 router = APIRouter(prefix="/pombos", tags=["certificado"])
 
 TEMPLATES_DIR = Path(__file__).resolve().parent.parent / "pdf" / "templates"
-_env = Environment(loader=FileSystemLoader(TEMPLATES_DIR))
+# autoescape: o texto digitado pelo usuário vira texto no PDF, nunca HTML (regra 1 da
+# "Segurança do certificado PDF" no README).
+_env = Environment(loader=FileSystemLoader(TEMPLATES_DIR), autoescape=True)
+
+
+def bloquear_urls(url: str, *args, **kwargs):
+    """url_fetcher do WeasyPrint que recusa tudo (regra 2). Sem isso, um HTML no
+    documento poderia embutir arquivos do servidor (file:///proc/self/environ) ou fazer
+    o servidor acessar endereços internos."""
+    raise ValueError(f"Recurso externo bloqueado no certificado: {url[:100]}")
 
 
 @dataclass
@@ -108,7 +117,9 @@ def gerar_certificado(
     usuario: Usuario = Depends(usuario_atual),
 ):
     html_str, anilha = _renderizar_html(pombo_id, geracoes, db, usuario)
-    pdf_bytes = HTML(string=html_str, base_url=str(TEMPLATES_DIR)).write_pdf()
+    pdf_bytes = HTML(
+        string=html_str, base_url=str(TEMPLATES_DIR), url_fetcher=bloquear_urls
+    ).write_pdf()
 
     filename = f"pedigree-{anilha.replace('/', '-')}.pdf"
     return Response(

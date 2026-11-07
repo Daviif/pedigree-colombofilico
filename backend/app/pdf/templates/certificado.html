@@ -180,7 +180,7 @@
     {% if pombo.proprietario.observacoes %}<div class="cabecalho-obs">{{ pombo.proprietario.observacoes }}</div>{% endif %}
     {% if pombo.proprietario.endereco or pombo.proprietario.telefone or pombo.proprietario.email %}
     <div class="cabecalho-contato">
-      {{ [pombo.proprietario.endereco, pombo.proprietario.telefone, pombo.proprietario.email] | select | join(' &middot; ') }}
+      {{ [pombo.proprietario.endereco, pombo.proprietario.telefone, pombo.proprietario.email] | select | join(' · ') }}
     </div>
     {% endif %}
   </div>
