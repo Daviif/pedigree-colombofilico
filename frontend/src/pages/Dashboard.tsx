@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 
 import { usePombos, useProprietarios, useUsuarioAtual } from '../api/hooks'
+import { FalhaAoCarregar } from '../components/FalhaAoCarregar'
 
 function Cartao({ titulo, valor, to }: { titulo: string; valor: number | string; to: string }) {
   return (
@@ -16,7 +17,7 @@ function Cartao({ titulo, valor, to }: { titulo: string; valor: number | string;
 
 export function Dashboard() {
   const { data: usuario } = useUsuarioAtual()
-  const { data: pombos } = usePombos({ usuario_id: usuario!.id })
+  const { data: pombos, isError, error, refetch } = usePombos({ usuario_id: usuario!.id })
   const { data: proprietarios } = useProprietarios()
 
   const reprodutores = pombos?.filter((p) => p.status === 'REPRODUTOR') ?? []
@@ -25,6 +26,7 @@ export function Dashboard() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold text-slate-800">Painel</h1>
+      {isError && <FalhaAoCarregar erro={error} oQue="o painel" onTentar={refetch} />}
 
       <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
         <Cartao titulo="Pombos cadastrados" valor={pombos?.length ?? '—'} to="/pombos" />

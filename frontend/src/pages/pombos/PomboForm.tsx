@@ -2,6 +2,8 @@ import { type ReactNode, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import {
+  eNaoEncontrado,
+  mensagemDeErro,
   useAtualizarPombo,
   useCriarPombo,
   usePombo,
@@ -10,6 +12,7 @@ import {
   useUsuarioAtual,
 } from '../../api/hooks'
 import type { PomboInput, Sexo, StatusPombo } from '../../api/types'
+import { FalhaAoCarregar } from '../../components/FalhaAoCarregar'
 import { PomboSelect } from '../../components/PomboSelect'
 import { capitalizarPrimeira, limparAnilha } from '../../formatadores'
 
@@ -42,7 +45,8 @@ export function PomboForm() {
   const navigate = useNavigate()
 
   const { data: usuario } = useUsuarioAtual()
-  const { data: pomboAtual } = usePombo(editandoId)
+  const pomboQuery = usePombo(editandoId)
+  const pomboAtual = pomboQuery.data
   // Pai, mãe e proprietário vêm do plantel do pombo (o admin pode editar pombos de outros).
   const donoId = editandoId ? pomboAtual?.usuario_id : usuario!.id
   const { data: todosPombos } = usePombos({ usuario_id: donoId }, donoId !== undefined)
@@ -91,9 +95,17 @@ export function PomboForm() {
         const resultado = await criar.mutateAsync(payload)
         navigate(`/pombos/${resultado.id}`)
       }
-    } catch (err: any) {
-      setErro(err?.response?.data?.detail ?? 'Erro ao salvar o pombo.')
+    } catch (err) {
+      setErro(mensagemDeErro(err, 'Erro ao salvar o pombo.'))
     }
+  }
+
+  if (pomboQuery.isError) {
+    return eNaoEncontrado(pomboQuery.error) ? (
+      <p className="text-slate-600">Pombo não encontrado.</p>
+    ) : (
+      <FalhaAoCarregar erro={pomboQuery.error} oQue="o pombo" onTentar={pomboQuery.refetch} />
+    )
   }
 
   return (

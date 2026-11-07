@@ -7,6 +7,7 @@ import {
   mensagemDeErro,
   useRemoverProprietario,
 } from '../api/hooks'
+import { FalhaAoCarregar } from '../components/FalhaAoCarregar'
 import type { ProprietarioInput } from '../api/types'
 
 const VAZIO: ProprietarioInput = {
@@ -19,7 +20,7 @@ const VAZIO: ProprietarioInput = {
 }
 
 export function Proprietarios() {
-  const { data: proprietarios } = useProprietarios()
+  const { data: proprietarios, isError, error, refetch } = useProprietarios()
   const criar = useCriarProprietario()
   const atualizar = useAtualizarProprietario()
   const remover = useRemoverProprietario()
@@ -140,6 +141,8 @@ export function Proprietarios() {
           </div>
         </form>
       )}
+
+      {isError && <FalhaAoCarregar erro={error} oQue="os proprietários" onTentar={refetch} />}
 
       {/* Celular: lista de cartões */}
       <ul className="divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white shadow-sm sm:hidden">

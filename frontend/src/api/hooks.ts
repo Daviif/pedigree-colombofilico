@@ -289,3 +289,8 @@ export function mensagemDeErro(erro: unknown, padrao: string): string {
   if (Array.isArray(detail) && detail[0]?.msg) return String(detail[0].msg).replace(/^Value error, /, '')
   return padrao
 }
+
+/** RF-02: a API respondeu 404 (o recurso não existe ou o usuário não pode vê-lo). */
+export function eNaoEncontrado(erro: unknown): boolean {
+  return isAxiosError(erro) && erro.response?.status === 404
+}

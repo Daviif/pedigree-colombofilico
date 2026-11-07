@@ -8,8 +8,12 @@ export const api = axios.create({
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // 401 não melhora tentando de novo: a sessão expirou, volta pro login.
-      retry: (falhas, erro) => !(isAxiosError(erro) && erro.response?.status === 401) && falhas < 3,
+      // Erros 4xx (sessão expirada, sem permissão, não encontrado) não melhoram tentando
+      // de novo; só falha de rede e erro do servidor (5xx) são repetidos.
+      retry: (falhas, erro) => {
+        const status = isAxiosError(erro) ? erro.response?.status : undefined
+        return !(status && status >= 400 && status < 500) && falhas < 2
+      },
     },
   },
 })

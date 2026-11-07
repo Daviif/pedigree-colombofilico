@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { useLogin } from '../api/hooks'
+import { mensagemDeErro, useLogin } from '../api/hooks'
 
 export function Login() {
   const login = useLogin()
@@ -13,8 +13,8 @@ export function Login() {
     setErro(null)
     try {
       await login.mutateAsync({ login: usuario, senha })
-    } catch (err: any) {
-      setErro(err?.response?.data?.detail ?? 'Não foi possível entrar. Tente de novo.')
+    } catch (err) {
+      setErro(mensagemDeErro(err, 'Não foi possível entrar. Tente de novo.'))
     }
   }
 

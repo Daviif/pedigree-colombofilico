@@ -10,6 +10,7 @@ import {
   useUsuarios,
 } from '../api/hooks'
 import type { UsuarioAdmin, UsuarioNovo } from '../api/types'
+import { FalhaAoCarregar } from '../components/FalhaAoCarregar'
 
 const VAZIO: UsuarioNovo = { login: '', nome: '', senha: '', admin: false }
 
@@ -38,7 +39,7 @@ const botaoSecundario =
   'rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50'
 
 export function Usuarios() {
-  const { data: usuarios, dataUpdatedAt: agora } = useUsuarios()
+  const { data: usuarios, dataUpdatedAt: agora, isError, error, refetch } = useUsuarios()
   const { data: eu } = useUsuarioAtual()
   const criar = useCriarUsuario()
   const [novo, setNovo] = useState<UsuarioNovo>(VAZIO)
@@ -159,6 +160,8 @@ export function Usuarios() {
           </div>
         </form>
       )}
+
+      {isError && <FalhaAoCarregar erro={error} oQue="os usuários" onTentar={refetch} />}
 
       <ul className="space-y-3">
         {usuarios?.map((u) => (

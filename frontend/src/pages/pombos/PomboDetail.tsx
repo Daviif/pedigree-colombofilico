@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import {
+  eNaoEncontrado,
   mensagemDeErro,
   useArvore,
   useCopiarPombo,
@@ -13,6 +14,7 @@ import { IrmaosSection } from '../../components/IrmaosSection'
 import { PedigreeTree } from '../../components/PedigreeTree'
 import { ProprietarioHeader } from '../../components/ProprietarioHeader'
 import { ResultadosSection } from '../../components/ResultadosSection'
+import { FalhaAoCarregar } from '../../components/FalhaAoCarregar'
 
 export function PomboDetail() {
   const { id } = useParams()
@@ -20,13 +22,26 @@ export function PomboDetail() {
   const navigate = useNavigate()
 
   const [geracoes, setGeracoes] = useState(4)
-  const { data: pombo, isLoading } = usePombo(pomboId)
-  const { data: arvore } = useArvore(pomboId, geracoes)
+  const { data: pombo, isError, error, refetch } = usePombo(pomboId)
+  const arvoreQuery = useArvore(pomboId, geracoes)
+  const arvore = arvoreQuery.data
   const remover = useRemoverPombo()
   const copiar = useCopiarPombo()
   const { data: usuario } = useUsuarioAtual()
 
-  if (isLoading || !pombo) {
+  if (isError && eNaoEncontrado(error)) {
+    return (
+      <div className="space-y-2">
+        <h1 className="text-xl font-semibold text-slate-800">Pombo não encontrado</h1>
+        <p className="text-sm text-slate-500">Ele pode ter sido excluído, ou não está num plantel que você pode ver.</p>
+        <Link to="/pombos" className="text-sm font-medium text-blue-700 hover:underline">
+          Voltar para a lista de pombos
+        </Link>
+      </div>
+    )
+  }
+  if (isError) return <FalhaAoCarregar erro={error} oQue="o pombo" onTentar={refetch} />
+  if (!pombo) {
     return <p className="text-slate-500">Carregando...</p>
   }
 
@@ -49,8 +64,8 @@ export function PomboDetail() {
     try {
       const copia = await copiar.mutateAsync(pomboId)
       navigate(`/pombos/${copia.id}`)
-    } catch (err: any) {
-      alert(err?.response?.data?.detail ?? 'Erro ao copiar o pombo.')
+    } catch (err) {
+      alert(mensagemDeErro(err, 'Erro ao copiar o pombo.'))
     }
   }
 
@@ -128,7 +143,13 @@ export function PomboDetail() {
             </select>
           </label>
         </div>
-        {arvore ? <PedigreeTree raiz={arvore} /> : <p className="text-sm text-slate-500">Carregando árvore...</p>}
+        {arvoreQuery.isError ? (
+          <FalhaAoCarregar erro={arvoreQuery.error} oQue="a árvore" onTentar={arvoreQuery.refetch} />
+        ) : arvore ? (
+          <PedigreeTree raiz={arvore} />
+        ) : (
+          <p className="text-sm text-slate-500">Carregando árvore...</p>
+        )}
       </div>
 
       <IrmaosSection pomboId={pomboId} />

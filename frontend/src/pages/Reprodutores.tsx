@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom'
 
 import { usePombos, useUsuarioAtual } from '../api/hooks'
+import { FalhaAoCarregar } from '../components/FalhaAoCarregar'
 
 export function Reprodutores() {
   const { data: usuario } = useUsuarioAtual()
-  const { data: pombos, isLoading } = usePombos({ status: 'REPRODUTOR', usuario_id: usuario!.id })
+  const { data: pombos, isLoading, isError, error, refetch } = usePombos({ status: 'REPRODUTOR', usuario_id: usuario!.id })
 
   const machos = pombos?.filter((p) => p.sexo === 'M') ?? []
   const femeas = pombos?.filter((p) => p.sexo === 'F') ?? []
@@ -37,10 +38,11 @@ export function Reprodutores() {
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold text-slate-800">Reprodutores</h1>
       {isLoading && <p className="text-slate-500">Carregando...</p>}
-      <div className="grid gap-4 sm:grid-cols-2 sm:gap-6">
+      {isError && <FalhaAoCarregar erro={error} oQue="os reprodutores" onTentar={refetch} />}
+      {!isError && <div className="grid gap-4 sm:grid-cols-2 sm:gap-6">
         <Grupo titulo="Machos" lista={machos} />
         <Grupo titulo="Fêmeas" lista={femeas} />
-      </div>
+      </div>}
       {outros.length > 0 && <Grupo titulo="Sexo não informado" lista={outros} />}
     </div>
   )

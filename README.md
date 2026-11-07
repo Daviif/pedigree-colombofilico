@@ -185,6 +185,14 @@ Detalhes e testes em `docs/requisitos.md` (RV-xx). Nenhuma entrada do usuário p
 - **RV-06:** senha de 8 a 72 bytes (limite do bcrypt). No login, senha maior conta como senha errada.
 - **RV-07:** mensagens de validação em português, com o nome do campo.
 
+## Mensagens e falhas na tela
+
+Detalhes em `docs/requisitos.md` (RF-xx). O redesenho completo é da Fase 7.
+
+- **RF-01:** os erros do servidor (400, 409, 422, 429) aparecem com o texto do servidor, inclusive as listas (filhos que impedem a exclusão, conflitos da cópia) e os erros de validação de campo.
+- **RF-02:** nenhuma tela fica em "Carregando..." para sempre. Falha de rede ou do servidor mostra "Não foi possível carregar…" com **Tentar de novo**. Pombo inexistente (ou de um plantel que o usuário não vê) mostra "Pombo não encontrado". Erros 4xx não são repetidos automaticamente; falha de rede e 5xx são repetidos até 2 vezes.
+- **RF-03:** o seletor de pai mostra só machos e pombos de sexo desconhecido, e o de mãe, só fêmeas e desconhecidos. O cadastro rápido dentro do seletor segue a mesma regra. O servidor continua validando (RG-04).
+
 ## Segurança do certificado PDF
 
 1. Todo texto digitado pelos usuários (anilha, cor, observações, nomes, resultados, dados do proprietário) aparece no PDF **como texto**, nunca como HTML: `<b>` aparece escrito, não em negrito.

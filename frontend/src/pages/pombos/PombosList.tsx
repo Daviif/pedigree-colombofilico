@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 
 import { useCompartilhamentos, usePombos, useProprietarios, useUsuarioAtual } from '../../api/hooks'
+import { FalhaAoCarregar } from '../../components/FalhaAoCarregar'
 import type { PombosFiltro, Sexo, StatusPombo } from '../../api/types'
 
 export function PombosList() {
@@ -14,7 +15,7 @@ export function PombosList() {
   const outrosPlanteis = compartilhamentos?.recebidos ?? []
 
   const [filtro, setFiltro] = useState<PombosFiltro>({})
-  const { data: pombos, isLoading } = usePombos({
+  const { data: pombos, isLoading, isError, error, refetch } = usePombos({
     ...filtro,
     // proprietários são do próprio plantel: o filtro só vale nele
     proprietario_id: meuPlantel ? filtro.proprietario_id : undefined,
@@ -96,6 +97,8 @@ export function PombosList() {
           ))}
         </select>
       </div>
+
+      {isError && <FalhaAoCarregar erro={error} oQue="os pombos" onTentar={refetch} />}
 
       {/* Celular: lista de cartões */}
       <ul className="divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white shadow-sm sm:hidden">

@@ -1,10 +1,16 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
-import { useCompartilhamentos, useCompartilhar, useRemoverCompartilhamento } from '../api/hooks'
+import {
+  mensagemDeErro,
+  useCompartilhamentos,
+  useCompartilhar,
+  useRemoverCompartilhamento,
+} from '../api/hooks'
+import { FalhaAoCarregar } from '../components/FalhaAoCarregar'
 
 export function Compartilhar() {
-  const { data: compartilhamentos } = useCompartilhamentos()
+  const { data: compartilhamentos, isError, error, refetch } = useCompartilhamentos()
   const compartilhar = useCompartilhar()
   const remover = useRemoverCompartilhamento()
   const [login, setLogin] = useState('')
@@ -16,8 +22,8 @@ export function Compartilhar() {
     try {
       await compartilhar.mutateAsync(login)
       setLogin('')
-    } catch (err: any) {
-      setErro(err?.response?.data?.detail ?? 'Erro ao compartilhar.')
+    } catch (err) {
+      setErro(mensagemDeErro(err, 'Erro ao compartilhar.'))
     }
   }
 
@@ -34,6 +40,7 @@ export function Compartilhar() {
   return (
     <div className="max-w-2xl space-y-6">
       <h1 className="text-2xl font-semibold text-slate-800">Compartilhar</h1>
+      {isError && <FalhaAoCarregar erro={error} oQue="os compartilhamentos" onTentar={refetch} />}
 
       <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
         <h2 className="text-lg font-medium text-slate-800">Quem vê o meu plantel</h2>

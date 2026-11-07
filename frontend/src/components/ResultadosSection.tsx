@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
-import { useCriarResultado, useRemoverResultado, useResultados } from '../api/hooks'
+import { mensagemDeErro, useCriarResultado, useRemoverResultado, useResultados } from '../api/hooks'
+import { FalhaAoCarregar } from './FalhaAoCarregar'
 
 export function ResultadosSection({
   pomboId,
@@ -9,23 +10,38 @@ export function ResultadosSection({
   pomboId: number
   somenteLeitura?: boolean
 }) {
-  const { data: resultados } = useResultados(pomboId)
+  const { data: resultados, isError, error, refetch } = useResultados(pomboId)
   const criar = useCriarResultado(pomboId)
   const remover = useRemoverResultado(pomboId)
   const [competicao, setCompeticao] = useState('')
+  const [erro, setErro] = useState<string | null>(null)
 
   async function adicionar(e: React.FormEvent) {
     e.preventDefault()
     if (!competicao.trim()) return
-    await criar.mutateAsync({
-      ano: undefined,
-      competicao,
-      distancia_km: undefined,
-      colocacao: null,
-      premio: null,
-      observacao: null,
-    })
-    setCompeticao('')
+    setErro(null)
+    try {
+      await criar.mutateAsync({
+        ano: undefined,
+        competicao,
+        distancia_km: undefined,
+        colocacao: null,
+        premio: null,
+        observacao: null,
+      })
+      setCompeticao('')
+    } catch (err) {
+      setErro(mensagemDeErro(err, 'Erro ao adicionar o resultado.'))
+    }
+  }
+
+  async function removerResultado(id: number) {
+    setErro(null)
+    try {
+      await remover.mutateAsync(id)
+    } catch (err) {
+      setErro(mensagemDeErro(err, 'Erro ao remover o resultado.'))
+    }
   }
 
   return (
@@ -51,6 +67,8 @@ export function ResultadosSection({
         </form>
       )}
 
+      {erro && <div className="mb-3 rounded bg-red-50 px-3 py-2 text-sm text-red-700">{erro}</div>}
+      {isError && <FalhaAoCarregar erro={error} oQue="os resultados" onTentar={refetch} />}
       {resultados?.length === 0 && <p className="text-sm text-slate-500">Nenhum resultado registrado.</p>}
 
       <ul className="divide-y divide-slate-100">
@@ -65,7 +83,7 @@ export function ResultadosSection({
               {r.observacao && <div className="whitespace-pre-line text-slate-400">{r.observacao}</div>}
             </div>
             {!somenteLeitura && (
-              <button onClick={() => remover.mutate(r.id)} className="shrink-0 py-1 text-xs text-red-600 hover:underline">
+              <button onClick={() => removerResultado(r.id)} className="shrink-0 py-1 text-xs text-red-600 hover:underline">
                 remover
               </button>
             )}

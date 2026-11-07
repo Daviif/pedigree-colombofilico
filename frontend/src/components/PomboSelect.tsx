@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 
-import { useCriarPombo, useProprietarios } from '../api/hooks'
+import { mensagemDeErro, useCriarPombo, useProprietarios } from '../api/hooks'
 import type { Pombo, Sexo } from '../api/types'
 import { capitalizarPrimeira, limparAnilha } from '../formatadores'
 
@@ -46,8 +46,14 @@ export function PomboSelect({
     return () => document.removeEventListener('mousedown', aoClicarFora, true)
   }, [])
 
+  // RF-03: pai só macho ou desconhecido; mãe só fêmea ou desconhecido (o servidor
+  // também valida, RG-04). sexoPadrao indica o papel: "M" = pai, "F" = mãe.
+  const sexosPermitidos: Sexo[] | undefined = sexoPadrao ? [sexoPadrao, 'DESCONHECIDO'] : undefined
   const opcoes = pombos.filter(
-    (p) => p.id !== excludeId && p.anilha.toLowerCase().includes(query.toLowerCase()),
+    (p) =>
+      p.id !== excludeId &&
+      (!sexosPermitidos || sexosPermitidos.includes(p.sexo)) &&
+      p.anilha.toLowerCase().includes(query.toLowerCase()),
   )
 
   function selecionar(id: number | undefined) {
@@ -85,8 +91,8 @@ export function PomboSelect({
         mae_id: undefined,
       })
       selecionar(criado.id)
-    } catch (err: any) {
-      setErroCriar(err?.response?.data?.detail ?? 'Erro ao cadastrar pombo.')
+    } catch (err) {
+      setErroCriar(mensagemDeErro(err, 'Erro ao cadastrar pombo.'))
     }
   }
 
@@ -174,8 +180,8 @@ export function PomboSelect({
               className="min-w-0 flex-1 rounded border border-slate-300 px-2 py-1 text-sm"
             >
               <option value="DESCONHECIDO">Desconhecido</option>
-              <option value="M">Macho</option>
-              <option value="F">Fêmea</option>
+              {(!sexosPermitidos || sexosPermitidos.includes('M')) && <option value="M">Macho</option>}
+              {(!sexosPermitidos || sexosPermitidos.includes('F')) && <option value="F">Fêmea</option>}
             </select>
             <input
               placeholder="Cor"

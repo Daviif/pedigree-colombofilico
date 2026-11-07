@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 
 import { useIrmaos } from '../api/hooks'
+import { FalhaAoCarregar } from './FalhaAoCarregar'
 import type { PomboSummary } from '../api/types'
 
 function Grupo({ titulo, lista }: { titulo: string; lista: PomboSummary[] }) {
@@ -25,8 +26,9 @@ function Grupo({ titulo, lista }: { titulo: string; lista: PomboSummary[] }) {
 }
 
 export function IrmaosSection({ pomboId }: { pomboId: number }) {
-  const { data: irmaos } = useIrmaos(pomboId)
+  const { data: irmaos, isError, error, refetch } = useIrmaos(pomboId)
 
+  if (isError) return <FalhaAoCarregar erro={error} oQue="os irmãos" onTentar={refetch} />
   if (!irmaos) return null
 
   const total = irmaos.completos.length + irmaos.meios_paternos.length + irmaos.meios_maternos.length
