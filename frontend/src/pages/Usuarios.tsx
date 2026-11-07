@@ -4,6 +4,7 @@ import {
   mensagemDeErro,
   useAtualizarUsuario,
   useCriarUsuario,
+  useDesbloquearUsuario,
   useRedefinirSenha,
   useUsuarioAtual,
   useUsuarios,
@@ -179,6 +180,7 @@ function LinhaUsuario({
 }) {
   const atualizar = useAtualizarUsuario()
   const redefinir = useRedefinirSenha()
+  const desbloquear = useDesbloquearUsuario()
   const [modo, setModo] = useState<'nome' | 'senha' | null>(null)
   const [valor, setValor] = useState('')
   const [erro, setErro] = useState<string | null>(null)
@@ -245,6 +247,14 @@ function LinhaUsuario({
             {u.admin && (
               <span className="rounded bg-purple-100 px-1.5 py-0.5 text-xs font-medium text-purple-700">admin</span>
             )}
+            {u.bloqueado && (
+              <span
+                className="rounded bg-red-100 px-1.5 py-0.5 text-xs font-medium text-red-700"
+                title="Errou a senha 5 vezes nos últimos 15 minutos"
+              >
+                bloqueado
+              </span>
+            )}
             {!u.ativo && (
               <span className="rounded bg-slate-200 px-1.5 py-0.5 text-xs font-medium text-slate-600">
                 desativado
@@ -298,6 +308,17 @@ function LinhaUsuario({
           <button onClick={() => abrir('senha')} className={botaoSecundario}>
             Redefinir senha
           </button>
+          {u.bloqueado && (
+            <button
+              onClick={() =>
+                executar(() => desbloquear.mutateAsync(u.id), `${u.nome} pode tentar entrar de novo.`)
+              }
+              disabled={desbloquear.isPending}
+              className={`${botaoSecundario} text-red-700`}
+            >
+              Desbloquear
+            </button>
+          )}
           {!souEu && (
             <>
               <button onClick={alternarAdmin} disabled={ocupado} className={botaoSecundario}>

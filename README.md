@@ -163,6 +163,19 @@ Detalhes e testes em `docs/requisitos.md` (RC-xx).
 - **RC-04:** um ancestral reaproveitado também precisa ter o sexo certo para o papel (pai macho, mãe fêmea, ou desconhecido). Ciclo não tem como surgir na cópia: os pombos novos só apontam para outros novos ou para os reaproveitados, nunca o contrário, e a origem não tem ciclos (RG-02).
 - **RC-05:** a cópia é atômica: ou copia tudo, ou nada.
 
+## Limite de tentativas de login
+
+Detalhes e testes em `docs/requisitos.md` (RA-xx).
+
+- **RA-01:** 5 senhas erradas para o mesmo login em 15 minutos bloqueiam esse login. A tentativa seguinte responde 429 com o tempo de espera, mesmo com a senha certa. O bloqueio acaba quando a 5ª falha mais recente completa 15 minutos.
+- **RA-02:** 20 falhas vindas do mesmo IP em 15 minutos bloqueiam esse IP, para quem testa muitos logins.
+- **RA-03:** só conta a falha que já aconteceu. Tentativa bloqueada (429) e login certo não contam. As tentativas do mesmo login são processadas uma de cada vez (trava no banco), então ninguém passa do limite mandando várias ao mesmo tempo.
+- **RA-04:** login certo zera as falhas daquele login (não as do IP).
+- **RA-05:** login inexistente ou desativado conta como falha, com a mesma mensagem ("Usuário ou senha incorretos.").
+- **RA-06:** o IP é o que o Caddy informa no `X-Forwarded-For`. O Caddy sobrescreve o valor mandado pelo cliente, e o backend só é acessível pela rede interna do Docker.
+- **RA-07:** as falhas ficam na tabela `tentativas_login`, e as com mais de 24 horas são apagadas.
+- **RA-08:** na tela Usuários, o admin vê quem está bloqueado e pode desbloquear. Redefinir a senha também desbloqueia.
+
 ## Validação de entrada
 
 Detalhes e testes em `docs/requisitos.md` (RV-xx). Nenhuma entrada do usuário pode gerar erro 500.

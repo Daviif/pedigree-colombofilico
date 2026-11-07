@@ -6,6 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.auth import hash_senha, usuario_atual
+from app import limite_login
 from app.database import get_db
 from app.models import Pombo, Usuario
 from app.routers.auth import gravar_cookie_sessao
@@ -27,8 +28,11 @@ def _com_total_pombos(db: Session, usuarios: list[Usuario]) -> list[UsuarioAdmin
             select(Pombo.usuario_id, func.count()).group_by(Pombo.usuario_id)
         ).all()
     )
+    bloqueados = limite_login.logins_bloqueados(db)
     return [
-        UsuarioAdminRead.model_validate(u).model_copy(update={"total_pombos": totais.get(u.id, 0)})
+        UsuarioAdminRead.model_validate(u).model_copy(
+            update={"total_pombos": totais.get(u.id, 0), "bloqueado": u.login in bloqueados}
+        )
         for u in usuarios
     ]
 
@@ -115,6 +119,15 @@ def redefinir_senha(
     alvo = _buscar(usuario_id, db)
     alvo.senha_hash = hash_senha(dados.senha)
     alvo.sessao_versao += 1  # encerra as sessões abertas
+    limite_login.zerar_falhas(alvo.login, db)  # RA-08
     db.commit()
     if alvo.id == admin.id:
         gravar_cookie_sessao(response, alvo)  # o admin continua logado aqui
+
+
+@router.post("/{usuario_id}/desbloquear", status_code=204)
+def desbloquear_login(usuario_id: int, db: Session = Depends(get_db)):
+    """RA-08: apaga as falhas de login do usuário (o bloqueio por IP continua)."""
+    alvo = _buscar(usuario_id, db)
+    limite_login.zerar_falhas(alvo.login, db)
+    db.commit()

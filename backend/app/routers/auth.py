@@ -12,7 +12,9 @@ from app.auth import (
     verificar_senha,
 )
 from app.config import settings
+from app import limite_login
 from app.database import get_db
+from app.limite_login import ip_do_cliente
 from app.models import Usuario
 from app.schemas import UsuarioRead
 
@@ -25,10 +27,22 @@ class LoginInput(BaseModel):
 
 
 @router.post("/login", response_model=UsuarioRead)
-def login(dados: LoginInput, response: Response, db: Session = Depends(get_db)):
+def login(
+    dados: LoginInput,
+    response: Response,
+    db: Session = Depends(get_db),
+    ip: str = Depends(ip_do_cliente),
+):
+    login_normalizado = limite_login.chave(dados.login)
+    limite_login.travar_login(login_normalizado, db)  # RA-03
+    limite_login.exigir_nao_bloqueado(login_normalizado, ip, db)  # RA-01/02
+
     usuario = db.scalar(select(Usuario).where(Usuario.login == dados.login.strip().lower()))
     if not verificar_senha(dados.senha, usuario.senha_hash if usuario else None) or not usuario.ativo:
+        limite_login.registrar_falha(login_normalizado, ip, db)  # RA-05: inexistente também conta
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Usuário ou senha incorretos.")
+
+    limite_login.zerar_falhas(login_normalizado, db)  # RA-04
 
     usuario.ultimo_acesso = None  # força a gravação: login sempre conta como acesso
     registrar_acesso(usuario, db)

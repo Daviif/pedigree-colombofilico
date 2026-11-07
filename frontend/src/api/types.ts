@@ -128,6 +128,8 @@ export interface UsuarioAdmin extends Usuario {
   ativo: boolean
   ultimo_acesso?: string | null
   total_pombos: number
+  // RA-08: muitas senhas erradas nos últimos 15 minutos
+  bloqueado: boolean
 }
 
 export interface UsuarioNovo {

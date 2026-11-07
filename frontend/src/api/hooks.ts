@@ -273,6 +273,14 @@ export function useRedefinirSenha() {
   })
 }
 
+export function useDesbloquearUsuario() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: number) => api.post(`/usuarios/${id}/desbloquear`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['usuarios'] }),
+  })
+}
+
 /** Mensagem legível de um erro da API (texto simples ou lista de validação do FastAPI). */
 export function mensagemDeErro(erro: unknown, padrao: string): string {
   if (!isAxiosError(erro)) return padrao

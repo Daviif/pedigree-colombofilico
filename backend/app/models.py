@@ -1,7 +1,7 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Index, Integer, String, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -119,3 +119,20 @@ class Compartilhamento(Base):
 
     dono: Mapped[Usuario] = relationship(foreign_keys=[dono_id])
     convidado: Mapped[Usuario] = relationship(foreign_keys=[convidado_id])
+
+
+class TentativaLogin(Base):
+    """Falha de login (senha errada, login inexistente ou desativado). RA-xx no README."""
+
+    __tablename__ = "tentativas_login"
+    __table_args__ = (
+        Index("ix_tentativas_login_login_criado_em", "login", "criado_em"),
+        Index("ix_tentativas_login_ip_criado_em", "ip", "criado_em"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    login: Mapped[str] = mapped_column(String(50), nullable=False)
+    ip: Mapped[str] = mapped_column(String(45), nullable=False)
+    criado_em: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )

@@ -241,6 +241,7 @@ class UsuarioAdminRead(UsuarioRead):
     ativo: bool
     ultimo_acesso: datetime | None = None
     total_pombos: int = 0
+    bloqueado: bool = False  # RA-08: muitas senhas erradas nos últimos 15 minutos
 
 
 SENHA_MAX_BYTES = 72  # limite do bcrypt (RV-06)
