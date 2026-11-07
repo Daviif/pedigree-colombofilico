@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
@@ -173,6 +174,62 @@ class UsuarioRead(BaseModel):
     admin: bool
 
 
+# ---------- Gestão de usuários (admin) ----------
+
+
+class UsuarioAdminRead(UsuarioRead):
+    ativo: bool
+    ultimo_acesso: datetime | None = None
+    total_pombos: int = 0
+
+
+def _validar_senha(valor: str) -> str:
+    if len(valor) < 8:
+        raise ValueError("A senha precisa ter pelo menos 8 caracteres")
+    return valor
+
+
+def _validar_nome(valor: str) -> str:
+    valor = " ".join(valor.split())
+    if len(valor.split()) < 2:
+        raise ValueError("Informe o nome completo (nome e sobrenome)")
+    return valor
+
+
+class UsuarioCreate(BaseModel):
+    login: str
+    nome: str
+    senha: str
+    admin: bool = False
+
+    @field_validator("login")
+    @classmethod
+    def validar_login(cls, valor: str) -> str:
+        valor = valor.strip().lower()
+        if not re.fullmatch(r"[a-z0-9._-]{3,50}", valor):
+            raise ValueError(
+                "O login deve ter de 3 a 50 caracteres: letras sem acento, números, ponto, _ ou -"
+            )
+        return valor
+
+    _nome = field_validator("nome")(_validar_nome)
+    _senha = field_validator("senha")(_validar_senha)
+
+
+class UsuarioUpdate(BaseModel):
+    nome: str | None = None
+    admin: bool | None = None
+    ativo: bool | None = None
+
+    _nome = field_validator("nome")(lambda v: None if v is None else _validar_nome(v))
+
+
+class SenhaInput(BaseModel):
+    senha: str
+
+    _senha = field_validator("senha")(_validar_senha)
+
+
 # ---------- Compartilhamento ----------
 
 
@@ -180,8 +237,13 @@ class CompartilharInput(BaseModel):
     login: str
 
 
+class UsuarioComLogin(UsuarioResumo):
+    # O login diferencia pessoas com o mesmo nome.
+    login: str
+
+
 class CompartilhamentosResponse(BaseModel):
     # usuários que veem o meu plantel
-    concedidos: list[UsuarioResumo] = []
+    concedidos: list[UsuarioComLogin] = []
     # usuários cujo plantel eu vejo
-    recebidos: list[UsuarioResumo] = []
+    recebidos: list[UsuarioComLogin] = []

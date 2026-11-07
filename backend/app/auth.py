@@ -11,6 +11,8 @@ from app.models import Usuario
 
 COOKIE_SESSAO = "sessao"
 DURACAO_SESSAO = timedelta(days=30)
+# Último acesso é gravado no máximo uma vez nesse intervalo, para não escrever a cada pedido.
+INTERVALO_ULTIMO_ACESSO = timedelta(minutes=5)
 
 # Usado para gastar o mesmo tempo quando o login não existe, sem revelar
 # por diferença de tempo de resposta quais usuários estão cadastrados.
@@ -29,7 +31,11 @@ def verificar_senha(senha: str, senha_hash: str | None) -> bool:
 
 
 def criar_token(usuario: Usuario) -> str:
-    payload = {"sub": str(usuario.id), "exp": datetime.now(UTC) + DURACAO_SESSAO}
+    payload = {
+        "sub": str(usuario.id),
+        "v": usuario.sessao_versao,
+        "exp": datetime.now(UTC) + DURACAO_SESSAO,
+    }
     return jwt.encode(payload, settings.secret_key, algorithm="HS256")
 
 
@@ -46,4 +52,15 @@ def usuario_atual(
         raise nao_autenticado
     if usuario is None or not usuario.ativo:
         raise nao_autenticado
+    # Token de antes de uma troca de senha. Tokens sem "v" (anteriores a essa regra) valem como 0.
+    if payload.get("v", 0) != usuario.sessao_versao:
+        raise nao_autenticado
+    registrar_acesso(usuario, db)
     return usuario
+
+
+def registrar_acesso(usuario: Usuario, db: Session) -> None:
+    agora = datetime.now(UTC)
+    if usuario.ultimo_acesso is None or agora - usuario.ultimo_acesso >= INTERVALO_ULTIMO_ACESSO:
+        usuario.ultimo_acesso = agora
+        db.commit()

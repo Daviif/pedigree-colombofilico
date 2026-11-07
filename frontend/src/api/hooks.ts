@@ -15,6 +15,8 @@ import type {
   Resultado,
   ResultadoInput,
   Usuario,
+  UsuarioAdmin,
+  UsuarioNovo,
 } from './types'
 
 // ---------- Autenticação ----------
@@ -233,4 +235,49 @@ export function useRemoverCompartilhamento() {
       qc.invalidateQueries({ queryKey: ['pombos'] })
     },
   })
+}
+
+// ---------- Usuários (só admin) ----------
+
+export function useUsuarios() {
+  return useQuery({
+    queryKey: ['usuarios'],
+    queryFn: async () => (await api.get<UsuarioAdmin[]>('/usuarios')).data,
+  })
+}
+
+export function useCriarUsuario() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (dados: UsuarioNovo) => (await api.post<UsuarioAdmin>('/usuarios', dados)).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['usuarios'] }),
+  })
+}
+
+export function useAtualizarUsuario() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, ...dados }: { id: number; nome?: string; admin?: boolean; ativo?: boolean }) =>
+      (await api.patch<UsuarioAdmin>(`/usuarios/${id}`, dados)).data,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['usuarios'] })
+      qc.invalidateQueries({ queryKey: ['usuario-atual'] })
+    },
+  })
+}
+
+export function useRedefinirSenha() {
+  return useMutation({
+    mutationFn: async ({ id, senha }: { id: number; senha: string }) =>
+      api.post(`/usuarios/${id}/senha`, { senha }),
+  })
+}
+
+/** Mensagem legível de um erro da API (texto simples ou lista de validação do FastAPI). */
+export function mensagemDeErro(erro: unknown, padrao: string): string {
+  if (!isAxiosError(erro)) return padrao
+  const detail = erro.response?.data?.detail
+  if (typeof detail === 'string') return detail
+  if (Array.isArray(detail) && detail[0]?.msg) return String(detail[0].msg).replace(/^Value error, /, '')
+  return padrao
 }

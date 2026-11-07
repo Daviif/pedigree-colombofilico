@@ -3,7 +3,14 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.auth import COOKIE_SESSAO, DURACAO_SESSAO, criar_token, usuario_atual, verificar_senha
+from app.auth import (
+    COOKIE_SESSAO,
+    DURACAO_SESSAO,
+    criar_token,
+    registrar_acesso,
+    usuario_atual,
+    verificar_senha,
+)
 from app.config import settings
 from app.database import get_db
 from app.models import Usuario
@@ -23,6 +30,13 @@ def login(dados: LoginInput, response: Response, db: Session = Depends(get_db)):
     if not verificar_senha(dados.senha, usuario.senha_hash if usuario else None) or not usuario.ativo:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Usuário ou senha incorretos.")
 
+    usuario.ultimo_acesso = None  # força a gravação: login sempre conta como acesso
+    registrar_acesso(usuario, db)
+    gravar_cookie_sessao(response, usuario)
+    return usuario
+
+
+def gravar_cookie_sessao(response: Response, usuario: Usuario) -> None:
     response.set_cookie(
         COOKIE_SESSAO,
         criar_token(usuario),
@@ -31,7 +45,6 @@ def login(dados: LoginInput, response: Response, db: Session = Depends(get_db)):
         secure=settings.cookie_secure,
         samesite="lax",
     )
-    return usuario
 
 
 @router.post("/logout", status_code=204)

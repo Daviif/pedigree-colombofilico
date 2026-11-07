@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom'
 
 import { useLogout, useUsuarioAtual } from '../api/hooks'
 
-const links = [
+const linksBase = [
   { to: '/', label: 'Início', end: true },
   { to: '/pombos', label: 'Pombos' },
   { to: '/reprodutores', label: 'Reprodutores' },
@@ -15,6 +15,7 @@ export function Layout({ children }: { children: ReactNode }) {
   const [menuAberto, setMenuAberto] = useState(false)
   const { data: usuario } = useUsuarioAtual()
   const logout = useLogout()
+  const links = usuario?.admin ? [...linksBase, { to: '/usuarios', label: 'Usuários' }] : linksBase
 
   return (
     <div className="min-h-screen bg-slate-50">

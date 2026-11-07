@@ -7,6 +7,7 @@
 
 from fastapi import HTTPException, status
 from sqlalchemy import ColumnElement, or_, select, true
+from sqlalchemy.orm import aliased
 
 from app.models import Compartilhamento, Usuario
 
@@ -16,8 +17,13 @@ def condicao_visivel(coluna_dono, usuario: Usuario) -> ColumnElement[bool]:
     id do dono (ex.: Pombo.usuario_id)."""
     if usuario.admin:
         return true()
-    compartilhados = select(Compartilhamento.dono_id).where(
-        Compartilhamento.convidado_id == usuario.id
+    # Dono desativado some dos plantéis compartilhados até ser reativado.
+    # Alias para a subconsulta não ser correlacionada com uma consulta externa que use Usuario.
+    dono = aliased(Usuario)
+    compartilhados = (
+        select(Compartilhamento.dono_id)
+        .join(dono, dono.id == Compartilhamento.dono_id)
+        .where(Compartilhamento.convidado_id == usuario.id, dono.ativo)
     )
     return or_(coluna_dono == usuario.id, coluna_dono.in_(compartilhados))
 

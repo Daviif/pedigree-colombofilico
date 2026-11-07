@@ -111,9 +111,26 @@ export interface Usuario {
   admin: boolean
 }
 
+export interface UsuarioComLogin extends UsuarioResumo {
+  login: string
+}
+
 export interface Compartilhamentos {
   // usuários que veem o meu plantel
-  concedidos: UsuarioResumo[]
+  concedidos: UsuarioComLogin[]
   // usuários cujo plantel eu vejo
-  recebidos: UsuarioResumo[]
+  recebidos: UsuarioComLogin[]
+}
+
+export interface UsuarioAdmin extends Usuario {
+  ativo: boolean
+  ultimo_acesso?: string | null
+  total_pombos: number
+}
+
+export interface UsuarioNovo {
+  login: string
+  nome: string
+  senha: string
+  admin: boolean
 }

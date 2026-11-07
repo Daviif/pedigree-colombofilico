@@ -1,6 +1,7 @@
 import enum
+from datetime import datetime
 
-from sqlalchemy import Boolean, Enum, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -100,6 +101,9 @@ class Usuario(Base):
     senha_hash: Mapped[str] = mapped_column(String(200), nullable=False)
     admin: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
     ativo: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true")
+    ultimo_acesso: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # Vai no token de sessão; aumentar o número encerra todas as sessões abertas.
+    sessao_versao: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
 
 
 class Compartilhamento(Base):

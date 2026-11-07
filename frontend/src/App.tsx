@@ -10,6 +10,7 @@ import { PomboForm } from './pages/pombos/PomboForm'
 import { PombosList } from './pages/pombos/PombosList'
 import { Proprietarios } from './pages/Proprietarios'
 import { Reprodutores } from './pages/Reprodutores'
+import { Usuarios } from './pages/Usuarios'
 
 function App() {
   const { data: usuario, isPending } = useUsuarioAtual()
@@ -28,6 +29,7 @@ function App() {
         <Route path="/reprodutores" element={<Reprodutores />} />
         <Route path="/proprietarios" element={<Proprietarios />} />
         <Route path="/compartilhar" element={<Compartilhar />} />
+        {usuario.admin && <Route path="/usuarios" element={<Usuarios />} />}
       </Routes>
     </Layout>
   )

@@ -79,9 +79,23 @@ docker compose exec backend python -m app.criar_usuario LOGIN --nome "Nome Exibi
 docker compose exec backend python -m app.criar_usuario LOGIN                         # troca a senha
 ```
 
+O terminal fica para criar o **primeiro admin**. Depois disso, o admin gerencia todos pela tela **Usuários**.
+
+#### Tela Usuários (só admin): regras
+
+1. Só o admin acessa a tela e a API `/api/usuarios`. Para os outros, a API responde **403**.
+2. A lista mostra nome, login, perfil (admin ou criador), situação (ativo ou desativado), **último acesso** e quantos pombos cada um tem.
+3. **Último acesso** é gravado no login e a cada uso do sistema, no máximo uma vez a cada 5 minutos por usuário, para não escrever no banco a cada clique.
+4. **Criar usuário:** login com 3 a 50 caracteres, só letras minúsculas sem acento, números, `.`, `_` e `-`. Espaços nas pontas são removidos e maiúsculas viram minúsculas. O **nome completo** é obrigatório, com pelo menos nome e sobrenome (duas palavras), porque é ele que aparece para os outros e pode haver nomes iguais. Espaços repetidos viram um só. A senha precisa ter pelo menos 8 caracteres. Login repetido responde **409**.
+5. **Editar:** o admin muda o nome (mesma regra do nome completo), o perfil (admin/criador) e a situação (ativo/desativado).
+6. **Desativar** não apaga nada: o plantel continua no banco, o usuário não consegue entrar, as sessões abertas dele param de funcionar na hora e ele some dos plantéis compartilhados. Reativar devolve tudo como estava. A API não apaga usuários.
+7. **Redefinir senha:** o admin define uma senha nova (mínimo 8 caracteres). Todas as sessões abertas daquele usuário são encerradas. Se o admin redefinir a própria senha, a sessão atual dele continua.
+8. O admin **não pode tirar o próprio perfil de admin nem se desativar**. Assim ninguém se tranca para fora sem querer.
+9. O sistema **sempre tem pelo menos um admin ativo**. Uma mudança que deixaria zero admins ativos responde **400**, inclusive quando dois admins tentam rebaixar um ao outro ao mesmo tempo (trava no banco).
+
 Cada usuário tem o próprio plantel (pombos e proprietários) e só vê o dele. A mesma anilha pode existir em plantéis diferentes. O admin (`--admin`) vê e edita os pombos de todos.
 
-Para mostrar o plantel a outra pessoa, use a tela **Compartilhar**: quem recebe vê todos os pombos do dono, inclusive os cadastrados depois, mas só para leitura. No pombo, o botão **Copiar para meu plantel** traz uma cópia independente, com ancestrais e resultados. Se o destino já tiver um ancestral com a mesma anilha, ele é reaproveitado. Pai, mãe e proprietário de um pombo precisam ser do mesmo plantel.
+Para mostrar o plantel a outra pessoa, use a tela **Compartilhar**: quem recebe vê todos os pombos do dono, inclusive os cadastrados depois, mas só para leitura. As duas listas da tela, e o seletor "Plantel de …" na lista de pombos, mostram o nome e o login de cada pessoa, para diferenciar quem tem o mesmo nome. No pombo, o botão **Copiar para meu plantel** traz uma cópia independente, com ancestrais e resultados. Se o destino já tiver um ancestral com a mesma anilha, ele é reaproveitado. Pai, mãe e proprietário de um pombo precisam ser do mesmo plantel.
 
 Na migração que criou os plantéis, os pombos e proprietários que já existiam foram para o primeiro admin.
 
