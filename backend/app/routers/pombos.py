@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import or_, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
 from app.acesso import condicao_visivel, exigir_edicao
@@ -178,18 +179,77 @@ def _proprietario_no_plantel(origem: Proprietario, dono_id: int, db: Session) ->
     return copia
 
 
+def _normalizar_cor(cor: str | None) -> str:
+    return " ".join((cor or "").split()).casefold()
+
+
+def _mesmo_pombo(origem: Pombo, existente: Pombo) -> bool:
+    """RC-02: o pombo do destino com a mesma anilha é o mesmo animal?"""
+    sexo_ok = (
+        origem.sexo == existente.sexo
+        or Sexo.DESCONHECIDO in (origem.sexo, existente.sexo)
+    )
+    cor_o, cor_e = _normalizar_cor(origem.cor), _normalizar_cor(existente.cor)
+    return sexo_ok and (not cor_o or not cor_e or cor_o == cor_e)
+
+
+def _descrever(p: Pombo) -> str:
+    sexo = {Sexo.M: "macho", Sexo.F: "fêmea"}.get(p.sexo, "sexo desconhecido")
+    return f"{sexo}, cor {p.cor or 'não informada'}"
+
+
+def _planejar_copia(raiz: Pombo, dono_id: int, db: Session) -> dict[int, Pombo]:
+    """Percorre a ascendência da origem antes de gravar qualquer coisa e decide quais
+    ancestrais o destino reaproveita (RC-02). Se houver conflito (RC-03/RC-04), cancela a
+    cópia inteira com 409 listando todos. Devolve {id na origem: pombo do destino}."""
+    reaproveitados: dict[int, Pombo] = {}
+    conflitos: list[str] = []
+    visitados: set[int] = set()
+    pendentes: list[tuple[Pombo, str | None]] = [(raiz.pai, "pai"), (raiz.mae, "mae")]
+    while pendentes:
+        origem, papel = pendentes.pop()
+        if origem is None:
+            continue
+        existente = reaproveitados.get(origem.id) or db.scalar(
+            select(Pombo).where(Pombo.usuario_id == dono_id, Pombo.anilha == origem.anilha)
+        )
+        if existente is not None:
+            permitido = (Sexo.M if papel == "pai" else Sexo.F, Sexo.DESCONHECIDO)
+            if not _mesmo_pombo(origem, existente):
+                conflitos.append(
+                    f"{origem.anilha} (no original: {_descrever(origem)}; "
+                    f"no seu plantel: {_descrever(existente)})"
+                )
+            elif existente.sexo not in permitido:  # RC-04
+                rotulo = "pai" if papel == "pai" else "mãe"
+                conflitos.append(
+                    f"{origem.anilha} (seria {rotulo}, mas no seu plantel é {_descrever(existente)})"
+                )
+            reaproveitados[origem.id] = existente
+            continue  # a ascendência de quem é reaproveitado já está no destino
+        if origem.id in visitados:
+            continue
+        visitados.add(origem.id)
+        pendentes += [(origem.pai, "pai"), (origem.mae, "mae")]
+
+    if conflitos:
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                "Não foi possível copiar: o seu plantel já tem pombos com estas anilhas, "
+                "mas eles não parecem ser os mesmos animais: "
+                + "; ".join(sorted(set(conflitos)))
+                + ". Corrija ou altere a anilha desses pombos e copie de novo."
+            ),
+        )
+    return reaproveitados
+
+
 def _copiar(origem: Pombo, dono_id: int, db: Session, copiados: dict[int, Pombo]) -> Pombo:
+    """Cria a cópia de `origem` e dos ancestrais que ainda não estão em `copiados`
+    (que já vem com os reaproveitados de _planejar_copia)."""
     if origem.id in copiados:
         return copiados[origem.id]
-    # Ancestral que o destino já tem cadastrado (mesma anilha) é reaproveitado
-    # em vez de duplicado.
-    existente = db.scalar(
-        select(Pombo).where(Pombo.usuario_id == dono_id, Pombo.anilha == origem.anilha)
-    )
-    if existente:
-        copiados[origem.id] = existente
-        return existente
-
     copia = Pombo(
         usuario_id=dono_id,
         anilha=origem.anilha,
@@ -227,17 +287,26 @@ def copiar_pombo(
 ):
     """Copia um pombo de outro plantel (com todos os ancestrais e resultados)
     para o plantel do usuário. A cópia é independente: mudanças feitas depois
-    no original não chegam a ela."""
-    pombo = buscar_pombo_ou_404(pombo_id, db, usuario)
+    no original não chegam a ela. Regras RC-xx (README)."""
+    pombo = buscar_pombo_ou_404(pombo_id, db, usuario)  # RC-01
     if pombo.usuario_id == usuario.id:
         raise HTTPException(status_code=400, detail="Este pombo já é do seu plantel")
+    travar_plantel(usuario.id, db)  # a cópia cria vínculos no destino (RG-03)
     if _anilha_em_uso(pombo.anilha, usuario.id, db):
         raise HTTPException(
             status_code=400, detail="Você já tem um pombo com essa anilha no seu plantel"
         )
 
-    copia = _copiar(pombo, usuario.id, db, {})
-    db.commit()
+    copiados = _planejar_copia(pombo, usuario.id, db)  # RC-02..04, antes de gravar
+    copia = _copiar(pombo, usuario.id, db, copiados)
+    try:
+        db.commit()  # RC-05: tudo ou nada
+    except IntegrityError:  # outra cópia ou cadastro da mesma anilha ao mesmo tempo
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail="Outro pombo com uma dessas anilhas foi cadastrado agora há pouco. Tente de novo.",
+        )
     return buscar_pombo_ou_404(copia.id, db, usuario)
 
 

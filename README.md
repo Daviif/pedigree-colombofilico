@@ -153,6 +153,16 @@ Detalhes, critérios e testes em `docs/requisitos.md` (códigos RG-xx). Os teste
 - **RG-10:** excluir um proprietário usado por algum pombo é bloqueado (409).
 - **RG-11:** ancestral desconhecido é simplesmente a ausência de pai ou mãe. O sistema nunca cria pombo fictício.
 
+## Cópia entre plantéis
+
+Detalhes e testes em `docs/requisitos.md` (RC-xx).
+
+- **RC-01:** só copia quem pode ver o pombo. A cópia nunca dá acesso de edição ao original.
+- **RC-02:** um ancestral que você já tem (mesma anilha) só é reaproveitado se o sexo for compatível (igual, ou um dos dois desconhecido) e a cor for a mesma, ignorando maiúsculas e espaços (ou uma das duas vazia).
+- **RC-03:** se a anilha já existe no seu plantel, mas o pombo é outro, a cópia inteira é cancelada (409) e a mensagem lista os conflitos. Corrija ou renomeie o seu pombo e copie de novo.
+- **RC-04:** um ancestral reaproveitado também precisa ter o sexo certo para o papel (pai macho, mãe fêmea, ou desconhecido). Ciclo não tem como surgir na cópia: os pombos novos só apontam para outros novos ou para os reaproveitados, nunca o contrário, e a origem não tem ciclos (RG-02).
+- **RC-05:** a cópia é atômica: ou copia tudo, ou nada.
+
 ## Segurança do certificado PDF
 
 1. Todo texto digitado pelos usuários (anilha, cor, observações, nomes, resultados, dados do proprietário) aparece no PDF **como texto**, nunca como HTML: `<b>` aparece escrito, não em negrito.
