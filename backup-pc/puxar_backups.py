@@ -18,7 +18,7 @@ import re
 import shutil
 import subprocess
 import sys
-from datetime import date, datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 ORIGEM = os.environ.get("PEDIGREE_BACKUP_ORIGEM", "pedigree-backup:")  # alias do ~/.ssh/config
@@ -29,6 +29,7 @@ NOME = re.compile(r"^pedigree-(\d{4}-\d{2}-\d{2})-(\d{4})\.sql\.gz\.age$")
 
 
 def data_do_arquivo(nome: str) -> datetime | None:
+    """Data/hora do backup pelo nome, em UTC (sem fuso no objeto; o backup.sh grava em UTC)."""
     m = NOME.match(nome)
     if not m:
         return None
@@ -111,7 +112,7 @@ def avisar(titulo: str, texto: str) -> None:
 
 
 def main(agora: datetime | None = None) -> int:
-    agora = agora or datetime.now()
+    agora = agora or datetime.now(UTC).replace(tzinfo=None)  # os nomes estão em UTC
     espelho, arquivo, registro = BASE / "espelho", BASE / "arquivo", BASE / "importados.txt"
     falha_rsync = None
     try:
@@ -125,7 +126,7 @@ def main(agora: datetime | None = None) -> int:
           f"mais_recente={ultimo:%F %H:%M}" if ultimo else f"{agora:%F %T} nenhum backup no PC")
 
     if ultimo is None or agora - ultimo > LIMITE_SEM_COPIA:
-        quando = f"a mais recente é de {ultimo:%d/%m %H:%M}" if ultimo else "não há nenhuma"
+        quando = f"a mais recente é de {ultimo:%d/%m %H:%M} UTC" if ultimo else "não há nenhuma"
         motivo = f" Falha ao buscar na VPS: {falha_rsync}" if falha_rsync else ""
         avisar("Backup do pedigree atrasado", f"Nenhuma cópia nova há mais de 48 h ({quando}).{motivo}")
         return 1

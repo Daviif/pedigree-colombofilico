@@ -24,6 +24,8 @@ deploy/backup-externo.sh*                          ~/.local/share/pedigree-backu
 | Log da cópia no PC | `journalctl --user -u pedigree-backup` |
 | Segredos (`.env`) | Só na VPS. **Não são necessários para recuperar** (RO-09): numa VPS nova geram-se outros |
 
+**Horários:** os nomes dos arquivos estão em **UTC** (Brasília = UTC − 3). O backup das 03h UTC corresponde a 00h em Brasília.
+
 **Objetivos (RO-08):**
 - RPO ≤ 24 h com o PC ligando todo dia. Com o PC desligado por N dias, a cópia externa atrasa N dias, e a VPS continua com o diário local.
 - RTO ≤ 4 h. Será medido no ensaio completo da seção 4.
@@ -43,6 +45,7 @@ O primeiro teste com um backup **de produção** é critério para o lançamento
 
 | Data | Arquivo | Chave | Tempo | Contagens | Migração | Admins | Resultado |
 |---|---|---|---|---|---|---|---|
+| 2026-11-07 | pedigree-2026-11-07-1949.sql.gz.age (**produção**, puxado pelo timer) | chave-age.txt (do PC) | 6 s | usuarios=3 pombos=290 resultados=5 proprietarios=45 compartilhamentos=0 | b7e2f4a91c3d (a da `main`, esperado) | 1 | **OK. Primeiro teste com backup de produção (fecha o P0-2).** Pendente: o mesmo teste com a chave do pendrive (RO-10) |
 | 2026-11-07 | pedigree-2026-11-07-1638.sql.gz.age | chave de teste | 8 s | usuarios=1 pombos=27 resultados=10 proprietarios=4 compartilhamentos=0 | c4d8e1f2a7b9 | 1 | OK. **Ensaio com o banco de dev**, não vale como teste de produção. Com chave errada, o script falha (saída 1) e apaga o contêiner |
 
 ## 4. Recuperar tudo numa VPS nova (perda total)

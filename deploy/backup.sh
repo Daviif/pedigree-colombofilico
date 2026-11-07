@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Backup diário do banco (RO-02, RO-03 em docs/requisitos.md). Agendado no crontab da VPS.
 #
-# - backups/pedigree-AAAA-MM-DD-HHMM.sql.gz          cópia local, sem cifra (30 dias)
+# - backups/pedigree-AAAA-MM-DD-HHMM.sql.gz          cópia local, sem cifra (30 dias); hora em UTC
 # - backups/externo/pedigree-....sql.gz.age          cópia cifrada para o PC puxar (30 dias),
 #                                                    só se existir backup.pub (chave pública age)
 #
@@ -24,7 +24,8 @@ erro() {
 
 mkdir -p backups/externo
 chmod 700 backups
-nome="pedigree-$(date +%F-%H%M).sql.gz"
+# Horário do nome sempre em UTC (o PC compara em UTC para o aviso de atraso, RO-06).
+nome="pedigree-$(date -u +%F-%H%M).sql.gz"
 arquivo="backups/$nome"
 
 # pipefail: se o pg_dump falhar, o pipeline inteiro falha
