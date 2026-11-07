@@ -7,7 +7,8 @@ services:
       POSTGRES_PASSWORD: pedigree
       POSTGRES_DB: pedigree
     ports:
-      - "5436:5432"
+      # Só na própria máquina: na Wi-Fi o firewalld do Fedora libera 1025-65535 (RO-01).
+      - "127.0.0.1:5436:5432"
     volumes:
       - pedigree_pgdata:/var/lib/postgresql/data
 
