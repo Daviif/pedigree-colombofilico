@@ -39,6 +39,8 @@ npm install
 npm run dev
 ```
 
+Testes do frontend (componentes, Vitest + Testing Library): `npm test`.
+
 Acesse a URL impressa pelo Vite (por padrão `http://localhost:5173`, ou a próxima porta livre). As chamadas para `/api/*` são redirecionadas automaticamente para o backend.
 
 ## Deploy (VPS Oracle Cloud Free Tier)
