@@ -5,6 +5,12 @@ from sqlalchemy.orm import Session, joinedload
 from app.acesso import condicao_visivel, exigir_edicao
 from app.auth import usuario_atual
 from app.database import get_db
+from app.genealogia import (
+    exigir_sem_filhos,
+    travar_plantel,
+    validar_genitor,
+    validar_mudanca_de_sexo,
+)
 from app.models import Pombo, Proprietario, Resultado, Sexo, StatusPombo, Usuario
 from app.pedigree import montar_arvore
 from app.schemas import ArvoreNo, IrmaosResponse, PomboCreate, PomboDetail, PomboRead, PomboUpdate
@@ -70,22 +76,21 @@ def buscar_pombo_ou_404(
 
 
 def _validar_vinculos(
-    dados: PomboCreate | PomboUpdate, pombo_id: int | None, dono_id: int, db: Session
+    dados: PomboCreate | PomboUpdate, atual: Pombo | None, dono_id: int, db: Session
 ) -> None:
-    """Pai, mãe e proprietário precisam ser do mesmo plantel do pombo. Para usar
-    um pombo de um plantel compartilhado como pai/mãe, copie-o antes."""
-    if dados.pai_id is not None:
-        if dados.pai_id == pombo_id:
-            raise HTTPException(status_code=400, detail="Um pombo não pode ser pai de si mesmo")
-        pai = db.get(Pombo, dados.pai_id)
-        if pai is None or pai.usuario_id != dono_id:
-            raise HTTPException(status_code=400, detail="Pai informado não existe")
-    if dados.mae_id is not None:
-        if dados.mae_id == pombo_id:
-            raise HTTPException(status_code=400, detail="Um pombo não pode ser mãe de si mesmo")
-        mae = db.get(Pombo, dados.mae_id)
-        if mae is None or mae.usuario_id != dono_id:
-            raise HTTPException(status_code=400, detail="Mãe informada não existe")
+    """Pai, mãe e proprietário precisam ser do mesmo plantel do pombo (RG-08); para usar
+    um pombo de um plantel compartilhado como pai/mãe, copie-o antes. Demais regras em
+    app/genealogia.py. `atual` é None no cadastro."""
+    pombo_id = atual.id if atual else None
+    mudou_pai = atual is None or dados.pai_id != atual.pai_id
+    mudou_mae = atual is None or dados.mae_id != atual.mae_id
+    mudou_sexo = atual is not None and dados.sexo != atual.sexo
+    if (mudou_pai and dados.pai_id) or (mudou_mae and dados.mae_id) or mudou_sexo:
+        travar_plantel(dono_id, db)  # RG-03, antes de ler a ascendência e os filhos
+    validar_genitor("pai", dados.pai_id, pombo_id, dados.anilha, dono_id, mudou_pai, db)
+    validar_genitor("mae", dados.mae_id, pombo_id, dados.anilha, dono_id, mudou_mae, db)
+    if atual is not None:
+        validar_mudanca_de_sexo(atual, dados.sexo, db)  # RG-06
     if dados.proprietario_id is not None:
         proprietario = db.get(Proprietario, dados.proprietario_id)
         if proprietario is None or proprietario.usuario_id != dono_id:
@@ -131,7 +136,7 @@ def atualizar_pombo(
 
     if _anilha_em_uso(dados.anilha, pombo.usuario_id, db, exceto_id=pombo_id):
         raise HTTPException(status_code=400, detail="Já existe um pombo com essa anilha")
-    _validar_vinculos(dados, pombo_id, pombo.usuario_id, db)
+    _validar_vinculos(dados, pombo, pombo.usuario_id, db)
 
     for campo, valor in dados.model_dump().items():
         setattr(pombo, campo, valor)
@@ -144,6 +149,7 @@ def remover_pombo(
     pombo_id: int, db: Session = Depends(get_db), usuario: Usuario = Depends(usuario_atual)
 ):
     pombo = buscar_pombo_ou_404(pombo_id, db, usuario, editar=True)
+    exigir_sem_filhos(pombo, db)  # RG-09
     db.delete(pombo)
     db.commit()
 

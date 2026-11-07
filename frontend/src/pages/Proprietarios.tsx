@@ -4,6 +4,7 @@ import {
   useAtualizarProprietario,
   useCriarProprietario,
   useProprietarios,
+  mensagemDeErro,
   useRemoverProprietario,
 } from '../api/hooks'
 import type { ProprietarioInput } from '../api/types'
@@ -59,7 +60,12 @@ export function Proprietarios() {
 
   async function excluir(id: number, nome: string) {
     if (!confirm(`Remover o proprietário "${nome}"?`)) return
-    await remover.mutateAsync(id)
+    try {
+      await remover.mutateAsync(id)
+    } catch (err) {
+      // RG-10: proprietário em uso não pode ser excluído.
+      alert(mensagemDeErro(err, 'Erro ao excluir o proprietário.'))
+    }
   }
 
   return (

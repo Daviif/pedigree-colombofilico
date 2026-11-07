@@ -83,6 +83,8 @@ export interface ArvoreNo {
   origem?: string | null
   proprietario_nome?: string | null
   duplicado: boolean
+  // RG-07: pai fêmea ou mãe macho (registro antigo)
+  alerta_sexo: boolean
   grau_parentesco?: string | null
   resultados: ArvoreResultado[]
   pai?: ArvoreNo | null

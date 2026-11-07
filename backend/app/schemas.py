@@ -149,6 +149,8 @@ class ArvoreNo(BaseModel):
     observacoes: str | None = None
     proprietario_nome: str | None = None
     duplicado: bool = False
+    # RG-07: pai fêmea ou mãe macho (registros antigos)
+    alerta_sexo: bool = False
     grau_parentesco: str | None = None
     resultados: list[ResultadoBase] = []
     pai: "ArvoreNo | None" = None

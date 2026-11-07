@@ -139,6 +139,20 @@ gunzip -c backups/ARQUIVO.sql.gz | docker compose exec -T db psql -U pedigree pe
 docker compose start backend
 ```
 
+## Regras genealógicas
+
+Detalhes, critérios e testes em `docs/requisitos.md` (códigos RG-xx). Os testes citam o código da regra.
+
+- **RG-01/02:** um pombo não pode ser pai ou mãe de si mesmo, nem ter como pai ou mãe um descendente seu, em qualquer número de gerações (sem ciclos). Ancestral repetido em ramos diferentes (consanguinidade) continua permitido.
+- **RG-03:** a verificação de ciclo trava o plantel durante a gravação. Duas edições simultâneas não fecham um ciclo juntas.
+- **RG-04/05:** o pai precisa ser macho ou de sexo desconhecido, e a mãe, fêmea ou desconhecida. Isso só é verificado quando o vínculo muda: vínculos antigos inconsistentes continuam editáveis nos outros campos.
+- **RG-06:** o sexo de um pombo não pode mudar para um valor incompatível com o papel que ele já tem (ex.: é pai de alguém e passaria a fêmea). Corrigir para o sexo certo ou para desconhecido é sempre permitido.
+- **RG-07:** a árvore marca com aviso o pai fêmea ou a mãe macho de registros antigos, sem bloquear a visualização nem o PDF.
+- **RG-08:** pai, mãe e proprietário precisam ser do mesmo plantel do pombo.
+- **RG-09:** excluir um pombo que é pai ou mãe de outro é bloqueado (409), com a lista dos filhos.
+- **RG-10:** excluir um proprietário usado por algum pombo é bloqueado (409).
+- **RG-11:** ancestral desconhecido é simplesmente a ausência de pai ou mãe. O sistema nunca cria pombo fictício.
+
 ## Segurança do certificado PDF
 
 1. Todo texto digitado pelos usuários (anilha, cor, observações, nomes, resultados, dados do proprietário) aparece no PDF **como texto**, nunca como HTML: `<b>` aparece escrito, não em negrito.

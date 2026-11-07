@@ -1,7 +1,14 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
-import { useArvore, useCopiarPombo, usePombo, useRemoverPombo, useUsuarioAtual } from '../../api/hooks'
+import {
+  mensagemDeErro,
+  useArvore,
+  useCopiarPombo,
+  usePombo,
+  useRemoverPombo,
+  useUsuarioAtual,
+} from '../../api/hooks'
 import { IrmaosSection } from '../../components/IrmaosSection'
 import { PedigreeTree } from '../../components/PedigreeTree'
 import { ProprietarioHeader } from '../../components/ProprietarioHeader'
@@ -25,8 +32,13 @@ export function PomboDetail() {
 
   async function excluir() {
     if (!confirm(`Remover o pombo ${pombo!.anilha}? Essa ação não pode ser desfeita.`)) return
-    await remover.mutateAsync(pomboId)
-    navigate('/pombos')
+    try {
+      await remover.mutateAsync(pomboId)
+      navigate('/pombos')
+    } catch (err) {
+      // RG-09: pombo com filhos não pode ser excluído; o servidor lista os filhos.
+      alert(mensagemDeErro(err, 'Erro ao excluir o pombo.'))
+    }
   }
 
   const doMeuPlantel = pombo.usuario_id === usuario!.id

@@ -1,4 +1,4 @@
-from app.models import Pombo
+from app.models import Pombo, Sexo
 from app.schemas import ArvoreNo
 
 _TERMOS_POR_GERACAO = [
@@ -53,6 +53,7 @@ def _montar_no(
         observacoes=pombo.observacoes,
         proprietario_nome=pombo.proprietario.nome if pombo.proprietario else None,
         grau_parentesco=_grau_parentesco(geracao, via),
+        alerta_sexo=(via == "pai" and pombo.sexo == Sexo.F) or (via == "mae" and pombo.sexo == Sexo.M),
         resultados=resultados,
         pai=pai,
         mae=mae,

@@ -38,6 +38,9 @@ function No({ no }: { no: ArvoreNo | null | undefined }) {
         {no.proprietario_nome && <div className="text-slate-400">Dono: {no.proprietario_nome}</div>}
         {no.origem && !no.id && <div className="text-slate-400">Origem: {no.origem}</div>}
         {no.duplicado && <div className="font-medium text-amber-700">⚠ ancestral repetido</div>}
+        {no.alerta_sexo && (
+          <div className="font-medium text-red-700">⚠ sexo não confere com o papel de {no.sexo === 'F' ? 'pai' : 'mãe'}</div>
+        )}
         {no.resultados.length > 0 && (
           <div className="mt-1 border-t border-dashed border-slate-200 pt-1 text-slate-600">
             {no.resultados.map((r, i) => (

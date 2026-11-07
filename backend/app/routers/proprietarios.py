@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.acesso import pode_editar
 from app.auth import usuario_atual
 from app.database import get_db
+from app.genealogia import exigir_proprietario_sem_uso
 from app.models import Proprietario, Usuario
 from app.schemas import ProprietarioCreate, ProprietarioRead, ProprietarioUpdate
 
@@ -73,5 +74,6 @@ def remover_proprietario(
     proprietario_id: int, db: Session = Depends(get_db), usuario: Usuario = Depends(usuario_atual)
 ):
     proprietario = _buscar_ou_404(proprietario_id, db, usuario)
+    exigir_proprietario_sem_uso(proprietario, db)  # RG-10
     db.delete(proprietario)
     db.commit()
