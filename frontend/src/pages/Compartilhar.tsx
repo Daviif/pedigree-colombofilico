@@ -8,6 +8,7 @@ import {
   useRemoverCompartilhamento,
 } from '../api/hooks'
 import { FalhaAoCarregar } from '../components/FalhaAoCarregar'
+import { Migalhas } from '../components/ui'
 
 export function Compartilhar() {
   const { data: compartilhamentos, isError, error, refetch } = useCompartilhamentos()
@@ -39,7 +40,10 @@ export function Compartilhar() {
 
   return (
     <div className="max-w-2xl space-y-6">
-      <h1 className="text-2xl font-semibold text-slate-800">Compartilhar</h1>
+      <div>
+            <Migalhas itens={[{ rotulo: 'Início', para: '/' }, { rotulo: 'Compartilhar' }]} />
+            <h1 className="text-2xl font-semibold text-marinho">Compartilhar</h1>
+          </div>
       {isError && <FalhaAoCarregar erro={error} oQue="os compartilhamentos" onTentar={refetch} />}
 
       <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-5">

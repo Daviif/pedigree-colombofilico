@@ -1,5 +1,5 @@
 import { type ReactNode, useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import {
   eNaoEncontrado,
@@ -13,6 +13,7 @@ import {
 } from '../../api/hooks'
 import type { PomboInput, Sexo, StatusPombo } from '../../api/types'
 import { FalhaAoCarregar } from '../../components/FalhaAoCarregar'
+import { Migalhas } from '../../components/ui'
 import { PomboSelect } from '../../components/PomboSelect'
 import { capitalizarPrimeira, limparAnilha } from '../../formatadores'
 
@@ -52,7 +53,9 @@ export function PomboForm() {
   const { data: todosPombos } = usePombos({ usuario_id: donoId }, donoId !== undefined)
   const { data: proprietarios } = useProprietarios(donoId)
 
-  const [dados, setDados] = useState<PomboInput>(VAZIO)
+  const [busca] = useSearchParams()
+  // NV-05: "Cadastrar <anilha>" na busca abre o formulário com a anilha preenchida
+  const [dados, setDados] = useState<PomboInput>(() => ({ ...VAZIO, anilha: limparAnilha(busca.get('anilha') ?? '') }))
   const [erro, setErro] = useState<string | null>(null)
 
   useEffect(() => {
@@ -110,7 +113,14 @@ export function PomboForm() {
 
   return (
     <div className="max-w-2xl space-y-4">
-      <h1 className="text-2xl font-semibold text-slate-800">
+      <Migalhas
+        itens={[
+          { rotulo: 'Início', para: '/' },
+          { rotulo: 'Meus pombos', para: '/pombos' },
+          { rotulo: editandoId ? `Editar ${pomboAtual?.anilha ?? ''}` : 'Novo pombo' },
+        ]}
+      />
+      <h1 className="text-2xl font-semibold text-marinho">
         {editandoId ? `Editar pombo ${pomboAtual?.anilha ?? ''}` : 'Novo pombo'}
       </h1>
 

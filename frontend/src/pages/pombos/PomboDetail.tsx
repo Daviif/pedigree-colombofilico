@@ -15,6 +15,7 @@ import { PedigreeTree } from '../../components/PedigreeTree'
 import { ProprietarioHeader } from '../../components/ProprietarioHeader'
 import { ResultadosSection } from '../../components/ResultadosSection'
 import { FalhaAoCarregar } from '../../components/FalhaAoCarregar'
+import { Migalhas } from '../../components/ui'
 
 export function PomboDetail() {
   const { id } = useParams()
@@ -82,7 +83,8 @@ export function PomboDetail() {
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="break-all text-2xl font-semibold text-slate-800">{pombo.anilha}</h1>
+          <Migalhas itens={[{ rotulo: 'Início', para: '/' }, { rotulo: 'Meus pombos', para: '/pombos' }, { rotulo: pombo.anilha }]} />
+          <h1 className="break-all text-2xl font-semibold text-marinho">{pombo.anilha}</h1>
           <p className="text-sm text-slate-500">
             {pombo.sexo} · {pombo.cor ?? '—'} · {pombo.status}
           </p>

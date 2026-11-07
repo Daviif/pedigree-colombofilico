@@ -11,6 +11,7 @@ import {
 } from '../api/hooks'
 import type { UsuarioAdmin, UsuarioNovo } from '../api/types'
 import { FalhaAoCarregar } from '../components/FalhaAoCarregar'
+import { Migalhas } from '../components/ui'
 
 const VAZIO: UsuarioNovo = { login: '', nome: '', senha: '', admin: false }
 
@@ -67,7 +68,10 @@ export function Usuarios() {
     <div className="max-w-3xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-800">Usuários</h1>
+          <div>
+            <Migalhas itens={[{ rotulo: 'Início', para: '/' }, { rotulo: 'Usuários' }]} />
+            <h1 className="text-2xl font-semibold text-marinho">Usuários</h1>
+          </div>
           {usuarios && (
             <p className="text-sm text-slate-500">
               {ativos} ativo{ativos === 1 ? '' : 's'} · {online} online agora

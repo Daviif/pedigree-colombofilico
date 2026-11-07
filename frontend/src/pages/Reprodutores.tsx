@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 
 import { usePombos, useUsuarioAtual } from '../api/hooks'
 import { FalhaAoCarregar } from '../components/FalhaAoCarregar'
+import { Migalhas } from '../components/ui'
 
 export function Reprodutores() {
   const { data: usuario } = useUsuarioAtual()
@@ -36,7 +37,10 @@ export function Reprodutores() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-slate-800">Reprodutores</h1>
+      <div>
+            <Migalhas itens={[{ rotulo: 'Início', para: '/' }, { rotulo: 'Reprodutores' }]} />
+            <h1 className="text-2xl font-semibold text-marinho">Reprodutores</h1>
+          </div>
       {isLoading && <p className="text-slate-500">Carregando...</p>}
       {isError && <FalhaAoCarregar erro={error} oQue="os reprodutores" onTentar={refetch} />}
       {!isError && <div className="grid gap-4 sm:grid-cols-2 sm:gap-6">

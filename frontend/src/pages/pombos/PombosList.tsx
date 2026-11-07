@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 
 import { useCompartilhamentos, usePombos, useProprietarios, useUsuarioAtual } from '../../api/hooks'
 import { FalhaAoCarregar } from '../../components/FalhaAoCarregar'
+import { Migalhas } from '../../components/ui'
 import type { PombosFiltro, Sexo, StatusPombo } from '../../api/types'
 
 export function PombosList() {
@@ -29,8 +30,9 @@ export function PombosList() {
 
   return (
     <div className="space-y-4">
+      <Migalhas itens={[{ rotulo: 'Início', para: '/' }, { rotulo: 'Meus pombos' }]} />
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold text-slate-800">Pombos</h1>
+        <h1 className="text-2xl font-semibold text-marinho">Meus pombos</h1>
         <Link
           to="/pombos/novo"
           className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"

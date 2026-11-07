@@ -169,6 +169,17 @@ Detalhes e testes em `docs/requisitos.md` (RV-xx). Nenhuma entrada do usuário p
 - **RV-06:** senha de 8 a 72 bytes (limite do bcrypt). No login, senha maior conta como senha errada.
 - **RV-07:** mensagens de validação em português, com o nome do campo.
 
+## Navegação e busca
+
+Desenho em `docs/ux/fluxos.md` e no protótipo `docs/ux/prototipos/alta-fidelidade.html`.
+
+- **NV-01:** menu superior azul-marinho com Início, Meus pombos, Reprodutores, Proprietários e Compartilhar. **Usuários só aparece para o admin** (e a rota só existe para ele). O item da página atual fica sublinhado em dourado e marcado com `aria-current="page"`.
+- **NV-02:** o menu completo aparece a partir de 1280 px de largura. Abaixo disso, vira a gaveta ☰, com itens de 48 px de altura, que fecha ao escolher um item ou com Esc. Entre 640 e 1279 px, a busca continua visível no topo; abaixo de 640 px (celular), ela abre pela lupa.
+- **NV-03:** busca por anilha sempre visível no topo. A tecla `/` leva o cursor até ela, a não ser que já se esteja digitando em outro campo. No celular, a busca abre pela lupa.
+- **NV-04:** a busca procura nos pombos que o usuário pode ver (o próprio plantel e os compartilhados; o admin vê todos) e mostra até 8 resultados, com sexo e cor. ↑ ↓ escolhem, Enter abre o escolhido (o primeiro, se nenhum foi escolhido) e Esc limpa.
+- **NV-05:** sem resultado, a busca oferece "Cadastrar <anilha>", que abre o formulário de novo pombo já com a anilha preenchida. Só aparece se o texto for uma anilha válida (números e `/`).
+- **NV-06:** as páginas mostram o caminho no topo ("Início › Meus pombos › 4272402/24"). O último item é a página atual e não é link.
+
 ## Mensagens e falhas na tela
 
 Detalhes em `docs/requisitos.md` (RF-xx). O redesenho completo é da Fase 7.

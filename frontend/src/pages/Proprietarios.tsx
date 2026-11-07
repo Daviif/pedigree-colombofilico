@@ -9,6 +9,7 @@ import {
 } from '../api/hooks'
 import { FalhaAoCarregar } from '../components/FalhaAoCarregar'
 import type { ProprietarioInput } from '../api/types'
+import { Migalhas } from '../components/ui'
 
 const VAZIO: ProprietarioInput = {
   nome: '',
@@ -72,7 +73,10 @@ export function Proprietarios() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold text-slate-800">Proprietários</h1>
+        <div>
+            <Migalhas itens={[{ rotulo: 'Início', para: '/' }, { rotulo: 'Proprietários' }]} />
+            <h1 className="text-2xl font-semibold text-marinho">Proprietários</h1>
+          </div>
         <button
           onClick={novo}
           className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
