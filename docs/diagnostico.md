@@ -1,6 +1,8 @@
 # Diagnóstico e planejamento — Fase 1
 
 > Data: 2026-11-07 · Branch: `dev` (criada a partir de `main` em `8b6f178`) · Autor: auditoria assistida por IA, a validar pelo responsável.
+> **Atualização 2026-11-07 (tarde):** P0-1 corrigido e em produção (hotfix `29365e9`, segredos trocados); `pip-audit` feito; adendo de refatoração integral de UX/UI incorporado (seções F e G); ritmo confirmado de **10 h/semana**.
+>
 > **Esta fase não alterou código, banco nem VPS.** Sondas foram executadas só no banco de teste local (`pedigree_test`).
 
 Legenda de evidência: **Confirmado** (código + execução) · **Provável** (código, sem reproduzir) · **Hipótese** · **Não verificado**.
@@ -13,7 +15,7 @@ O sistema é pequeno (~4,5 mil linhas), bem organizado e funcional: plantel por 
 
 As lacunas que impedem vender com segurança são poucas, mas sérias:
 
-1. **Falha crítica no PDF (P0, confirmada):** o texto digitado pelo usuário entra no certificado como HTML. Com isso, qualquer usuário logado consegue embutir arquivos do servidor no PDF, por exemplo as variáveis de ambiente com a `SECRET_KEY` e a senha do banco. Com a chave, dá para forjar a sessão do admin. Está em produção hoje.
+1. ~~**Falha crítica no PDF (P0, confirmada):**~~ **Resolvida em 2026-11-07** (hotfix na `main`, segredos trocados na VPS). o texto digitado pelo usuário entra no certificado como HTML. Com isso, qualquer usuário logado consegue embutir arquivos do servidor no PDF, por exemplo as variáveis de ambiente com a `SECRET_KEY` e a senha do banco. Com a chave, dá para forjar a sessão do admin. Está em produção hoje.
 2. **Backup só dentro da VPS (P0 para venda):** se a instância for perdida, os dados vão junto. A restauração nunca foi testada.
 3. **Integridade genealógica (P1, confirmadas):** ciclos são aceitos, excluir um pombo apaga em silêncio o vínculo dos filhos, e a cópia entre plantéis pode ligar o pai errado quando a anilha coincide.
 4. **Login sem limite de tentativas (P1, confirmado).**
@@ -46,7 +48,7 @@ Estratégia recomendada: **corrigir o P0 do PDF antes de qualquer outra coisa** 
 
 | # | Área | Situação atual | Evidência | Class. | Grav. | Prior. | Recomendação |
 |---|---|---|---|---|---|---|---|
-| 1 | Segurança / PDF | Texto do usuário vira HTML no certificado; WeasyPrint embute arquivos locais (`<a rel="attachment" href="file:///…">`) e busca URLs | `routers/certificado.py:22` cria o `Environment` sem `autoescape`. Sonda: `{{ x }}` com `<b>` sai sem escape e o PDF contém `/EmbeddedFile` de `/etc/hostname` | **Confirmado** | Crítica | **P0** | `autoescape=True` + `url_fetcher` que recusa tudo que não seja o diretório de templates + teste. Depois, trocar `SECRET_KEY` e senha do banco na VPS por precaução |
+| 1 | Segurança / PDF | ✅ **Resolvido** (`29365e9`): autoescape + `url_fetcher` que recusa tudo, 7 testes, contraprova no código antigo. Antes: texto do usuário virava HTML; WeasyPrint embutia arquivos locais e buscava URLs | `routers/certificado.py:22` cria o `Environment` sem `autoescape`. Sonda: `{{ x }}` com `<b>` sai sem escape e o PDF contém `/EmbeddedFile` de `/etc/hostname` | **Confirmado** | Crítica | **P0** | `autoescape=True` + `url_fetcher` que recusa tudo que não seja o diretório de templates + teste. Depois, trocar `SECRET_KEY` e senha do banco na VPS por precaução |
 | 2 | Backup | Só no disco da VPS, sem alerta de falha, restauração nunca testada | `deploy/backup.sh`, README | **Confirmado** | Crítica (para venda) | **P0** | Cópia externa diária criptografada + alerta + restauração testada em ambiente isolado |
 | 3 | Genealogia | Ciclo indireto aceito (A pai de B, depois B pai de A) | Sonda: `PUT` responde 200; a árvore mostra a raiz como seu próprio ancestral | **Confirmado** | Alta | P1 | Antes de gravar pai/mãe, subir a ascendência do candidato (CTE recursiva) e recusar se encontrar o próprio pombo |
 | 4 | Genealogia | Excluir um pombo com filhos responde 204 e o pai/mãe dos filhos fica vazio sem aviso | Sonda `REMOVER_PAI` = 204. O SQLAlchemy anula `pai_id` porque a relação `filhos_como_pai` não tem cascade | Confirmado (status); Provável (anulação) | Alta | P1 | Bloquear (409) ou exigir confirmação explícita listando os descendentes afetados |
@@ -62,7 +64,7 @@ Estratégia recomendada: **corrigir o P0 do PDF antes de qualquer outra coisa** 
 | 14 | Pedigree UX | A árvore só mostra dados. Para completar a genealogia, é preciso sair da árvore e ir ao formulário | `components/PedigreeTree.tsx` | **Confirmado** | Média | P2 | Objetivo principal da Fase 6 |
 | 15 | Infraestrutura | Backend roda como root no contêiner; imagens sem versão fixa; Caddy sem cabeçalhos de segurança | `backend/Dockerfile`, `deploy/docker-compose.yml`, `frontend/Caddyfile` | **Confirmado** | Baixa a média | P2 | `USER` sem privilégio, versões fixas, CSP/X-Frame-Options/nosniff |
 | 16 | Dependências | `npm audit`: 1 alta em `follow-redirects`, via axios. Só afeta uso em Node, não o bundle do navegador | `npm audit --omit=dev` | Confirmado (alerta); Provável (sem impacto real) | Baixa | P3 | `npm audit fix` numa fase de manutenção |
-| 17 | Dependências Python | Vulnerabilidades conhecidas | — | **Não verificado** | ? | P2 | `pip-audit` na Fase 2b |
+| 17 | Dependências Python | `pip-audit`: WeasyPrint 63.1 (4 alertas: SSRF no fetcher padrão, `url_fetcher` ignorado em `xmp_metadata`/`stylesheets`, CSS em `presentational_hints`, EPS→Ghostscript), Starlette 0.49.3 (5), pydantic-settings 2.12 (1), pytest 8.4 (1) | `pip-audit -r requirements.txt` em venv isolado | **Confirmado** (alertas); **Provável não explorável**: não usamos `xmp_metadata`, `stylesheets`, `presentational_hints`, `secrets_dir`, `HTTPEndpoint` nem formulários; o fetcher recusa tudo, inclusive `data:`, e a imagem não tem Ghostscript | Média | P2 | Atualizar WeasyPrint 70 e FastAPI/Starlette na Fase 8, com teste visual do PDF (salto de versão grande) |
 | 18 | Desempenho | A árvore faz carga preguiçosa por nó: até ~126 nós × 4 consultas com 6 gerações | `pedigree.py` acessa `pombo.pai`/`.mae`/`.resultados`/`.proprietario` | Provável | Baixa | P3 | Só otimizar se medir lentidão (CTE ou `selectinload` em lote) |
 | 19 | CSRF | Cookie `SameSite=Lax` + API JSON → risco baixo | `routers/auth.py` | Provável | Baixa | P3 | Manter. Revisar se algum dia houver formulário fora de JSON |
 | 20 | Logout | O logout apaga o cookie, mas o token continua válido até expirar (30 dias) se tiver sido copiado | `routers/auth.py` | **Confirmado** | Baixa | P3 | Aceitar. A versão da sessão já cobre troca de senha e desativação |
@@ -151,7 +153,15 @@ As atividades triviais foram fundidas. Estimativas em horas de trabalho do respo
 | 5.2 | Restauração testada | restauração em ambiente isolado + registro (data, tempo, contagens) | 5.1 | 2–3 h | Contagens batem; login e PDF funcionam na cópia |
 | 5.3 | Runbook | `docs/operacao.md`: incidentes da seção 23 em formato curto | 5.2 | 2–3 h | Cada incidente tem detectar, conter, recuperar e verificar |
 | **6** | **Pedigree interativo** | vaga "+", buscar/vincular, cadastrar no contexto, navegação no celular | 4.1 | 16–28 h | Cenários 5, 6, 17, 18 e 20; teste manual no celular |
-| **7** | **UX geral** | padrões visuais mínimos, lista/pesquisa, cadastro "salvar e outro", acessibilidade de teclado | 3 | 14–26 h | Fluxos 1–12 da seção 14 percorridos sem bloqueio |
+| **7** | **Refatoração integral de UX/UI (adendo)** | | 3 | **35–55 h** | |
+| 7.1 | Auditoria de UX | inventário de telas e componentes, o que preservar em cada uma, problemas com evidência, impacto, frequência (hipótese) e gravidade; desktop, tablet e celular; estados de carregamento, erro, vazio e sem permissão; teclado | 2 | 5–8 h | Toda tela avaliada; registro de preservação funcional por tela |
+| 7.2 | Linha de base de usabilidade | 7 cenários do adendo (G) medidos antes: passos, cliques, erros, perda de contexto. Avaliação heurística, sem inventar dados de usuários; teste com o cliente se ele topar | 7.1 | 2–4 h | Tabela "antes" registrada |
+| 7.3 | Arquitetura de informação e fluxos | navegação proposta + fluxos antes/depois (cadastro, vários pombos, pesquisa, edição, detalhe, pai/mãe, pedigree, resultados, PDF, compartilhar/copiar, erros) | 7.1 | 4–6 h | Cada fluxo com etapas removidas, mantidas e acrescentadas e o porquê |
+| 7.4 | Especificação visual | tokens (cor, tipografia, espaçamento, raios), botões, campos, cartões, diálogos, alertas, vazios, carregamento, foco; contraste AA | 7.3 | 3–5 h | `docs/ux/sistema-visual.md` aprovado |
+| 7.5 | Protótipos baixa fidelidade | lista, cadastro/edição, detalhe e árvore (inclui Fase 6) | 7.3, 7.4 | 4–6 h | **Aprovação do responsável** |
+| 7.6 | Protótipos detalhados | telas aprovadas em alta fidelidade (página HTML navegável) | 7.5 | 4–6 h | **Aprovação do responsável** |
+| 7.7 | Implementação em grupos | componentes compartilhados → lista → cadastro → detalhe → demais telas; um grupo por vez, testes de regressão a cada grupo | 7.6 | 12–18 h | Critérios por grupo; nenhum recurso removido sem aprovação |
+| 7.8 | Validação final | cenários de 7.2 medidos depois; responsividade; acessibilidade básica | 7.7 | 2–3 h | Tabela "antes × depois"; pendências priorizadas |
 | **8** | **Endurecimento** | contêiner sem root, imagens com versão fixa, cabeçalhos no Caddy, dependências, `docs/ameacas.md` | 2 | 5–8 h | Checklist da seção 19/20 com evidência |
 | **9** | **Preparação comercial** | guia do usuário de 1–2 páginas, política de privacidade simples, canal de suporte, checklist de lançamento, aceitação com o cliente | 4, 5, 8 | 6–10 h | Checklist da seção 27 completo |
 | **10** | **Merge e lançamento** | PR `dev → main`, deploy, verificação pós-deploy | 9 | 2–3 h | Produção na versão nova; backup do dia restaurável |
@@ -164,11 +174,13 @@ Gestão (registro de riscos, decisões, mudanças): esta seção e as seções H
 
 **Premissa a confirmar:** quantas horas por semana o responsável tem. Os cenários abaixo supõem **~10 h/semana**.
 
+Ritmo confirmado: **10 h/semana**. Valores atualizados com o adendo de UX:
+
 | Cenário | Esforço total | + contingência 20% | Semanas (10 h/sem) |
 |---|---|---|---|
-| Otimista | ~70 h | 84 h | ~8–9 |
-| Provável | ~95 h | 115 h | ~11–12 |
-| Conservador | ~130 h | 155 h | ~15–16 |
+| Otimista | ~90 h | 108 h | ~11 |
+| Provável | ~120 h | 145 h | ~14–15 |
+| Conservador | ~160 h | 190 h | ~19 |
 
 **Marcos:**
 - **M0** Correção do PDF em produção (semana 1)
@@ -179,7 +191,7 @@ Gestão (registro de riscos, decisões, mudanças): esta seção e as seções H
 - **M5** UX
 - **M6** Lançamento (merge na `main`)
 
-**Caminho crítico provável:** 1 → 3 → 4.1 → 6 → 9 → 10. O pedigree interativo é o maior pacote e depende das regras de integridade.
+**Caminho crítico provável:** 1 → 3 → 4.1 → 7.1 → 7.3 → 7.5 (aprovação) → 6 + 7.7 → 7.8 → 9 → 10. A UX passou a ser o maior bloco. A Fase 6 é desenhada dentro dos protótipos 7.5/7.6. O pedigree interativo é o maior pacote e depende das regras de integridade.
 
 **Pode correr em paralelo:** a Fase 5 (backup) com 3 e 4, a Fase 8 com 6 e 7. A espera por decisões do responsável (serviço de backup, sexo × papel, aprovação de protótipos) **não está nas horas**. Conte de 1 a 3 dias de calendário por decisão.
 
@@ -243,6 +255,14 @@ Pendente de decisão: o destino do backup externo. Opções de custo zero ou mui
 ---
 
 ## K. Próxima ação recomendada
+
+**Atualização 2026-11-07:** a Fase 0 está concluída. A próxima é a **Fase 2 complementar**:
+- Comandos de leitura na VPS (o responsável executa): instância, disco, portas, firewall, SSH, atualizações, backups, cron, e as consultas de integridade (`pombos_em_ciclo`, pai fêmea/mãe macho, vínculos entre plantéis).
+- Passeio no navegador, que vira o insumo da 7.1.
+
+Depois vêm a Fase 3 (requisitos) e, em paralelo, o backup externo (Fase 5).
+
+### Recomendação original (Fase 0, já executada)
 
 **Fase 0: corrigir o PDF agora, como hotfix na `main`.**
 
