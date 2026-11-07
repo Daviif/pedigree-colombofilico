@@ -9,6 +9,26 @@ Legenda de evidência: **Confirmado** (código + execução) · **Provável** (c
 
 ---
 
+## Fase 2 complementar — resultados da VPS (2026-11-07)
+
+Comandos de leitura rodados pelo responsável. Nada foi alterado.
+
+| Item | Observado | Class. | Avaliação | Prior. |
+|---|---|---|---|---|
+| Instância | x86_64, 2 vCPU, **954 MiB de RAM**, swap 2 GiB (276 MiB em uso), disco 45 GB (22% usado) → **AMD micro (E2.1.Micro)**, CPU com burst | Confirmado | Contêineres em repouso: backend 111 MiB, db 15 MiB, web 21 MiB. Sobram ~376 MiB. Aguenta 10+ usuários no uso normal. O gargalo é o PDF: CPU com burst e pico de memória. Medir na Fase 9 (vários PDFs seguidos de 6 gerações). Mudar para ARM A1, também grátis, quando houver capacidade na região | P2 |
+| Sistema | Ubuntu 24.04.5, atualizações automáticas ligadas, **28 pacotes pendentes**, 24 dias sem reiniciar | Confirmado | Conferir `/var/run/reboot-required`. Aplicar e reiniciar numa janela combinada | P2 |
+| Portas | 22, 80, 443 (esperado) e **111/rpcbind** em `0.0.0.0` | Confirmado | O iptables rejeita tudo que não está liberado (regra 5), então 111 provavelmente não está acessível de fora. Hipótese: precisa de `iptables -L -v` e da security list da Oracle. rpcbind não tem uso aqui: desativar | P2 |
+| iptables | As regras de 80/443 (6 e 7) ficaram **depois** do REJECT (5), então não fazem efeito. O site funciona porque o tráfego do Docker passa pela cadeia FORWARD/DOCKER | Confirmado | Sem risco. O README manda inserir na posição 6: corrigir a instrução para evitar confusão | P3 |
+| SSH | `PasswordAuthentication no`; `PermitRootLogin` no padrão (`prohibit-password`) | Confirmado | Adequado | — |
+| `.env` | `-rw-rw-r--` (legível por qualquer usuário do sistema) | Confirmado | `chmod 600 .env` | P2 |
+| Imagens | `postgres:16-alpine` de 7 semanas; backend e web recém-construídos | Confirmado | Fixar versões na Fase 8 | P2 |
+| Backup | Diário às 3h funcionando, ~12 KB cada, o log mostra sucesso | Confirmado | Continua **só na VPS** (P0-2). Pequeno o bastante para enviar para fora sem custo | P0 |
+| Logs | 0 linhas de erro no backend em 48 h | Confirmado | — | — |
+| Dados | 3 usuários, 290 pombos, 5 resultados, banco de 8 MB | Confirmado | Volume pequeno; paginação não é necessária agora | — |
+| Ciclos | `pombos_em_ciclo = 0` | Confirmado | A trava da Fase 4 pode entrar sem tratar dados antigos | — |
+| Sexo × papel | **2 pombos com pai fêmea e 3 com mãe macho** | Confirmado | Dados reais inconsistentes: um pai ou mãe com o sexo errado, ou um vínculo trocado. A regra da Fase 4 precisa decidir o que fazer com eles (ver J) | P1 |
+| Vínculos entre plantéis | 0 | Confirmado | — | — |
+
 ## A. Resumo executivo
 
 O sistema é pequeno (~4,5 mil linhas), bem organizado e funcional: plantel por usuário, compartilhamento só leitura, cópia com ancestrais, árvore e PDF, 46 testes de backend passando contra Postgres real. A arquitetura (React + FastAPI + Postgres + Caddy numa VPS) é adequada ao tamanho do produto e **não deve ser trocada**.
