@@ -8,19 +8,18 @@
 ### Hoje
 Menu: Início · Pombos · Reprodutores · Proprietários · Compartilhar (· Usuários). Não há busca global; "Início" no menu e "Painel" no título.
 
-### Proposta
+### Decisão (2026-11-07, responsável)
 ```
-┌──────────────────────────────────────────────────────────────────────────────┐
-│ 🐦 Pedigree   [🔍 Buscar anilha…  /]   Pombos  Reprodutores  Mais ▾   Nome ▾ │
-└──────────────────────────────────────────────────────────────────────────────┘
-  Mais ▾  = Proprietários · Compartilhar · Usuários (admin)
-  Nome ▾  = Sair
+┌──────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 🐦 Pedigree   Início  Meus pombos  Reprodutores  Proprietários  Compartilhar  Usuários*  [🔍 Buscar anilha… /] (DF) │
+└──────────────────────────────────────────────────────────────────────────────────────────────┘
+  * Usuários só aparece para o admin.   Barra azul-marinho; item ativo sublinhado em dourado.
 ```
-- **Busca por anilha sempre visível** (atalho `/`). Com um resultado só, abre direto; com vários, mostra uma lista curta; com nenhum, oferece "Cadastrar 12345/26". Resolve UX-07 e UX-13.
-- **Pombos** é o centro. O painel vira a página inicial com: busca grande, "+ Novo pombo" e os últimos cadastrados. Um nome só: "Início".
-- As telas raras (Proprietários, Compartilhar, Usuários) vão para "Mais". O menu de topo fica com o que é frequente.
-- **Celular:** cabeçalho com 🐦, 🔍 e ☰. A lupa abre a busca em tela cheia. O menu ☰ continua igual (ele funciona bem).
-- **Onde estou / como volto:** título da página com "‹ Voltar" contextual (do detalhe para a lista com os filtros que estavam; de um ancestral para o pombo de onde se veio).
+- **Menu superior com todos os itens** (decisão do responsável). Não há menu "Mais" nem menu lateral.
+- **Busca por anilha sempre visível** (atalho `/`). Com um resultado só, abre direto; com nenhum, oferece "Cadastrar". Resolve UX-07 e UX-13.
+- **Página inicial**: faixa de boas-vindas com busca grande e foto de pombo-correio (licença livre, com crédito), números do plantel, últimos cadastrados, "Cadastrar novo pombo" e últimos resultados.
+- **Celular**: barra azul-marinho com 🐦, 🔍 e ☰. O ☰ abre uma gaveta com os mesmos itens, de 48 px de altura cada.
+- **Onde estou / como volto**: caminho no topo ("Início › Meus pombos › 4272402/24").
 
 ## 2. Fluxos — antes × depois
 

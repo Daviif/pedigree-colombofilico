@@ -297,3 +297,19 @@ Depois vêm a Fase 3 (requisitos) e, em paralelo, o backup externo (Fase 5).
 - **Se o responsável preferir manter a regra:** até o fim do projeto, **não criar contas para outras pessoas** (o cliente inclusive).
 
 Em seguida, a **Fase 2 complementar**: comandos de leitura na VPS, que o responsável roda, e `pip-audit`. Com isso o diagnóstico fica completo antes dos requisitos.
+
+
+---
+
+## Registro de mudanças de escopo
+
+| Data | Pedido | Decisão | Custo / efeito no cronograma |
+|---|---|---|---|
+| 2026-11-07 | Adendo de refatoração integral de UX/UI | Aprovado | Fase 7: de 14–26 h para 35–55 h |
+| 2026-11-07 | Identidade visual das referências (azul-marinho e dourado, ♂/♀, abas, breadcrumb) com **menu superior** (Usuários só admin) | **Aprovado** | Dentro da Fase 7 (troca de tokens e layout) |
+| 2026-11-07 | Novo visual do certificado PDF (moldura dourada) | **Não** — o layout do PDF fica como está | −3–5 h |
+| 2026-11-07 | Nome do pombo | **Adiado** (só se o cliente pedir) | ~2 h quando entrar |
+| 2026-11-07 | Foto do pombo | **Depois do lançamento** | 10–16 h (envio, armazenamento, backup, segurança); o layout novo não depende de foto |
+| 2026-11-07 | Data de nascimento | **Não** (desnecessária; a anilha já tem o ano) | — |
+| 2026-11-07 | Modo escuro | **Não** (só se o cliente pedir) | +30–40% do trabalho de tela quando entrar |
+| 2026-11-07 | Sino de notificações · plano premium · vários plantéis · paginação | **Não** | — |

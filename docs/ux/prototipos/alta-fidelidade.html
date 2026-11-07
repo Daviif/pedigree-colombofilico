@@ -3,122 +3,175 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pedigree — protótipo detalhado</title>
+<title>Pedigree Colombófilo — protótipo detalhado</title>
 <style>
 :root{
-  --primaria:#2563eb; --primaria-esc:#1d4ed8; --primaria-clara:#eff6ff;
-  --texto:#0f172a; --texto-suave:#475569; --texto-fraco:#64748b;
-  --borda:#cbd5e1; --borda-suave:#e2e8f0; --fundo:#f8fafc; --cartao:#fff;
-  --sucesso:#15803d; --sucesso-f:#f0fdf4; --perigo:#b91c1c; --perigo-f:#fef2f2; --perigo-b:#fecaca;
+  --marinho:#0f1f3d; --marinho-2:#1a3160; --marinho-3:#24407a;
+  --dourado:#e3b04b; --dourado-2:#d29c33; --dourado-claro:#fbf3df; --dourado-texto:#8a5a00;
+  --link:#1d4ed8; --link-claro:#eff6ff;
+  --texto:#0f172a; --texto-suave:#475569; --texto-fraco:#64748b; --menu-texto:#cbd5e1;
+  --borda:#cfd6e2; --borda-suave:#e3e8f0; --fundo:#f4f6fa; --cartao:#fff;
+  --sucesso:#15803d; --sucesso-f:#ecfdf3; --perigo:#b91c1c; --perigo-f:#fef2f2; --perigo-b:#fecaca;
   --aviso:#92400e; --aviso-f:#fffbeb; --aviso-b:#fcd34d;
-  --macho:#0284c7; --femea:#e11d48;
-  --raio:8px; --raio-campo:6px;
-  --sombra:0 1px 2px rgba(15,23,42,.06),0 1px 3px rgba(15,23,42,.08);
-  --sombra-g:0 10px 30px rgba(15,23,42,.18);
+  --macho:#2563eb; --femea:#db2777;
+  --raio:10px; --raio-campo:7px;
+  --sombra:0 1px 2px rgba(15,31,61,.05),0 2px 6px rgba(15,31,61,.06);
+  --sombra-g:0 18px 40px rgba(15,31,61,.22);
 }
 *{box-sizing:border-box}
 html,body{margin:0}
-body{font:14px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--texto);background:#dbe2ea}
+body{font:14px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--texto);background:#d5dbe5}
 button,input,select,textarea{font:inherit;color:inherit}
-:focus-visible{outline:2px solid var(--primaria);outline-offset:2px}
+:focus-visible{outline:2px solid var(--link);outline-offset:2px}
 .num{font-variant-numeric:tabular-nums}
-/* barra do protótipo */
-.proto{position:sticky;top:0;z-index:100;background:#0f172a;color:#cbd5e1;display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 14px;font-size:13px}
+svg{flex-shrink:0}
+.proto{position:sticky;top:0;z-index:100;background:#111827;color:#cbd5e1;display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 14px;font-size:13px}
 .proto b{color:#fff;margin-right:6px}
-.proto button{background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:6px;padding:4px 10px;cursor:pointer}
-.proto button[aria-pressed=true]{background:var(--primaria);border-color:var(--primaria);color:#fff}
-.proto .sep{width:1px;height:20px;background:#334155;margin:0 4px}
+.proto button{background:#1f2937;border:1px solid #374151;color:#e5e7eb;border-radius:6px;padding:4px 10px;cursor:pointer}
+.proto button[aria-pressed=true]{background:var(--dourado);border-color:var(--dourado);color:var(--marinho);font-weight:600}
+.proto .sep{width:1px;height:20px;background:#374151;margin:0 4px}
 .palco{display:flex;justify-content:center;padding:22px 12px 60px}
-.app{width:1280px;max-width:100%;min-height:760px;background:var(--fundo);border-radius:12px;overflow:hidden;box-shadow:var(--sombra-g);position:relative;display:flex;flex-direction:column}
-.app.celular{width:390px;min-height:780px;border:10px solid #0f172a;border-radius:34px}
-/* topo */
-.topo{background:#fff;border-bottom:1px solid var(--borda-suave);display:flex;align-items:center;gap:18px;padding:0 24px;height:60px;position:sticky;top:0;z-index:10}
-.marca{display:flex;align-items:center;gap:8px;font-weight:700;font-size:16px;cursor:pointer;white-space:nowrap}
-.marca svg{color:var(--primaria)}
-.busca{position:relative;flex:0 1 380px}
-.busca input{width:100%;height:38px;border:1px solid var(--borda);border-radius:999px;padding:0 40px 0 38px;background:var(--fundo)}
-.busca input:focus{background:#fff;border-color:var(--primaria);outline:none;box-shadow:0 0 0 3px #bfdbfe}
-.busca>svg{position:absolute;left:13px;top:11px;color:var(--texto-fraco)}
-.busca kbd{position:absolute;right:12px;top:9px;font:11px ui-monospace,monospace;border:1px solid var(--borda);border-radius:4px;padding:1px 6px;color:var(--texto-fraco);background:#fff}
-.resultados-busca{position:absolute;top:44px;left:0;right:0;background:#fff;border:1px solid var(--borda-suave);border-radius:10px;box-shadow:var(--sombra-g);overflow:hidden;display:none}
+.app{width:1320px;max-width:100%;min-height:800px;background:var(--fundo);border-radius:14px;overflow:hidden;box-shadow:var(--sombra-g);position:relative;display:flex;flex-direction:column}
+.app.celular{width:390px;min-height:800px;border:10px solid #0b1220;border-radius:34px}
+.coluna{display:flex;flex-direction:column;min-width:0}
+.topo{background:var(--marinho);display:flex;align-items:center;gap:22px;padding:0 28px;height:64px;position:sticky;top:0;z-index:10}
+.logo{display:flex;align-items:center;gap:10px;cursor:pointer;color:#fff;white-space:nowrap}
+.logo .simbolo{display:grid;place-items:center;color:#fff}
+.logo .simbolo svg{width:40px;height:34px}
+.logo b{display:block;font-size:15px;line-height:1.1}
+.logo small{color:#dbe4f3;font-size:12px;letter-spacing:.02em}
+.menu{display:flex;gap:2px;flex:1}
+.menu a{padding:8px 12px;border-radius:8px;color:var(--menu-texto);text-decoration:none;cursor:pointer;font-weight:550;white-space:nowrap;position:relative}
+.menu a:hover{color:#fff;background:rgba(255,255,255,.07)}
+.menu a.ativo{color:#fff}
+.menu a.ativo::after{content:"";position:absolute;left:12px;right:12px;bottom:-12px;height:3px;border-radius:3px 3px 0 0;background:var(--dourado)}
+.menu a.admin{display:none}
+.app.e-admin .menu a.admin{display:block}
+.menu a .tag{font-size:10px;background:rgba(227,176,75,.2);color:var(--dourado);border-radius:4px;padding:0 5px;margin-left:5px;vertical-align:1px}
+.busca{position:relative;flex:0 1 280px}
+.busca input{width:100%;height:40px;border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:0 40px 0 38px;background:rgba(255,255,255,.08);color:#fff}
+.busca input::placeholder{color:#a9b6cc}
+.busca input:focus{background:#fff;color:var(--texto);border-color:var(--dourado);outline:none;box-shadow:0 0 0 3px rgba(227,176,75,.35)}
+.busca>svg{position:absolute;left:13px;top:12px;color:#a9b6cc}
+.busca kbd{position:absolute;right:10px;top:10px;font:11px ui-monospace,monospace;border:1px solid rgba(255,255,255,.25);border-radius:4px;padding:1px 6px;color:#a9b6cc}
+.resultados-busca{position:absolute;top:46px;left:0;right:0;min-width:300px;background:#fff;border:1px solid var(--borda-suave);border-radius:12px;box-shadow:var(--sombra-g);overflow:hidden;display:none;z-index:20;text-align:left;color:var(--texto)}
 .resultados-busca.aberto{display:block}
-.resultados-busca button{display:flex;justify-content:space-between;width:100%;border:0;background:none;padding:9px 14px;text-align:left;cursor:pointer}
-.resultados-busca button[aria-selected=true],.resultados-busca button:hover{background:var(--primaria-clara)}
-.menu{display:flex;gap:4px}
-.menu a{padding:7px 12px;border-radius:6px;color:var(--texto-suave);font-weight:500;cursor:pointer;text-decoration:none;position:relative}
-.menu a:hover{background:var(--fundo);color:var(--texto)}
-.menu a.ativo{color:var(--primaria);background:var(--primaria-clara)}
-.usuario{margin-left:auto;display:flex;align-items:center;gap:8px;color:var(--texto-suave);cursor:pointer}
-.avatar{width:30px;height:30px;border-radius:50%;background:#dbeafe;color:var(--primaria-esc);display:grid;place-items:center;font-weight:700;font-size:13px}
-.icone-btn{display:none;border:0;background:none;width:44px;height:44px;border-radius:8px;cursor:pointer;color:var(--texto-suave)}
-.celular .topo{padding:0 8px 0 16px;gap:4px}
-.celular .busca,.celular .menu,.celular .usuario{display:none}
+.resultados-busca button{display:flex;justify-content:space-between;gap:10px;width:100%;border:0;background:none;padding:10px 14px;cursor:pointer}
+.resultados-busca button[aria-selected=true],.resultados-busca button:hover{background:var(--link-claro)}
+.usuario{display:flex;align-items:center;gap:8px;color:#fff;cursor:pointer;white-space:nowrap}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--dourado);color:var(--marinho);display:grid;place-items:center;font-weight:700;font-size:13px}
+.icone-btn{display:none;border:0;background:none;width:44px;height:44px;border-radius:8px;cursor:pointer;color:#fff}
+.celular .topo{padding:0 6px 0 14px;height:58px;gap:4px}
+.celular .menu,.celular .topo .busca,.celular .usuario,.celular .logo small{display:none}
 .celular .icone-btn{display:grid;place-items:center}
 .celular .icone-btn.primeiro{margin-left:auto}
-.celular.buscando .busca{display:block;position:absolute;inset:8px 8px auto 8px;z-index:3}
-/* conteúdo */
-main{flex:1;padding:28px 24px 40px;max-width:1180px;width:100%;margin:0 auto}
-.celular main{padding:18px 14px 30px}
-.voltar{display:inline-flex;align-items:center;gap:4px;color:var(--texto-suave);font-size:13px;cursor:pointer;margin-bottom:10px;border:0;background:none;padding:4px 0}
-.voltar:hover{color:var(--primaria)}
+.celular.buscando .topo .busca{display:block;position:absolute;inset:8px 8px auto 8px;z-index:30}
+.celular.buscando .topo .busca input{background:#fff;color:var(--texto)}
+.gaveta{display:none;position:absolute;top:58px;left:0;right:0;background:var(--marinho);z-index:45;padding:6px 10px 14px;box-shadow:var(--sombra-g)}
+.celular.menu-aberto .gaveta{display:block}
+.gaveta a{display:flex;align-items:center;gap:12px;padding:0 12px;height:48px;border-radius:8px;color:var(--menu-texto);cursor:pointer;font-weight:550}
+.gaveta a.ativo{background:var(--dourado);color:var(--marinho)}
+.gaveta a.admin{display:none}.app.e-admin .gaveta a.admin{display:flex}
+.gaveta .pe{border-top:1px solid rgba(255,255,255,.1);margin-top:8px;padding:12px 12px 0;display:flex;align-items:center;gap:10px;color:#fff}
+main{flex:1;padding:24px 28px 44px;width:100%;max-width:1240px;margin:0 auto}
+.celular main{padding:16px 14px 30px}
+.migalhas{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:13px;color:var(--texto-fraco);margin-bottom:14px}
+.migalhas button{border:0;background:none;padding:0;color:var(--texto-suave);cursor:pointer}
+.migalhas button:hover{color:var(--link);text-decoration:underline}
+.migalhas span:last-child{color:var(--texto);font-weight:600}
 .cab-pagina{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:18px}
-h1{font-size:24px;line-height:1.2;margin:0;font-weight:650;letter-spacing:-.01em}
-h2{font-size:17px;margin:0;font-weight:600}
+h1{font-size:26px;line-height:1.2;margin:0;font-weight:700;letter-spacing:-.015em;color:var(--marinho)}
+h2{font-size:17px;margin:0;font-weight:650;color:var(--marinho)}
 .sub{color:var(--texto-suave);font-size:13px}
 .cartao{background:var(--cartao);border:1px solid var(--borda-suave);border-radius:var(--raio);box-shadow:var(--sombra);padding:20px;margin-bottom:20px}
 .celular .cartao{padding:16px}
 .cartao-cab{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
-/* botões */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:38px;padding:0 14px;border-radius:var(--raio);border:1px solid var(--borda);background:#fff;font-weight:550;cursor:pointer;white-space:nowrap;transition:background .12s,border-color .12s}
+.cartao-cab h2{display:flex;align-items:center;gap:8px}
+.cartao-cab h2 svg{color:var(--dourado-texto)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:40px;padding:0 16px;border-radius:9px;border:1px solid var(--borda);background:#fff;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .12s,border-color .12s}
 .btn:hover{background:var(--fundo)}
-.btn.pri{background:var(--primaria);border-color:var(--primaria);color:#fff}
-.btn.pri:hover{background:var(--primaria-esc)}
+.btn.pri{background:var(--dourado);border-color:var(--dourado-2);color:var(--marinho)}
+.btn.pri:hover{background:var(--dourado-2)}
+.btn.escuro{background:var(--marinho);border-color:var(--marinho);color:#fff}
+.btn.escuro:hover{background:var(--marinho-2)}
+.btn.vidro{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.25);color:#fff}
+.btn.vidro:hover{background:rgba(255,255,255,.16)}
 .btn.fantasma{border-color:transparent;background:none;color:var(--texto-suave)}
 .btn.fantasma:hover{background:var(--fundo);color:var(--texto)}
 .btn.perigo{background:var(--perigo);border-color:var(--perigo);color:#fff}
-.btn.peq{height:32px;padding:0 10px;font-size:13px}
-.btn[disabled]{opacity:.55;cursor:not-allowed}
+.btn.peq{height:34px;padding:0 12px;font-size:13px}
 .celular .btn{height:44px}
-/* campos */
-.campo{display:flex;flex-direction:column;gap:5px}
+.campo{display:flex;flex-direction:column;gap:6px}
 .campo label,.campo .rotulo{font-size:13px;font-weight:600;color:#334155}
 .campo .obr{color:var(--perigo)}
-.entrada{height:38px;border:1px solid var(--borda);border-radius:var(--raio-campo);padding:0 11px;background:#fff;width:100%}
-textarea.entrada{height:80px;padding:9px 11px;resize:vertical}
-.entrada:focus{outline:none;border-color:var(--primaria);box-shadow:0 0 0 3px #bfdbfe}
+.entrada{height:42px;border:1px solid var(--borda);border-radius:var(--raio-campo);padding:0 12px;background:#fff;width:100%}
+textarea.entrada{height:84px;padding:10px 12px;resize:vertical}
+.entrada:focus{outline:none;border-color:var(--link);box-shadow:0 0 0 3px #dbeafe}
 .entrada.invalida{border-color:var(--perigo);box-shadow:0 0 0 3px #fee2e2}
 .dica{font-size:12px;color:var(--texto-fraco)}
 .erro-campo{font-size:12.5px;color:var(--perigo);display:flex;gap:5px;align-items:flex-start}
-.celular .entrada{height:44px;font-size:16px}
-.grade-form{display:grid;grid-template-columns:1fr 1fr;gap:16px 18px}
+.celular .entrada{height:46px;font-size:16px}
+.grade-form{display:grid;grid-template-columns:1fr 1fr;gap:18px 20px}
 .celular .grade-form{grid-template-columns:1fr}
 .larga{grid-column:1/-1}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
-.chip{border:1px solid var(--borda);background:#fff;border-radius:999px;padding:2px 10px;font-size:12.5px;cursor:pointer}
-.chip:hover{border-color:var(--primaria);color:var(--primaria)}
-/* selos */
-.selo{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:1px 9px;font-size:12px;font-weight:600;border:1px solid transparent;white-space:nowrap}
-.selo.ativo{background:#f1f5f9;color:#334155}
-.selo.reprodutor{background:var(--primaria-clara);color:var(--primaria-esc);border-color:#bfdbfe}
+.chip{border:1px solid var(--borda);background:#fff;border-radius:999px;padding:3px 11px;font-size:12.5px;cursor:pointer}
+.chip:hover{border-color:var(--dourado-2);background:var(--dourado-claro)}
+.celular .chip{padding:8px 13px}
+.sexo-radio{display:flex;gap:8px}
+.sexo-radio label{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;height:42px;border:1px solid var(--borda);border-radius:var(--raio-campo);cursor:pointer;font-weight:500;position:relative}
+.celular .sexo-radio label{height:46px}
+.sexo-radio input{position:absolute;opacity:0;width:1px;height:1px}
+.sexo-radio label:has(input:checked){border-color:var(--marinho);box-shadow:inset 0 0 0 1px var(--marinho);background:#f8fafd;font-weight:700}
+.sexo-radio label:has(input:focus-visible){outline:2px solid var(--link);outline-offset:2px}
+.selo{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:650;border:1px solid transparent;white-space:nowrap}
+.selo.ativo{background:var(--sucesso-f);color:var(--sucesso);border-color:#bbf7d0}
+.selo.reprodutor{background:var(--dourado-claro);color:var(--dourado-texto);border-color:#f1d79a}
 .selo.vendido{background:var(--aviso-f);color:var(--aviso);border-color:var(--aviso-b)}
 .selo.falecido{background:#f1f5f9;color:var(--texto-fraco);text-decoration:line-through}
 .selo.leitura{background:var(--aviso-f);color:var(--aviso);border-color:var(--aviso-b)}
 .sexo{display:inline-flex;align-items:center;gap:6px}
-.sexo i{width:8px;height:8px;border-radius:50%;display:inline-block}
-.sexo.m i{background:var(--macho)} .sexo.f i{background:var(--femea)} .sexo.d i{background:#94a3b8}
-/* lista */
-.filtros{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr 1.3fr;gap:12px;margin-bottom:0}
+.sexo b{font-size:17px;line-height:1;font-weight:700}
+.sexo.m b{color:var(--macho)} .sexo.f b{color:var(--femea)} .sexo.d b{color:#94a3b8;font-size:14px}
+.boas-vindas{position:relative;background:radial-gradient(120% 140% at 60% 10%,#2b4b8a 0%,var(--marinho) 55%);color:#fff;border-radius:16px;padding:34px 34px 96px;margin-bottom:-64px;min-height:250px}
+.boas-vindas h1{color:#fff;font-size:28px}
+.boas-vindas p{color:#c7d2e6;margin:6px 0 18px}
+.boas-vindas{overflow:hidden}
+.boas-vindas .foto{position:absolute;right:0;top:0;bottom:0;width:46%;background:url("img/pombo-correio.webp") center 18%/cover no-repeat;-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 45%);mask-image:linear-gradient(90deg,transparent 0%,#000 45%);opacity:.95;pointer-events:none}
+.boas-vindas>*:not(.foto){position:relative}
+.creditos{font-size:11.5px;color:var(--texto-fraco);text-align:center;padding:10px 0 18px}
+.creditos a{color:var(--texto-fraco)}
+.celular .boas-vindas{padding:22px 18px 80px}
+.celular .boas-vindas .foto{width:100%;opacity:.28;-webkit-mask-image:none;mask-image:none}
+.boas-vindas .busca{flex:none;max-width:520px}
+.boas-vindas .busca input{background:#fff;height:48px;font-size:15px;border:0}
+.boas-vindas .busca>svg{top:16px}
+.boas-vindas .busca kbd{top:14px}
+.numeros{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:0 18px;position:relative;margin-bottom:22px}
+.celular .numeros{padding:0 10px;gap:8px}
+.numero{background:#fff;border-radius:12px;box-shadow:var(--sombra);border:1px solid var(--borda-suave);padding:16px;text-align:center}
+.numero svg{color:var(--dourado-2)}
+.numero b{display:block;font-size:26px;color:var(--marinho);line-height:1.1;margin-top:4px}
+.celular .numero{padding:10px 6px}.celular .numero b{font-size:20px}.celular .numero .sub{font-size:11.5px}
+.duas{display:grid;grid-template-columns:1.25fr 1fr;gap:20px}
+.celular .duas{grid-template-columns:1fr;gap:0}
+.acao-novo{background:linear-gradient(160deg,var(--marinho) 0%,var(--marinho-3) 100%);color:#fff;border:0;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+.acao-novo .circ{width:52px;height:52px;border-radius:50%;border:2px solid var(--dourado);display:grid;place-items:center;color:var(--dourado);margin-bottom:4px}
+.acao-novo h2{color:#fff}
+.acao-novo p{color:#c7d2e6;margin:0 0 10px;font-size:13px}
+.filtros{display:grid;grid-template-columns:1.2fr 1.2fr 1fr 1fr 1.2fr;gap:12px}
 .celular .filtros{grid-template-columns:1fr 1fr}
 .celular .filtros .so-desk{display:none}
 table{width:100%;border-collapse:collapse}
-th{font-size:12px;font-weight:600;color:var(--texto-fraco);text-align:left;padding:10px 12px;border-bottom:1px solid var(--borda-suave);white-space:nowrap}
+th{font-size:12px;font-weight:650;color:var(--texto-fraco);text-align:left;padding:11px 14px;border-bottom:1px solid var(--borda-suave);white-space:nowrap;background:#f8fafd}
 th button{border:0;background:none;font:inherit;color:inherit;cursor:pointer;padding:0}
-td{padding:11px 12px;border-bottom:1px solid var(--borda-suave)}
+td{padding:12px 14px;border-bottom:1px solid var(--borda-suave)}
 tbody tr{cursor:pointer}
-tbody tr:hover{background:#f8fafc}
-.lnk{color:var(--primaria);font-weight:600;text-decoration:none;cursor:pointer;border:0;background:none;padding:0}
+tbody tr:hover{background:#f8fafd}
+tbody tr:last-child td{border-bottom:0}
+.lnk{color:var(--link);font-weight:650;text-decoration:none;cursor:pointer;border:0;background:none;padding:0}
 .lnk:hover{text-decoration:underline}
-.lnk.neutro{color:var(--texto-suave);font-weight:400}
+.lnk.neutro{color:var(--texto-suave);font-weight:500}
 .desconh{color:var(--texto-fraco);font-style:italic}
 .tabela-cartao{padding:0;overflow:hidden}
 .cartoes-pombo{display:none}
@@ -128,105 +181,152 @@ tbody tr:hover{background:#f8fafc}
 .cartao-pombo:last-child{border-bottom:0}
 .linha{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .entre{justify-content:space-between}
-/* estados */
 .vazio{text-align:center;padding:48px 20px;color:var(--texto-suave)}
 .vazio svg{color:#94a3b8;margin-bottom:8px}
-.esqueleto{height:14px;border-radius:4px;background:linear-gradient(90deg,#e2e8f0 25%,#f1f5f9 50%,#e2e8f0 75%);background-size:200% 100%;animation:brilho 1.2s infinite}
+.esqueleto{height:14px;border-radius:4px;background:linear-gradient(90deg,#e3e8f0 25%,#f1f4f8 50%,#e3e8f0 75%);background-size:200% 100%;animation:brilho 1.2s infinite}
 @keyframes brilho{to{background-position:-200% 0}}
 .aviso{display:flex;gap:10px;align-items:flex-start;border-radius:var(--raio);padding:12px 14px;border:1px solid}
 .aviso.erro{background:var(--perigo-f);border-color:var(--perigo-b);color:var(--perigo)}
 .aviso.alerta{background:var(--aviso-f);border-color:var(--aviso-b);color:var(--aviso)}
-/* detalhe */
-.cab-pombo{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;margin-bottom:22px}
-.anilha-g{font-size:30px;font-weight:700;letter-spacing:-.02em}
-.celular .anilha-g{font-size:26px}
-.meta{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:4px;color:var(--texto-suave)}
+.faixa{background:radial-gradient(130% 160% at 90% 0%,#2b4b8a 0%,var(--marinho) 60%);color:#fff;border-radius:14px;padding:22px 24px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start}
+.faixa .anilha-g{font-size:32px;font-weight:750;letter-spacing:-.02em;line-height:1.1}
+.celular .faixa{padding:18px 16px}.celular .faixa .anilha-g{font-size:26px}
+.faixa .meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px;color:#dbe4f3}
+.faixa .sexo.m b{color:#93c5fd}.faixa .sexo.f b{color:#f9a8d4}
+.faixa .prop{color:#b8c4da;font-size:13px;margin-top:6px}
+.faixa .prop b{color:#fff}
 .acoes{display:flex;gap:8px;flex-wrap:wrap}
 .mais{position:relative}
-.mais-lista{position:absolute;right:0;top:44px;background:#fff;border:1px solid var(--borda-suave);border-radius:var(--raio);box-shadow:var(--sombra-g);min-width:210px;padding:4px;display:none;z-index:5}
+.mais-lista{position:absolute;right:0;top:46px;background:#fff;color:var(--texto);border:1px solid var(--borda-suave);border-radius:var(--raio);box-shadow:var(--sombra-g);min-width:210px;padding:4px;display:none;z-index:5}
+.celular .mais-lista{right:auto;left:0}
 .mais-lista.aberto{display:block}
-.mais-lista button{display:flex;gap:8px;align-items:center;width:100%;text-align:left;border:0;background:none;padding:9px 10px;border-radius:6px;cursor:pointer}
+.mais-lista button{display:flex;gap:8px;align-items:center;width:100%;text-align:left;border:0;background:none;padding:10px;border-radius:6px;cursor:pointer}
 .mais-lista button:hover{background:var(--fundo)}
 .mais-lista .perigo{color:var(--perigo)}
-.genitores{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px}
-/* árvore desktop */
-.arvore{display:grid;gap:0 26px;overflow-x:auto;padding:4px 2px 8px;position:relative}
+.abas-det{display:flex;gap:4px;border-bottom:1px solid var(--borda);margin:18px 0;overflow-x:auto}
+.abas-det button{border:0;background:none;padding:12px 14px;cursor:pointer;color:var(--texto-suave);font-weight:600;border-bottom:3px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.abas-det button[aria-selected=true]{color:var(--marinho);border-color:var(--dourado)}
+.abas-det .cont{font-size:11px;background:#e8edf5;border-radius:999px;padding:1px 7px;margin-left:4px;color:var(--texto-suave)}
+[data-aba-det]{display:none}[data-aba-det].visivel{display:block}
+.arvore{display:grid;gap:0 26px;overflow-x:auto;padding:4px 2px 8px}
 .col{display:flex;flex-direction:column;justify-content:space-around;gap:8px;min-width:0}
-.no{position:relative;border:1px solid var(--borda);border-left:4px solid #94a3b8;border-radius:var(--raio-campo);background:#fff;padding:7px 10px;height:68px;text-align:left;cursor:pointer;width:100%;overflow:hidden}
-.no:hover{border-color:var(--primaria);box-shadow:0 0 0 3px #dbeafe;border-left-color:inherit}
-.no.m{border-left-color:var(--macho)} .no.f{border-left-color:var(--femea)}
-.no .rot{font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--texto-fraco);font-weight:600}
-.no .an{font-weight:700;font-size:13.5px}
+.no{position:relative;border:1px solid var(--borda);border-radius:var(--raio-campo);background:#fff;padding:7px 10px 7px 13px;height:70px;text-align:left;cursor:pointer;width:100%;overflow:hidden;box-shadow:0 1px 2px rgba(15,31,61,.05)}
+.no::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:#94a3b8}
+.no.m::before{background:var(--macho)} .no.f::before{background:var(--femea)}
+.no:hover{border-color:var(--marinho-3);box-shadow:0 0 0 3px #dbe4f3}
+.no .rot{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--texto-fraco);font-weight:650}
+.no .an{font-weight:750;font-size:13.5px;color:var(--marinho);display:flex;align-items:center;gap:6px}
+.no .an .s{font-size:14px}
+.no.m .an .s{color:var(--macho)} .no.f .an .s{color:var(--femea)}
 .no .det{font-size:12px;color:var(--texto-suave);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.no.raiz{height:auto;min-height:96px;border-width:2px;border-left-width:5px;box-shadow:0 0 0 4px var(--primaria-clara)}
-.no.raiz .an{font-size:16px}
-.no.rep{background:var(--aviso-f)}
-.no .marca-rep{position:absolute;right:6px;top:5px;font-size:11px;color:var(--aviso);font-weight:700}
-.vaga{border:1.5px dashed var(--borda);border-radius:var(--raio-campo);background:#f8fafc;height:68px;width:100%;color:var(--primaria);font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
-.vaga:hover{border-color:var(--primaria);background:var(--primaria-clara)}
+.no.raiz{height:auto;min-height:100px;border:2px solid var(--marinho);box-shadow:0 0 0 4px var(--dourado-claro)}
+.no.raiz .an{font-size:17px}
+.no.rep{background:var(--aviso-f);border-color:var(--aviso-b)}
+.no .marca-rep{position:absolute;right:7px;top:6px;font-size:10.5px;color:var(--aviso);font-weight:750}
+.no.rep .rot{padding-right:76px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vaga{border:1.5px dashed #b7c2d4;border-radius:var(--raio-campo);background:#f8fafd;height:70px;width:100%;color:var(--marinho-3);font-weight:650;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.vaga:hover{border-color:var(--dourado-2);background:var(--dourado-claro);color:var(--dourado-texto)}
 .vaga.leitura{color:var(--texto-fraco);font-weight:400;cursor:default;background:#fff}
 .vaga.oculta{visibility:hidden}
-.col.compacta .no,.col.compacta .vaga{height:32px;padding:4px 10px}
+.col.compacta .no,.col.compacta .vaga{height:33px;padding:4px 10px 4px 13px}
 .col.compacta .no .rot,.col.compacta .no .det{display:none}
 .col.compacta .no .an{font-size:12.5px}
-.legenda{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--texto-suave);margin-top:12px}
+.legenda{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--texto-suave);margin-top:14px}
 .legenda span{display:inline-flex;gap:6px;align-items:center}
 .legenda i{width:10px;height:10px;border-radius:2px;display:inline-block}
-/* árvore celular */
 .arv-cel{display:none}
 .celular .arvore{display:none}
 .celular .arv-cel{display:block}
 .trilha{display:flex;flex-wrap:wrap;gap:4px;font-size:13px;margin-bottom:12px;color:var(--texto-fraco)}
-.trilha button{border:0;background:none;color:var(--primaria);cursor:pointer;padding:2px 0;font-weight:500}
-.trilha span:last-child{color:var(--texto);font-weight:600}
-.arv-cel .no{height:auto;min-height:74px;margin-bottom:10px}
-.arv-cel .vaga{margin-bottom:10px;height:60px}
+.trilha button{border:0;background:none;color:var(--link);cursor:pointer;padding:2px 0;font-weight:600}
+.trilha span:last-child{color:var(--texto);font-weight:650}
+.arv-cel .no{height:auto;min-height:76px;margin-bottom:10px}
+.arv-cel .vaga{margin-bottom:10px;height:62px}
 .ligacao{display:flex;align-items:center;gap:8px;color:var(--texto-fraco);font-size:12px;margin:2px 0 10px}
 .ligacao::before,.ligacao::after{content:"";flex:1;border-top:1px dashed var(--borda)}
-/* painel e diálogo */
-.veu{position:absolute;inset:0;background:rgba(15,23,42,.42);z-index:40;display:none}
+.veu{position:absolute;inset:0;background:rgba(11,23,48,.5);z-index:40;display:none}
 .veu.aberto{display:block}
-.painel{position:absolute;top:0;right:0;bottom:0;width:420px;background:#fff;z-index:41;box-shadow:var(--sombra-g);display:none;flex-direction:column}
+.painel{position:absolute;top:0;right:0;bottom:0;width:430px;background:#fff;z-index:41;box-shadow:var(--sombra-g);display:none;flex-direction:column}
 .painel.aberto{display:flex}
-.celular .painel{top:auto;left:0;width:auto;height:86%;border-radius:18px 18px 0 0}
-.painel-cab{padding:18px 20px 0;display:flex;justify-content:space-between;gap:10px}
-.painel-corpo{padding:14px 20px 20px;overflow:auto;flex:1}
-.abas{display:flex;border-bottom:1px solid var(--borda-suave);margin:14px 20px 0;gap:4px}
-.abas button{border:0;background:none;padding:9px 12px;cursor:pointer;color:var(--texto-suave);font-weight:550;border-bottom:2px solid transparent;margin-bottom:-1px}
-.abas button[aria-selected=true]{color:var(--primaria);border-color:var(--primaria)}
-.opcao{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--borda-suave);border-radius:var(--raio);margin-bottom:8px}
-.opcao:hover{border-color:#bfdbfe;background:#f8fbff}
-.dialogo{position:absolute;left:50%;top:22%;transform:translateX(-50%);width:min(460px,calc(100% - 28px));background:#fff;border-radius:12px;box-shadow:var(--sombra-g);z-index:42;padding:22px;display:none}
+.celular .painel{top:auto;left:0;width:auto;height:86%;border-radius:18px 18px 0 0;overflow:hidden}
+.painel-topo{background:var(--marinho);color:#fff;padding:18px 20px;display:flex;justify-content:space-between;gap:10px}
+.painel-topo h2{color:#fff}
+.painel-topo .sub{color:#b8c4da}
+.painel-topo .btn{color:#fff}
+.painel-corpo{padding:16px 20px 20px;overflow:auto;flex:1}
+.abas{display:flex;border-bottom:1px solid var(--borda-suave);margin:0 20px;gap:4px}
+.abas button{border:0;background:none;padding:12px 12px;cursor:pointer;color:var(--texto-suave);font-weight:600;border-bottom:3px solid transparent;margin-bottom:-1px}
+.abas button[aria-selected=true]{color:var(--marinho);border-color:var(--dourado)}
+.opcao{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 12px;border:1px solid var(--borda-suave);border-radius:var(--raio);margin-bottom:8px}
+.opcao:hover{border-color:#c9d6ea;background:#f8fafd}
+.dialogo{position:absolute;left:50%;top:12%;transform:translateX(-50%);width:min(480px,calc(100% - 28px));background:#fff;border-radius:14px;box-shadow:var(--sombra-g);z-index:42;padding:24px;display:none;max-height:82%;overflow:auto}
+.dialogo.largo{width:min(640px,calc(100% - 28px))}
 .dialogo.aberto{display:block}
 .dialogo p{color:var(--texto-suave);margin:8px 0 0}
-.dialogo .botoes{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}
-.toast{position:absolute;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:#0f172a;color:#fff;border-radius:999px;padding:10px 18px;font-weight:500;opacity:0;transition:.2s;z-index:60;display:flex;gap:8px;align-items:center;pointer-events:none;white-space:nowrap}
+.dialogo .botoes{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;flex-wrap:wrap}
+.toast{position:absolute;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:var(--marinho);color:#fff;border-radius:999px;padding:11px 18px;font-weight:550;opacity:0;transition:.2s;z-index:60;display:flex;gap:8px;align-items:center;pointer-events:none;white-space:nowrap;box-shadow:var(--sombra-g)}
 .toast.ver{opacity:1;transform:translateX(-50%)}
-.toast svg{color:#4ade80}
-/* telas */
+.toast svg{color:var(--dourado)}
 [data-tela]{display:none}[data-tela].visivel{display:block}
-.inicio-busca{background:linear-gradient(180deg,#eff6ff,#fff);border:1px solid #dbeafe;text-align:center;padding:36px 24px}
-.inicio-busca .busca{margin:16px auto 14px;max-width:520px}
-.inicio-busca .busca input{height:48px;font-size:16px;background:#fff}
-.inicio-busca .busca>svg{top:16px}
-.inicio-busca .busca kbd{top:14px}
-.resumo{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
-.celular .resumo{grid-template-columns:1fr 1fr 1fr;gap:8px}
-.resumo .cartao{margin:0;padding:14px 16px}
-.resumo b{font-size:24px;display:block}
-.celular .resumo b{font-size:20px}
-.celular .resumo .cartao{padding:10px}
-.resultado-linha td{padding:8px 12px}
-.so-cel{display:none}.celular .so-cel{display:initial}.celular .so-desk{display:none!important}
+.ger-opcoes{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px}
+.celular .ger-opcoes{grid-template-columns:repeat(3,1fr)}
+.ger-opcoes button{border:1px solid var(--borda);background:#fff;border-radius:10px;padding:10px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:64px}
+.ger-opcoes button b{font-size:20px;color:var(--marinho)}
+.ger-opcoes button span{font-size:11.5px;color:var(--texto-suave);text-align:center}
+.ger-opcoes button[aria-checked=true]{border-color:var(--marinho);box-shadow:inset 0 0 0 1px var(--marinho);background:var(--dourado-claro)}
+.duas-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.celular .duas-col{grid-template-columns:1fr;gap:0}
+.cab-col{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.cab-col .sexo-g{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:19px;font-weight:700}
+.cab-col .sexo-g.m{background:#dbeafe;color:var(--macho)} .cab-col .sexo-g.f{background:#fce7f3;color:var(--femea)}
+.item-rep{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--borda-suave);cursor:pointer}
+.item-rep:last-child{border-bottom:0}
+.item-rep .info{font-size:12.5px;color:var(--texto-suave)}
+.contagem-chip{font-size:12px;color:var(--texto-suave);background:#eef2f7;border-radius:999px;padding:2px 9px;white-space:nowrap}
+.pessoa{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--borda-suave)}
+.pessoa:last-child{border-bottom:0}
+.pessoa .ini{width:38px;height:38px;border-radius:50%;background:#e8edf5;color:var(--marinho);display:grid;place-items:center;font-weight:700;font-size:13px;flex-shrink:0}
+.usuario-cartao{border:1px solid var(--borda-suave);border-radius:var(--raio);padding:14px 16px;margin-bottom:12px;background:#fff}
+.usuario-cartao.inativo{opacity:.6}
+.acoes-peq{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.online{display:inline-flex;align-items:center;gap:5px;color:var(--sucesso);font-weight:600;font-size:12.5px}
+.online i{width:8px;height:8px;border-radius:50%;background:#22c55e}
+.form-linha{display:grid;grid-template-columns:90px 1fr 90px 1fr auto;gap:10px;align-items:end;margin-bottom:14px}
+.celular .form-linha{grid-template-columns:1fr 1fr}
+.celular .migalhas button,.celular .trilha button{min-height:44px;padding:0 6px}
+.celular .migalhas{margin:-8px 0 6px}
+.celular button.lnk{min-height:40px}
+.celular .so-desk{display:none!important}
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-pombo" viewBox="0 0 400 340"><g transform="translate(0,340) scale(0.1,-0.1)" fill="currentColor"><path d="M3664 2648 c-26 -24 -84 -88 -130 -144 -90 -110 -175 -183 -298 -259 -164 -100 -246 -187 -337 -354 -100 -185 -122 -208 -184 -197 -27 5 -62 33 -148 114 -115 111 -262 225 -332 259 -22 11 -122 55 -221 97 -100 42 -207 92 -238 111 -80 48 -175 134 -242 218 -92 117 -107 125 -149 82 -32 -32 -34 -111 -4 -193 14 -37 23 -95 28 -167 7 -109 7 -111 59 -201 29 -52 56 -114 63 -145 22 -112 30 -130 85 -192 37 -40 73 -97 105 -164 43 -90 57 -109 107 -148 75 -59 170 -108 255 -130 117 -30 147 -78 91 -145 -36 -42 -157 -123 -252 -168 -75 -36 -80 -37 -202 -39 -69 -1 -133 -2 -142 -2 -28 -1 -58 -38 -58 -69 0 -42 49 -112 111 -158 194 -145 245 -174 352 -200 87 -22 142 -13 209 34 119 82 252 162 270 162 24 0 23 -26 -3 -85 -36 -81 -12 -152 63 -191 46 -24 144 -18 238 16 47 16 105 30 130 30 141 1 201 88 97 142 -34 18 -60 22 -135 22 -108 1 -128 14 -118 75 11 68 51 93 237 146 237 68 408 197 499 374 38 75 51 132 59 262 6 82 14 137 25 157 10 19 46 51 88 79 87 58 110 90 133 185 9 40 38 117 62 172 35 74 48 116 53 170 7 73 22 110 71 183 16 23 29 48 29 56 0 20 -61 72 -120 102 -38 19 -56 37 -83 82 -43 75 -62 78 -123 21z"/></g></symbol><!-- pomba: vetorizada (potrace) da referência do responsável -->
+  <symbol id="i-busca" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></g></symbol>
+  <symbol id="i-mais" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></symbol>
+  <symbol id="i-casa" viewBox="0 0 24 24"><path d="M3 11 12 4l9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></symbol>
+  <symbol id="i-lista" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+  <symbol id="i-coroa" viewBox="0 0 24 24"><path d="m3 7 4.5 4L12 4l4.5 7L21 7l-2 12H5z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></symbol>
+  <symbol id="i-pessoas" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.7 3.4-5.5 6.5-5.5s5.7 1.8 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 14.8c1.6.8 2.6 2.5 3 5.2"/></g></symbol>
+  <symbol id="i-partilha" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="m8.3 10.8 7.4-4.5M8.3 13.2l7.4 4.5"/></g></symbol>
+  <symbol id="i-escudo" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.5 3.4 8 8 9 4.6-1 8-4.5 8-9V6z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></symbol>
+  <symbol id="i-trofeu" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H4.5v1.5A3.5 3.5 0 0 0 8 11M16 6h3.5v1.5A3.5 3.5 0 0 1 16 11M12 13v4M8.5 20h7M10 17h4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+  <symbol id="i-pdf" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M9 13h6M9 17h6"/></g></symbol>
+  <symbol id="i-arvore" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9"><rect x="2.5" y="9.5" width="6" height="5" rx="1"/><rect x="15.5" y="3.5" width="6" height="5" rx="1"/><rect x="15.5" y="15.5" width="6" height="5" rx="1"/><path d="M8.5 12H12m0-6v12m0-12h3.5M12 18h3.5"/></g></symbol>
+  <symbol id="i-sair" viewBox="0 0 24 24"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-ok" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></symbol>
+</svg>
+
 <div class="proto" role="toolbar" aria-label="Controles do protótipo">
-  <b>Protótipo detalhado</b>
+  <b>Protótipo detalhado · menu superior</b>
   <button data-tela-btn="inicio">Início</button>
-  <button data-tela-btn="lista">Lista</button>
+  <button data-tela-btn="lista">Meus pombos</button>
   <button data-tela-btn="form">Cadastro</button>
   <button data-tela-btn="detalhe">Detalhe + árvore</button>
+  <button data-tela-btn="rep">Reprodutores</button>
+  <button data-tela-btn="prop">Proprietários</button>
+  <button data-tela-btn="comp">Compartilhar</button>
+  <button data-tela-btn="usu">Usuários</button>
   <span class="sep"></span>
   <button id="p-desk" aria-pressed="true">Desktop</button>
   <button id="p-cel" aria-pressed="false">Celular</button>
@@ -238,147 +338,234 @@ tbody tr:hover{background:#f8fafc}
   <button data-estado="vazio">vazio</button>
   <span class="sep"></span>
   <button id="p-leitura" aria-pressed="false">Só leitura</button>
+  <button id="p-admin" aria-pressed="true">Admin</button>
 </div>
 
-<div class="palco"><div class="app" id="app">
-  <header class="topo">
-    <div class="marca" data-ir="inicio" tabindex="0">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 7.5c-1.4 0-2.6.7-3.4 1.7-.9-2.5-3.3-4.2-6.1-4.2C7.8 5 5 7.8 5 11.4V13l-3 4h5.2c.9 1.8 2.8 3 4.9 3 3 0 5.5-2.4 5.5-5.4v-1.1L21 12V7.5z"/></svg>
-      Pedigree
-    </div>
-    <div class="busca" id="busca-topo">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      <input type="search" placeholder="Buscar anilha…" aria-label="Buscar pombo pela anilha" autocomplete="off">
-      <kbd>/</kbd>
-      <div class="resultados-busca" role="listbox" aria-label="Resultados da busca"></div>
-    </div>
-    <nav class="menu" aria-label="Principal">
-      <a data-ir="lista" data-menu="lista">Pombos</a>
-      <a data-menu="reprodutores" data-fora>Reprodutores</a>
-      <a data-fora>Mais ▾</a>
+<div class="palco"><div class="app e-admin" id="app">
+  
+
+      <header class="topo">
+      <div class="logo" data-ir="inicio" tabindex="0">
+        <span class="simbolo"><svg width="40" height="34"><use href="#i-pombo"/></svg></span>
+        <span><b>Pedigree</b><small>Colombófilo</small></span>
+      </div>
+      <nav class="menu" aria-label="Principal">
+        <a data-ir="inicio" data-menu="inicio">Início</a>
+        <a data-ir="lista" data-menu="lista">Meus pombos</a>
+        <a data-ir="rep" data-menu="rep">Reprodutores</a>
+        <a data-ir="prop" data-menu="prop">Proprietários</a>
+        <a data-ir="comp" data-menu="comp">Compartilhar</a>
+        <a data-ir="usu" data-menu="usu" class="admin">Usuários<span class="tag">admin</span></a>
+      </nav>
+      <div class="busca" id="busca-topo">
+        <svg width="16" height="16"><use href="#i-busca"/></svg>
+        <input type="search" placeholder="Buscar anilha…" aria-label="Buscar pombo pela anilha" autocomplete="off">
+        <kbd>/</kbd>
+        <div class="resultados-busca" role="listbox" aria-label="Resultados da busca"></div>
+      </div>
+      <div class="usuario" data-fora title="Davi Fonseca — Sair"><span class="avatar">DF</span></div>
+      <button class="icone-btn primeiro" id="abrir-busca-cel" aria-label="Buscar"><svg width="21" height="21"><use href="#i-busca"/></svg></button>
+      <button class="icone-btn" id="abrir-menu-cel" aria-label="Abrir menu" aria-expanded="false"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
+    </header>
+    <nav class="gaveta" aria-label="Menu">
+      <a data-ir="inicio" data-menu="inicio">Início</a>
+      <a data-ir="lista" data-menu="lista">Meus pombos</a>
+      <a data-ir="rep" data-menu="rep">Reprodutores</a>
+      <a data-ir="prop" data-menu="prop">Proprietários</a>
+      <a data-ir="comp" data-menu="comp">Compartilhar</a>
+      <a data-ir="usu" data-menu="usu" class="admin">Usuários (admin)</a>
+      <div class="pe"><span class="avatar">DF</span><div><b>Davi Fonseca</b><div><button class="btn fantasma peq" style="color:var(--menu-texto);padding:0" data-fora>Sair</button></div></div></div>
     </nav>
-    <div class="usuario" data-fora><span>Davi Fonseca</span><span class="avatar">DF</span></div>
-    <button class="icone-btn primeiro" id="abrir-busca-cel" aria-label="Buscar">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
-    <button class="icone-btn" aria-label="Abrir menu" data-fora>
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-  </header>
 
-  <main>
-    <!-- INÍCIO -->
-    <section data-tela="inicio">
-      <div class="cartao inicio-busca">
-        <h1>Bom dia, Davi</h1>
-        <div class="sub">Encontre um pombo pela anilha ou cadastre um novo.</div>
-        <div class="busca" id="busca-inicio">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-          <input type="search" placeholder="Digite a anilha (ex.: 4272402)" aria-label="Buscar pombo pela anilha" autocomplete="off">
-          <kbd>Enter</kbd>
-          <div class="resultados-busca" role="listbox"></div>
+    <main>
+      <section data-tela="inicio">
+        <div class="boas-vindas">
+          <div class="foto" role="img" aria-label="Pombo-correio com anilhas"></div>
+          <h1>Bom dia, Davi!</h1>
+          <p>Seu plantel sempre à mão. Busque pela anilha ou cadastre um novo pombo.</p>
+          <div class="busca" id="busca-inicio">
+            <svg width="18" height="18"><use href="#i-busca"/></svg>
+            <input type="search" placeholder="Digite a anilha (ex.: 4272402)" aria-label="Buscar pombo pela anilha" autocomplete="off">
+            <kbd>Enter</kbd>
+            <div class="resultados-busca" role="listbox"></div>
+          </div>
         </div>
-        <button class="btn pri" data-ir="form" data-novo>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> Novo pombo</button>
-      </div>
-      <div class="resumo">
-        <div class="cartao"><span class="sub">Pombos</span><b class="num" id="r-total">0</b></div>
-        <div class="cartao"><span class="sub">Reprodutores</span><b class="num" id="r-rep">0</b></div>
-        <div class="cartao"><span class="sub">Sem pai/mãe</span><b class="num" id="r-inc">0</b></div>
-      </div>
-      <div class="cartao tabela-cartao">
-        <div class="cartao-cab" style="padding:16px 20px 0"><h2>Últimos cadastrados</h2><button class="btn fantasma peq" data-ir="lista">Ver todos →</button></div>
-        <table><tbody id="ultimos"></tbody></table>
-      </div>
-    </section>
-
-    <!-- LISTA -->
-    <section data-tela="lista">
-      <div class="cab-pagina">
-        <div><h1>Pombos</h1><div class="sub" id="contagem"></div></div>
-        <button class="btn pri" data-ir="form" data-novo><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> Novo pombo</button>
-      </div>
-      <div class="cartao" style="padding:16px">
-        <div class="filtros">
-          <div class="campo so-desk"><label for="f-plantel">Plantel</label><select class="entrada" id="f-plantel"><option>Meu plantel</option><option>Plantel de João Lima (só leitura)</option></select></div>
-          <div class="campo"><label for="f-anilha">Anilha</label><input class="entrada" id="f-anilha" placeholder="contém…"></div>
-          <div class="campo"><label for="f-sexo">Sexo</label><select class="entrada" id="f-sexo"><option value="">Todos</option><option value="M">Macho</option><option value="F">Fêmea</option><option value="D">Desconhecido</option></select></div>
-          <div class="campo so-desk"><label for="f-sit">Situação</label><select class="entrada" id="f-sit"><option value="">Todas</option><option>Ativo</option><option>Reprodutor</option><option>Vendido</option><option>Falecido</option></select></div>
-          <div class="campo so-desk"><label for="f-prop">Proprietário</label><select class="entrada" id="f-prop"><option value="">Todos</option></select></div>
+        <div class="numeros">
+          <div class="numero"><svg width="24" height="24"><use href="#i-pombo"/></svg><b class="num" id="r-total">0</b><span class="sub">Pombos</span></div>
+          <div class="numero"><svg width="22" height="22"><use href="#i-coroa"/></svg><b class="num" id="r-rep">0</b><span class="sub">Reprodutores</span></div>
+          <div class="numero"><svg width="22" height="22"><use href="#i-arvore"/></svg><b class="num" id="r-inc">0</b><span class="sub">Pedigree incompleto</span></div>
         </div>
-      </div>
-      <div id="lista-corpo"></div>
-    </section>
-
-    <!-- FORMULÁRIO -->
-    <section data-tela="form">
-      <button class="voltar" data-voltar>‹ Voltar</button>
-      <div class="cab-pagina"><div><h1 id="form-titulo">Novo pombo</h1><div class="sub">Campos com <span style="color:var(--perigo)">*</span> são obrigatórios.</div></div></div>
-      <form class="cartao" id="form" novalidate style="max-width:780px">
-        <div class="grade-form">
-          <div class="campo"><label for="c-anilha">Anilha <span class="obr">*</span></label>
-            <input class="entrada num" id="c-anilha" inputmode="numeric" placeholder="ex.: 4272402/24" aria-describedby="e-anilha">
-            <div id="e-anilha" aria-live="polite"></div></div>
-          <div class="campo"><label for="c-sexo">Sexo</label>
-            <select class="entrada" id="c-sexo"><option value="D">Desconhecido</option><option value="M">Macho</option><option value="F">Fêmea</option></select></div>
-          <div class="campo"><label for="c-cor">Cor</label><input class="entrada" id="c-cor" list="cores" placeholder="ex.: Escama">
-            <datalist id="cores"></datalist>
-            <div class="chips" id="chips-cor" aria-label="Cores usadas no seu plantel"></div></div>
-          <div class="campo"><label for="c-sit">Situação</label>
-            <select class="entrada" id="c-sit"><option>Ativo</option><option>Reprodutor</option><option>Vendido</option><option>Falecido</option></select></div>
-          <div class="campo"><label for="c-pai">Pai</label><select class="entrada" id="c-pai"></select><span class="dica">Só machos ou de sexo desconhecido</span></div>
-          <div class="campo"><label for="c-mae">Mãe</label><select class="entrada" id="c-mae"></select><span class="dica">Só fêmeas ou de sexo desconhecido</span></div>
-          <div class="campo"><label for="c-prop">Proprietário</label><select class="entrada" id="c-prop"></select></div>
-          <div class="campo"><label for="c-origem">Origem</label><input class="entrada" id="c-origem" placeholder="se pai/mãe não estão no sistema"></div>
-          <div class="campo larga"><label for="c-obs">Observações</label><textarea class="entrada" id="c-obs"></textarea></div>
+        <div class="duas">
+          <div class="cartao tabela-cartao">
+            <div class="cartao-cab" style="padding:16px 18px 2px"><h2><svg width="20" height="20"><use href="#i-lista"/></svg>Últimos cadastrados</h2><button class="btn fantasma peq" data-ir="lista">Ver todos →</button></div>
+            <table><tbody id="ultimos"></tbody></table>
+          </div>
+          <div>
+            <div class="cartao acao-novo">
+              <span class="circ"><svg width="24" height="24"><use href="#i-mais"/></svg></span>
+              <h2>Cadastrar novo pombo</h2><p>Pai e mãe podem ser ligados agora ou depois, direto na árvore.</p>
+              <button class="btn pri" data-novo>Cadastrar agora →</button>
+            </div>
+            <div class="cartao">
+              <div class="cartao-cab" style="margin-bottom:6px"><h2><svg width="20" height="20"><use href="#i-trofeu"/></svg>Últimos resultados</h2></div>
+              <div id="ult-res"></div>
+            </div>
+          </div>
         </div>
-        <div class="linha" style="margin-top:20px">
-          <button class="btn pri" type="submit" data-acao="salvar">Salvar</button>
-          <button class="btn" type="submit" data-acao="outro" id="btn-outro">Salvar e cadastrar outro</button>
-          <button class="btn fantasma" type="button" data-voltar>Cancelar</button>
+      </section>
+
+      <section data-tela="lista">
+        <nav class="migalhas" aria-label="Caminho"><button data-ir="inicio">Início</button>›<span>Meus pombos</span></nav>
+        <div class="cab-pagina">
+          <div><h1>Meus pombos</h1><div class="sub" id="contagem"></div></div>
+          <button class="btn pri" data-novo><svg width="16" height="16"><use href="#i-mais"/></svg> Novo pombo</button>
         </div>
-      </form>
-    </section>
-
-    <!-- DETALHE -->
-    <section data-tela="detalhe">
-      <button class="voltar" data-ir="lista">‹ Pombos</button>
-      <div id="aviso-leitura"></div>
-      <div class="cab-pombo">
-        <div>
-          <div class="anilha-g num" id="d-anilha"></div>
-          <div class="meta" id="d-meta"></div>
-          <div class="sub" id="d-prop" style="margin-top:6px"></div>
+        <div class="cartao" style="padding:16px">
+          <div class="filtros">
+            <div class="campo so-desk"><label for="f-plantel">Plantel</label><select class="entrada" id="f-plantel"><option>Meu plantel</option><option>Plantel de João Lima (só leitura)</option></select></div>
+            <div class="campo"><label for="f-anilha">Anilha</label><input class="entrada" id="f-anilha" placeholder="contém…"></div>
+            <div class="campo"><label for="f-sexo">Sexo</label><select class="entrada" id="f-sexo"><option value="">Todos</option><option value="M">♂ Macho</option><option value="F">♀ Fêmea</option><option value="D">Desconhecido</option></select></div>
+            <div class="campo so-desk"><label for="f-sit">Situação</label><select class="entrada" id="f-sit"><option value="">Todas</option><option>Ativo</option><option>Reprodutor</option><option>Vendido</option><option>Falecido</option></select></div>
+            <div class="campo so-desk"><label for="f-prop">Proprietário</label><select class="entrada" id="f-prop"><option value="">Todos</option></select></div>
+          </div>
         </div>
-        <div class="acoes" id="d-acoes"></div>
-      </div>
+        <div id="lista-corpo"></div>
+      </section>
 
-      <div class="cartao">
-        <div class="cartao-cab">
-          <h2>Árvore genealógica</h2>
-          <div class="linha so-desk"><label for="d-ger" class="sub">Gerações</label>
-            <select class="entrada" id="d-ger" style="width:72px;height:32px"><option>3</option><option selected>4</option><option>5</option></select></div>
+      <section data-tela="form">
+        <nav class="migalhas" aria-label="Caminho"><button data-ir="inicio">Início</button>›<button data-ir="lista">Meus pombos</button>›<span id="form-migalha">Novo pombo</span></nav>
+        <div class="cab-pagina"><div><h1 id="form-titulo">Novo pombo</h1><div class="sub">Campos com <span style="color:var(--perigo)">*</span> são obrigatórios.</div></div></div>
+        <form class="cartao" id="form" novalidate style="max-width:820px">
+          <div class="grade-form">
+            <div class="campo"><label for="c-anilha">Anilha <span class="obr">*</span></label>
+              <input class="entrada num" id="c-anilha" inputmode="numeric" placeholder="ex.: 4272402/24" aria-describedby="e-anilha">
+              <div id="e-anilha" aria-live="polite"></div></div>
+            <div class="campo"><span class="rotulo" id="r-sexo">Sexo</span>
+              <div class="sexo-radio" role="radiogroup" aria-labelledby="r-sexo">
+                <label><input type="radio" name="sexo" value="M"><b style="color:var(--macho)">♂</b> Macho</label>
+                <label><input type="radio" name="sexo" value="F"><b style="color:var(--femea)">♀</b> Fêmea</label>
+                <label><input type="radio" name="sexo" value="D" checked>Não sei</label>
+              </div></div>
+            <div class="campo"><label for="c-cor">Cor</label><input class="entrada" id="c-cor" list="cores" placeholder="ex.: Escama">
+              <datalist id="cores"></datalist>
+              <div class="chips" id="chips-cor" aria-label="Cores usadas no seu plantel"></div></div>
+            <div class="campo"><label for="c-sit">Situação</label>
+              <select class="entrada" id="c-sit"><option>Ativo</option><option>Reprodutor</option><option>Vendido</option><option>Falecido</option></select></div>
+            <div class="campo"><label for="c-pai">Pai <b style="color:var(--macho)">♂</b></label><select class="entrada" id="c-pai"></select><span class="dica">Só machos ou de sexo desconhecido</span></div>
+            <div class="campo"><label for="c-mae">Mãe <b style="color:var(--femea)">♀</b></label><select class="entrada" id="c-mae"></select><span class="dica">Só fêmeas ou de sexo desconhecido</span></div>
+            <div class="campo"><label for="c-prop">Proprietário</label><select class="entrada" id="c-prop"></select></div>
+            <div class="campo"><label for="c-origem">Origem</label><input class="entrada" id="c-origem" placeholder="se pai/mãe não estão no sistema"></div>
+            <div class="campo larga"><label for="c-obs">Observações</label><textarea class="entrada" id="c-obs"></textarea></div>
+          </div>
+          <div class="linha" style="margin-top:22px">
+            <button class="btn pri" type="submit" data-acao="salvar">Salvar</button>
+            <button class="btn" type="submit" data-acao="outro" id="btn-outro">Salvar e cadastrar outro</button>
+            <button class="btn fantasma" type="button" data-voltar>Cancelar</button>
+          </div>
+        </form>
+      </section>
+
+      <section data-tela="detalhe">
+        <nav class="migalhas" aria-label="Caminho"><button data-ir="inicio">Início</button>›<button data-ir="lista">Meus pombos</button>›<span id="d-migalha"></span></nav>
+        <div id="aviso-leitura"></div>
+        <div class="faixa">
+          <div>
+            <div class="anilha-g num" id="d-anilha"></div>
+            <div class="meta" id="d-meta"></div>
+            <div class="prop" id="d-prop"></div>
+          </div>
+          <div class="acoes" id="d-acoes"></div>
         </div>
-        <div class="arvore" id="arvore"></div>
-        <div class="arv-cel" id="arv-cel"></div>
-        <div class="legenda so-desk">
-          <span><i style="background:var(--macho)"></i>Macho</span><span><i style="background:var(--femea)"></i>Fêmea</span>
-          <span><i style="background:var(--aviso-b)"></i>Ancestral repetido (consanguinidade)</span>
-          <span><i style="border:1.5px dashed var(--borda);background:#f8fafc"></i>Desconhecido — clique para adicionar</span>
+        <div class="abas-det" role="tablist" aria-label="Seções do pombo">
+          <button role="tab" aria-selected="true" data-aba-btn="pedigree">Pedigree</button>
+          <button role="tab" aria-selected="false" data-aba-btn="resultados">Resultados <span class="cont" id="cont-res">0</span></button>
+          <button role="tab" aria-selected="false" data-aba-btn="obs">Observações</button>
         </div>
-      </div>
+        <div data-aba-det="pedigree" class="visivel">
+          <div class="cartao">
+            <div class="cartao-cab">
+              <h2><svg width="20" height="20"><use href="#i-arvore"/></svg>Árvore genealógica</h2>
+              <div class="linha so-desk"><label for="d-ger" class="sub">Gerações</label>
+                <select class="entrada" id="d-ger" style="width:76px;height:34px"><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option></select></div>
+            </div>
+            <div class="arvore" id="arvore"></div>
+            <div class="arv-cel" id="arv-cel"></div>
+            <div class="legenda so-desk">
+              <span><b style="color:var(--macho)">♂</b> Macho</span><span><b style="color:var(--femea)">♀</b> Fêmea</span>
+              <span><i style="background:var(--aviso-b)"></i>Ancestral repetido (consanguinidade)</span>
+              <span><i style="border:1.5px dashed #b7c2d4;background:#f8fafd"></i>Desconhecido — clique para adicionar</span>
+            </div>
+          </div>
+          <div class="cartao" id="d-irmaos"></div>
+        </div>
+        <div data-aba-det="resultados">
+          <div class="cartao">
+            <div class="cartao-cab"><h2><svg width="20" height="20"><use href="#i-trofeu"/></svg>Resultados</h2><button class="btn peq" id="btn-res">+ Resultado</button></div>
+            <form class="form-linha" id="form-res" novalidate style="display:none">
+              <div class="campo"><label for="r-ano">Ano</label><input class="entrada num" id="r-ano" inputmode="numeric" placeholder="2025"></div>
+              <div class="campo"><label for="r-prova">Prova <span class="obr">*</span></label><input class="entrada" id="r-prova" placeholder="ex.: Prova Navarro"></div>
+              <div class="campo"><label for="r-km">Km</label><input class="entrada num" id="r-km" inputmode="numeric"></div>
+              <div class="campo"><label for="r-col">Colocação</label><input class="entrada" id="r-col" placeholder="ex.: 1º"></div>
+              <button class="btn escuro">Adicionar</button>
+              <div id="e-res" style="grid-column:1/-1"></div>
+            </form>
+            <table><thead><tr><th>Ano</th><th>Prova</th><th class="so-desk">Km</th><th>Colocação</th></tr></thead><tbody id="d-res"></tbody></table>
+          </div>
+        </div>
+        <div data-aba-det="obs"><div class="cartao"><p class="sub" style="margin:0" id="d-obs"></p></div></div>
+      </section>
+      <section data-tela="rep">
+        <nav class="migalhas" aria-label="Caminho"><button data-ir="inicio">Início</button>›<span>Reprodutores</span></nav>
+        <div class="cab-pagina"><div><h1>Reprodutores</h1><div class="sub">Pombos com a situação "Reprodutor". Clique para ver o pedigree.</div></div></div>
+        <div class="duas-col" id="rep-corpo"></div>
+      </section>
 
-      <div class="cartao" id="d-irmaos"></div>
+      <section data-tela="prop">
+        <nav class="migalhas" aria-label="Caminho"><button data-ir="inicio">Início</button>›<span>Proprietários</span></nav>
+        <div class="cab-pagina">
+          <div><h1>Proprietários</h1><div class="sub">Donos e pombais que aparecem no pombo e no certificado.</div></div>
+          <button class="btn pri" id="btn-novo-prop"><svg width="16" height="16"><use href="#i-mais"/></svg> Novo proprietário</button>
+        </div>
+        <div class="cartao tabela-cartao"><table>
+          <thead><tr><th>Nome</th><th class="so-desk">Pombal</th><th class="so-desk">Contato</th><th>Pombos</th><th></th></tr></thead>
+          <tbody id="prop-corpo"></tbody></table></div>
+      </section>
 
-      <div class="cartao">
-        <div class="cartao-cab"><h2>Resultados</h2><button class="btn peq" id="btn-res" data-edicao>+ Resultado</button></div>
-        <table><thead><tr><th>Ano</th><th>Prova</th><th class="so-desk">Km</th><th>Colocação</th></tr></thead><tbody id="d-res"></tbody></table>
-      </div>
-    </section>
-  </main>
+      <section data-tela="comp">
+        <nav class="migalhas" aria-label="Caminho"><button data-ir="inicio">Início</button>›<span>Compartilhar</span></nav>
+        <div class="cab-pagina"><div><h1>Compartilhar</h1><div class="sub">Mostre o seu plantel a outro criador, só para leitura.</div></div></div>
+        <div class="duas-col">
+          <div class="cartao">
+            <div class="cartao-cab"><h2><svg width="20" height="20"><use href="#i-partilha"/></svg>Quem vê o meu plantel</h2></div>
+            <p class="sub" style="margin:-6px 0 14px">A pessoa vê todos os seus pombos, inclusive os cadastrados depois, mas não altera nada. Ela pode copiar um pombo, com os ancestrais, para o plantel dela.</p>
+            <form class="linha" id="form-comp" novalidate style="align-items:flex-start">
+              <div class="campo" style="flex:1;min-width:180px"><label for="c-login">Login do criador</label><input class="entrada" id="c-login" autocapitalize="none" placeholder="ex.: joao.lima"><div id="e-login"></div></div>
+              <button class="btn escuro" style="margin-top:25px">Compartilhar</button>
+            </form>
+            <div id="concedidos" style="margin-top:8px"></div>
+          </div>
+          <div class="cartao">
+            <div class="cartao-cab"><h2><svg width="20" height="20"><use href="#i-pessoas"/></svg>Plantéis compartilhados comigo</h2></div>
+            <div id="recebidos"></div>
+          </div>
+        </div>
+      </section>
 
-  <!-- painel lateral -->
+      <section data-tela="usu">
+        <nav class="migalhas" aria-label="Caminho"><button data-ir="inicio">Início</button>›<span>Usuários</span></nav>
+        <div class="cab-pagina">
+          <div><h1>Usuários</h1><div class="sub" id="usu-resumo"></div></div>
+          <button class="btn pri" id="btn-novo-usu"><svg width="16" height="16"><use href="#i-mais"/></svg> Novo usuário</button>
+        </div>
+        <div id="usu-corpo"></div>
+      </section>
+
+      <div class="creditos">Foto: <a href="https://commons.wikimedia.org/wiki/File:Racing_pigeon_rataedl.jpg" target="_blank" rel="noopener">“Racing pigeon”, RATAEDL</a>, <a href="https://creativecommons.org/licenses/by-sa/2.0" target="_blank" rel="noopener">CC BY-SA 2.0</a>, recortada · Pomba do logo: vetorizada da referência do responsável</div>
+    </main>
+
   <div class="veu" id="veu"></div>
   <aside class="painel" id="painel" role="dialog" aria-modal="true" aria-labelledby="painel-t">
-    <div class="painel-cab"><div><h2 id="painel-t"></h2><div class="sub" id="painel-s"></div></div>
+    <div class="painel-topo"><div><h2 id="painel-t"></h2><div class="sub" id="painel-s"></div></div>
       <button class="btn fantasma peq" data-fechar aria-label="Fechar">✕</button></div>
     <div class="abas" role="tablist">
       <button role="tab" aria-selected="true" data-aba="buscar">Escolher do plantel</button>
@@ -391,9 +578,9 @@ tbody tr:hover{background:#f8fafc}
       </div>
       <form data-pai-aba="novo" id="p-form" novalidate style="display:none">
         <div class="campo"><label for="p-anilha">Anilha <span class="obr">*</span></label><input class="entrada num" id="p-anilha"><div id="p-erro"></div></div>
-        <div class="campo" style="margin-top:12px"><span class="rotulo">Sexo</span><div class="entrada" style="display:flex;align-items:center;background:var(--fundo)" id="p-sexo"></div></div>
-        <div class="campo" style="margin-top:12px"><label for="p-cor">Cor</label><input class="entrada" id="p-cor" list="cores"></div>
-        <button class="btn pri" style="margin-top:18px;width:100%">Cadastrar e ligar</button>
+        <div class="campo" style="margin-top:14px"><span class="rotulo">Sexo</span><div class="entrada" style="display:flex;align-items:center;background:var(--fundo)" id="p-sexo"></div></div>
+        <div class="campo" style="margin-top:14px"><label for="p-cor">Cor</label><input class="entrada" id="p-cor" list="cores"></div>
+        <button class="btn pri" style="margin-top:20px;width:100%">Cadastrar e ligar</button>
       </form>
     </div>
   </aside>
@@ -402,66 +589,83 @@ tbody tr:hover{background:#f8fafc}
     <h2 id="dlg-t"></h2><div id="dlg-p"></div>
     <div class="botoes" id="dlg-b"></div>
   </div>
-  <div class="toast" id="toast" role="status"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5 9-10"/></svg><span></span></div>
+  <div class="toast" id="toast" role="status"><svg width="18" height="18"><use href="#i-ok"/></svg><span></span></div>
 </div></div>
 
 <script>
-/* ---------- dados de exemplo (fictícios) ---------- */
-const P = {};  // id -> pombo
+const P = {};
 let seq = 1;
 function add(anilha, sexo, cor, sit, prop, pai, mae, extra = {}) {
-  const id = seq++; P[id] = { id, anilha, sexo, cor, sit, prop, pai, mae, res: [], ...extra }; return id;
+  const id = seq++; P[id] = { id, anilha, sexo, cor, sit, prop, pai, mae, res: [], obs: "", ...extra }; return id;
 }
 const PROPS = ["Anízio Xavier da Costa", "Antônio Célio", "Francisco Livramento"];
+const PINFO = [
+  { pombal: "Bons Amigos", tel: "(31) 9 9682-3222", end: "Rua Carlos Chagas, 201 — Bairro Industrial, Contagem/MG", email: "anizio@exemplo.com", obs: "Campeão e vice-campeão Soc. Asas de Ibirité. Tricampeão Champions League." },
+  { pombal: "", tel: "", end: "", email: "", obs: "" },
+  { pombal: "Livramento", tel: "(31) 9 8811-0042", end: "Sítio Boa Vista, zona rural — Sete Lagoas/MG", email: "", obs: "Pombos de fundo (acima de 600 km)." }];
+const USUARIOS = [
+  { login: "davi", nome: "Davi Fonseca", admin: true, ativo: true, acesso: "online", pombos: 0, bloq: false, eu: true },
+  { login: "joao.lima", nome: "João Lima", admin: false, ativo: true, acesso: "Há 2 h", pombos: 46, bloq: false },
+  { login: "maria.s", nome: "Maria Souza", admin: false, ativo: true, acesso: "Há 3 dias", pombos: 120, bloq: true },
+  { login: "pedro.alves", nome: "Pedro Alves", admin: false, ativo: false, acesso: "Há 2 meses", pombos: 12, bloq: false },
+];
+let concedidos = ["joao.lima"], recebidos = [{ login: "maria.s", nome: "Maria Souza" }, { login: "joao.lima", nome: "João Lima" }];
+const usuarioPor = (l) => USUARIOS.find((u) => u.login === l);
+const iniciais = (n) => n.split(" ").map((x) => x[0]).slice(0, 2).join("").toUpperCase();
 const t1 = add("1290708/12", "M", "Escama", "Reprodutor", 1), t2 = add("1165603/11", "F", "Escama", "Reprodutor", 1);
 const b1 = add("1122415/11", "M", "Azul", "Reprodutor", 0), b2 = add("7005227/17", "F", "Escama", "Ativo", 0);
 const b3 = add("440007/16", "M", "Escama", "Reprodutor", 1, t1, t2), b4 = add("440012/16", "F", "Escama", "Ativo", 1);
 const a1 = add("1397211/21", "M", "Azul", "Reprodutor", 0, b1, b2), a2 = add("1397258/21", "F", "Escama", "Reprodutor", 1, b3, b4);
 const a3 = add("1466412/14", "M", "Escama", "Ativo", 0, b3, null), a4 = add("334815/15", "F", "Escama", "Ativo", 0);
 const pai = add("1356642/22", "M", "Azul", "Ativo", 0, a1, a2), mae = add("440013/16", "F", "Escama", "Reprodutor", 0, a3, a4);
-const RAIZ = add("4272402/24", "M", "Escama", "Ativo", 0, pai, mae);
-const irmao = add("4272403/24", "F", "Escama clara", "Ativo", 0, pai, mae);
+const RAIZ = add("4272402/24", "M", "Escama", "Ativo", 0, pai, mae, { obs: "Filho de 1356642/22, neto do campeão 1397211/21. Muito regular em provas de meio fundo." });
+add("4272403/24", "F", "Escama clara", "Ativo", 0, pai, mae);
 add("390936/05", "M", "Escama", "Falecido", 2); add("529725/16", "F", "Pigarça", "Vendido", 0);
 add("334801/15", "F", "Azul", "Ativo", 0); add("965275/10", "M", "Macotado", "Ativo", 0);
 P[a1].res = [{ ano: 2020, prova: "Tacarambi", km: 512, col: "1º" }, { ano: 2020, prova: "Fundo Milenium", km: 690, col: "Prata" }, { ano: 2019, prova: "Geral de Fundo", km: 640, col: "8º" }];
 P[RAIZ].res = [{ ano: 2025, prova: "Prova Navarro", km: 438, col: "1º" }, { ano: 2025, prova: "Velocidade Sete Lagoas", km: 92, col: "14º" }];
 
-/* ---------- utilidades ---------- */
 const $ = (s, el = document) => el.querySelector(s), $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const app = $("#app");
-const SEXO = { M: "Macho", F: "Fêmea", D: "Desconhecido" };
+const SEXO = { M: "Macho", F: "Fêmea", D: "Desconhecido" }, SIMB = { M: "♂", F: "♀", D: "?" };
 const lista = () => Object.values(P);
 const porAnilha = (a) => lista().find((p) => p.anilha === a);
 let leitura = false, atual = RAIZ, estadoLista = "normal", ordemAsc = true, historico = [];
-function sexo(p) { return `<span class="sexo ${p.sexo.toLowerCase()}"><i></i>${SEXO[p.sexo]}</span>`; }
-function selo(sit) { return `<span class="selo ${sit.toLowerCase()}">${sit}</span>`; }
-function link(id, neutro) { return id ? `<button class="lnk num ${neutro ? "neutro" : ""}" data-abrir="${id}">${P[id].anilha}</button>` : `<span class="desconh">desconhecido</span>`; }
+const sexo = (p) => `<span class="sexo ${p.sexo.toLowerCase()}"><b aria-hidden="true">${SIMB[p.sexo]}</b>${SEXO[p.sexo]}</span>`;
+const selo = (sit) => `<span class="selo ${sit.toLowerCase()}">${sit}</span>`;
+const link = (id, neutro) => id ? `<button class="lnk num ${neutro ? "neutro" : ""}" data-abrir="${id}">${P[id].anilha}</button>` : `<span class="desconh">desconhecido</span>`;
 function toast(msg) { const t = $("#toast"); $("span", t).textContent = msg; t.classList.add("ver"); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove("ver"), 2400); }
-function filhos(id) { return lista().filter((p) => p.pai === id || p.mae === id); }
+const filhos = (id) => lista().filter((p) => p.pai === id || p.mae === id);
 
-/* ---------- navegação ---------- */
 function ir(tela, empilhar = true) {
   if (empilhar) historico.push(tela);
+  app.classList.remove("menu-aberto");
   $$("[data-tela]").forEach((s) => s.classList.toggle("visivel", s.dataset.tela === tela));
   $$("[data-tela-btn]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.telaBtn === tela));
-  $$(".menu a").forEach((a) => a.classList.toggle("ativo", a.dataset.menu === tela || (tela === "detalhe" && a.dataset.menu === "lista")));
+  $$(".menu a, .gaveta a").forEach((a) => a.classList.toggle("ativo", a.dataset.menu === tela || (["detalhe", "form"].includes(tela) && a.dataset.menu === "lista")));
   if (tela === "lista") desenharLista();
   if (tela === "detalhe") desenharDetalhe();
   if (tela === "inicio") desenharInicio();
-  app.scrollTop = 0; window.scrollTo(0, 0);
+  if (tela === "rep") desenharRep();
+  if (tela === "prop") desenharProp();
+  if (tela === "comp") desenharComp();
+  if (tela === "usu") desenharUsu();
+  window.scrollTo(0, 0);
 }
-function abrir(id) { atual = +id; celFoco = [atual]; ir("detalhe"); }
+function abrir(id) { atual = +id; celFoco = [atual]; abaDet("pedigree"); ir("detalhe"); }
 
-/* ---------- início ---------- */
 function desenharInicio() {
   $("#r-total").textContent = lista().length;
   $("#r-rep").textContent = lista().filter((p) => p.sit === "Reprodutor").length;
   $("#r-inc").textContent = lista().filter((p) => !p.pai || !p.mae).length;
   $("#ultimos").innerHTML = lista().slice(-5).reverse().map((p) =>
-    `<tr data-abrir="${p.id}"><td>${link(p.id)}</td><td class="so-desk">${sexo(p)}</td><td>${p.cor || "—"}</td><td>${selo(p.sit)}</td></tr>`).join("");
+    `<tr data-abrir="${p.id}"><td>${link(p.id)}</td><td>${sexo(p)}</td><td class="so-desk">${p.cor || "—"}</td><td>${selo(p.sit)}</td></tr>`).join("");
+  const res = lista().flatMap((p) => p.res.map((r) => ({ ...r, p }))).sort((a, b) => b.ano - a.ano).slice(0, 3);
+  $("#ult-res").innerHTML = res.map((r) => `<div class="linha entre" style="padding:8px 0;border-bottom:1px solid var(--borda-suave)">
+    <div class="linha" style="gap:10px"><svg width="20" height="20" style="color:var(--dourado-texto)"><use href="#i-trofeu"/></svg>
+    <div><b>${r.col} — ${r.prova}</b><div class="sub">${link(r.p.id, 1)}</div></div></div><span class="sub num">${r.ano}</span></div>`).join("");
 }
 
-/* ---------- lista ---------- */
 function filtrados() {
   const an = $("#f-anilha").value.trim(), sx = $("#f-sexo").value, st = $("#f-sit").value, pr = $("#f-prop").value;
   return lista().filter((p) => (!an || p.anilha.includes(an)) && (!sx || p.sexo === sx) && (!st || p.sit === st) && (pr === "" || p.prop === +pr))
@@ -471,7 +675,7 @@ function desenharLista() {
   const corpo = $("#lista-corpo");
   if (estadoLista === "carregando") {
     $("#contagem").textContent = "Carregando…";
-    corpo.innerHTML = `<div class="cartao">${Array.from({ length: 6 }, () => `<div class="esqueleto" style="margin:14px 0;width:${60 + Math.random() * 35}%"></div>`).join("")}</div>`; return;
+    corpo.innerHTML = `<div class="cartao">${[72, 88, 64, 80, 70, 90].map((w) => `<div class="esqueleto" style="margin:14px 0;width:${w}%"></div>`).join("")}</div>`; return;
   }
   if (estadoLista === "erro") {
     $("#contagem").textContent = "";
@@ -480,32 +684,31 @@ function desenharLista() {
       <button class="btn peq" style="margin-top:10px" data-estado="normal">Tentar de novo</button></div></div>`; return;
   }
   const ps = estadoLista === "vazio" ? [] : filtrados();
-  $("#contagem").textContent = `${ps.length} ${ps.length === 1 ? "pombo" : "pombos"} · Meu plantel`;
+  $("#contagem").textContent = `${ps.length} ${ps.length === 1 ? "pombo" : "pombos"} no seu plantel`;
   if (!ps.length) {
-    corpo.innerHTML = `<div class="cartao vazio"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      <div style="font-weight:600;color:var(--texto)">${estadoLista === "vazio" ? "Nenhum pombo cadastrado ainda" : "Nenhum pombo com esses filtros"}</div>
-      <div style="margin:4px 0 14px">${estadoLista === "vazio" ? "Comece pelo primeiro — dá para ligar pai e mãe depois, direto na árvore." : "Tente outra anilha ou limpe os filtros."}</div>
-      <button class="btn pri" data-ir="form" data-novo>+ Cadastrar ${estadoLista === "vazio" ? "o primeiro" : "pombo"}</button></div>`; return;
+    corpo.innerHTML = `<div class="cartao vazio"><svg width="56" height="56"><use href="#i-pombo"/></svg>
+      <div style="font-weight:650;color:var(--marinho);font-size:16px">${estadoLista === "vazio" ? "Nenhum pombo cadastrado ainda" : "Nenhum pombo com esses filtros"}</div>
+      <div style="margin:4px 0 16px">${estadoLista === "vazio" ? "Comece pelo primeiro — pai e mãe podem ser ligados depois, direto na árvore." : "Tente outra anilha ou limpe os filtros."}</div>
+      <button class="btn pri" data-novo>+ Cadastrar ${estadoLista === "vazio" ? "o primeiro" : "pombo"}</button></div>`; return;
   }
   corpo.innerHTML = `<div class="cartao tabela-cartao tabela-desk"><table>
-    <thead><tr><th><button id="ordenar" aria-label="Ordenar por anilha">Anilha ${ordemAsc ? "▲" : "▼"}</button></th><th>Sexo</th><th>Cor</th><th>Situação</th><th>Proprietário</th><th>Pai</th><th>Mãe</th></tr></thead>
+    <thead><tr><th><button id="ordenar" aria-label="Ordenar por anilha">Anilha ${ordemAsc ? "▲" : "▼"}</button></th><th>Sexo</th><th>Cor</th><th>Situação</th><th>Proprietário</th><th>Pai / Mãe</th></tr></thead>
     <tbody>${ps.map((p) => `<tr data-abrir="${p.id}"><td>${link(p.id)}</td><td>${sexo(p)}</td><td>${p.cor || "—"}</td><td>${selo(p.sit)}</td>
-      <td>${PROPS[p.prop] ?? "—"}</td><td>${link(p.pai, 1)}</td><td>${link(p.mae, 1)}</td></tr>`).join("")}</tbody></table></div>
+      <td>${PROPS[p.prop] ?? "—"}</td><td>${link(p.pai, 1)} <span class="sub">/</span> ${link(p.mae, 1)}</td></tr>`).join("")}</tbody></table></div>
     <div class="cartao tabela-cartao cartoes-pombo">${ps.map((p) => `<div class="cartao-pombo" data-abrir="${p.id}">
       <div class="linha entre"><span class="lnk num">${p.anilha}</span>${selo(p.sit)}</div>
       <div class="linha" style="margin-top:4px;gap:8px">${sexo(p)}<span class="sub">· ${p.cor || "—"}</span></div>
       <div class="sub" style="margin-top:2px">Pai ${p.pai ? P[p.pai].anilha : "—"} · Mãe ${p.mae ? P[p.mae].anilha : "—"}</div></div>`).join("")}</div>`;
 }
 
-/* ---------- busca global ---------- */
 function ligarBusca(caixa) {
-  const inp = $("input", caixa), res = $(".resultados-busca", caixa); let sel = 0, achados = [];
+  const inp = $("input", caixa), res = $(".resultados-busca", caixa); let sel = 0;
   function mostrar() {
     const q = inp.value.trim();
     if (!q) { res.classList.remove("aberto"); return; }
-    achados = lista().filter((p) => p.anilha.includes(q)).slice(0, 6); sel = 0;
+    const achados = lista().filter((p) => p.anilha.includes(q)).slice(0, 6); sel = 0;
     res.innerHTML = achados.length
-      ? achados.map((p, i) => `<button role="option" aria-selected="${i === 0}" data-abrir="${p.id}"><span class="num"><b>${p.anilha}</b></span><span class="sub">${SEXO[p.sexo]} · ${p.cor || "—"}</span></button>`).join("")
+      ? achados.map((p, i) => `<button role="option" aria-selected="${i === 0}" data-abrir="${p.id}"><span class="num"><b>${p.anilha}</b></span><span class="sub">${SIMB[p.sexo]} ${SEXO[p.sexo]} · ${p.cor || "—"}</span></button>`).join("")
       : `<button data-novo-anilha="${q}"><span>Nenhum pombo com <b>${q}</b></span><span class="lnk">+ Cadastrar</span></button>`;
     res.classList.add("aberto");
   }
@@ -524,33 +727,39 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") fecharTudo();
 });
 
-/* ---------- detalhe ---------- */
+function abaDet(a) {
+  $$("[data-aba-btn]").forEach((b) => b.setAttribute("aria-selected", b.dataset.abaBtn === a));
+  $$("[data-aba-det]").forEach((d) => d.classList.toggle("visivel", d.dataset.abaDet === a));
+}
 function desenharDetalhe() {
-  const p = P[atual]; const edita = !leitura;
-  $("#aviso-leitura").innerHTML = leitura ? `<div class="aviso alerta" style="margin-bottom:16px"><b>Plantel de João Lima</b> — você pode ver este pombo, mas não alterá-lo.</div>` : "";
+  const p = P[atual], edita = !leitura;
+  $("#d-migalha").textContent = p.anilha;
+  $("#aviso-leitura").innerHTML = leitura ? `<div class="aviso alerta" style="margin-bottom:14px"><b>Plantel de João Lima</b> — você pode ver este pombo, mas não alterá-lo.</div>` : "";
   $("#d-anilha").textContent = p.anilha;
   $("#d-meta").innerHTML = `${sexo(p)}<span>·</span><span>${p.cor || "Cor não informada"}</span>${selo(p.sit)}${leitura ? '<span class="selo leitura">Só leitura</span>' : ""}`;
-  $("#d-prop").innerHTML = PROPS[p.prop] ? `Proprietário: <b style="color:var(--texto)">${PROPS[p.prop]}</b>${p.prop === 0 ? " — Pombal Bons Amigos" : ""}` : "Sem proprietário";
+  $("#d-prop").innerHTML = PROPS[p.prop] ? `Proprietário: <b>${PROPS[p.prop]}</b>${p.prop === 0 ? " · Pombal Bons Amigos" : ""}` : "Sem proprietário";
   const ger = +$("#d-ger").value;
-  $("#d-acoes").innerHTML = `<button class="btn pri" id="btn-pdf"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 3H6v18h12V7z M14 3v4h4M9 13h6M9 17h6"/></svg> PDF (${ger} gerações)</button>
-    ${edita ? `<button class="btn" id="btn-editar">Editar</button><div class="mais"><button class="btn" id="btn-mais" aria-haspopup="menu" aria-expanded="false" aria-label="Mais ações">⋯</button>
+  $("#d-acoes").innerHTML = `<button class="btn pri" id="btn-pdf"><svg width="17" height="17"><use href="#i-pdf"/></svg> Certificado PDF</button>
+    ${edita ? `<button class="btn vidro" id="btn-editar">Editar</button><div class="mais"><button class="btn vidro" id="btn-mais" aria-haspopup="menu" aria-expanded="false" aria-label="Mais ações">⋯</button>
       <div class="mais-lista" role="menu"><button role="menuitem" id="btn-copiar-an">Copiar anilha</button><button role="menuitem" class="perigo" id="btn-excluir">Excluir pombo…</button></div></div>`
-      : `<button class="btn" id="btn-copiar">Copiar para meu plantel</button>`}`;
+      : `<button class="btn vidro" id="btn-copiar">Copiar para meu plantel</button>`}`;
   desenharArvore(); desenharCelular();
   const irm = lista().filter((x) => x.id !== p.id && p.pai && x.pai === p.pai && x.mae === p.mae);
   $("#d-irmaos").style.display = irm.length ? "" : "none";
   $("#d-irmaos").innerHTML = `<div class="cartao-cab" style="margin-bottom:8px"><h2>Irmãos</h2></div>${irm.map((x) => `<div class="linha" style="padding:6px 0">${link(x.id)}${sexo(x)}<span class="sub">${x.cor}</span></div>`).join("")}`;
   const rs = [...p.res].sort((a, b) => b.ano - a.ano);
-  $("#d-res").innerHTML = rs.length ? rs.map((r) => `<tr class="resultado-linha"><td class="num">${r.ano}</td><td>${r.prova}</td><td class="num so-desk">${r.km}</td><td>${r.col}</td></tr>`).join("")
-    : `<tr><td colspan="4" class="sub" style="padding:14px 12px">Nenhum resultado registrado.</td></tr>`;
+  $("#cont-res").textContent = rs.length;
+  $("#d-res").innerHTML = rs.length ? rs.map((r) => `<tr><td class="num">${r.ano}</td><td>${r.prova}</td><td class="num so-desk">${r.km}</td><td><b>${r.col}</b></td></tr>`).join("")
+    : `<tr><td colspan="4" class="sub" style="padding:16px 14px">Nenhum resultado registrado.</td></tr>`;
   $("#btn-res").style.display = edita ? "" : "none";
+  $("#d-obs").textContent = p.obs || "Nenhuma observação.";
 }
 function rotulo(nivel, papeis) {
   if (nivel === 0) return "Pombo principal";
   if (nivel === 1) return papeis[0] === "pai" ? "Pai" : "Mãe";
-  const lado = papeis[0] === "pai" ? "paterno" : "materno", sx = papeis[papeis.length - 1] === "pai";
+  const lado = papeis[0] === "pai" ? "paterno" : "materno", macho = papeis[papeis.length - 1] === "pai";
   const nomes = { 2: ["Avô", "Avó"], 3: ["Bisavô", "Bisavó"], 4: ["Tataravô", "Tataravó"] }[nivel] || ["Ascendente", "Ascendente"];
-  return `${nomes[sx ? 0 : 1]} ${sx ? lado : lado.slice(0, -1) + "a"}`;
+  return `${nomes[macho ? 0 : 1]} ${macho ? lado : lado.slice(0, -1) + "a"}`;
 }
 function contarRepetidos(id, ger) {
   const c = {}; (function f(x, n) { if (!x || n > ger) return; c[x] = (c[x] || 0) + 1; f(P[x].pai, n + 1); f(P[x].mae, n + 1); })(id, 0); return c;
@@ -558,22 +767,22 @@ function contarRepetidos(id, ger) {
 function caixaNo(id, nivel, papeis, rep) {
   const p = P[id], b = document.createElement("button");
   b.className = `no ${p.sexo === "M" ? "m" : p.sexo === "F" ? "f" : ""}${nivel === 0 ? " raiz" : ""}${rep[id] > 1 ? " rep" : ""}`;
-  const prov = p.res.length ? ` · 🏆 ${p.res.length} prova${p.res.length > 1 ? "s" : ""}` : "";
+  const prov = p.res.length ? ` · 🏆 ${p.res.length}` : "";
   b.innerHTML = `${rep[id] > 1 ? '<span class="marca-rep" title="Aparece mais de uma vez na árvore">⚠ repetido</span>' : ""}<div class="rot">${rotulo(nivel, papeis)}</div>
-    <div class="an num">${p.anilha}</div><div class="det">${SEXO[p.sexo]} · ${p.cor || "—"}${prov}</div>`;
+    <div class="an num"><span class="s" aria-hidden="true">${SIMB[p.sexo]}</span>${p.anilha}</div><div class="det">${SEXO[p.sexo]} · ${p.cor || "—"}${prov}</div>`;
   b.title = `${p.anilha} — abrir`; b.onclick = () => (nivel === 0 ? null : abrir(id)); return b;
 }
 function caixaVaga(papel, filhoId, existeFilho) {
   const v = document.createElement(existeFilho && !leitura ? "button" : "div");
   if (!existeFilho) { v.className = "vaga oculta"; return v; }
   if (leitura) { v.className = "vaga leitura"; v.textContent = "Desconhecido"; return v; }
-  v.className = "vaga"; v.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>${papel === "pai" ? "Pai" : "Mãe"}`;
+  v.className = "vaga"; v.innerHTML = `<svg width="14" height="14"><use href="#i-mais"/></svg>${papel === "pai" ? "♂ Pai" : "♀ Mãe"}`;
   v.setAttribute("aria-label", `Adicionar ${papel === "pai" ? "pai" : "mãe"} de ${P[filhoId].anilha}`);
   v.onclick = () => abrirPainel(papel, filhoId); return v;
 }
 function desenharArvore() {
   const ger = +$("#d-ger").value, el = $("#arvore"); el.innerHTML = "";
-  el.style.gridTemplateColumns = `repeat(${ger + 1}, minmax(${ger > 4 ? 150 : 170}px, 1fr))`;
+  el.style.gridTemplateColumns = `repeat(${ger + 1}, minmax(${ger > 4 ? 150 : 165}px, 1fr))`;
   const rep = contarRepetidos(atual, ger);
   let nivel = [{ id: atual, papeis: [], filho: null, existe: true }];
   for (let n = 0; n <= ger; n++) {
@@ -605,22 +814,21 @@ function desenharCelular() {
   }
 }
 
-/* ---------- painel lateral: completar a árvore ---------- */
 let alvo = null;
 function abrirPainel(papel, filhoId) {
   alvo = { papel, filhoId };
-  $("#painel-t").textContent = `Adicionar ${papel === "pai" ? "pai" : "mãe"} de ${P[filhoId].anilha}`;
+  $("#painel-t").textContent = `Adicionar ${papel === "pai" ? "pai ♂" : "mãe ♀"} de ${P[filhoId].anilha}`;
   $("#painel-s").textContent = papel === "pai" ? "Mostrando só machos ou de sexo desconhecido" : "Mostrando só fêmeas ou de sexo desconhecido";
-  $("#p-sexo").textContent = papel === "pai" ? "Macho (definido pelo papel)" : "Fêmea (definido pelo papel)";
+  $("#p-sexo").textContent = papel === "pai" ? "♂ Macho (definido pelo papel)" : "♀ Fêmea (definido pelo papel)";
   $("#p-busca").value = ""; $("#p-anilha").value = ""; $("#p-cor").value = ""; $("#p-erro").innerHTML = "";
   trocarAba("buscar"); opcoesPainel();
-  $("#veu").classList.add("aberto"); $("#painel").classList.add("aberto"); setTimeout(() => $("#p-busca").focus(), 30);
+  $("#veu").classList.add("aberto"); $("#painel").classList.add("aberto"); $("#p-busca").focus();
 }
 function descendentes(id) { const s = new Set([id]); let mudou = true; while (mudou) { mudou = false; for (const p of lista()) if (!s.has(p.id) && (s.has(p.pai) || s.has(p.mae))) { s.add(p.id); mudou = true; } } return s; }
 function opcoesPainel() {
   const q = $("#p-busca").value.trim(), ok = alvo.papel === "pai" ? ["M", "D"] : ["F", "D"], proibidos = descendentes(alvo.filhoId);
   const ops = lista().filter((p) => ok.includes(p.sexo) && !proibidos.has(p.id) && (!q || p.anilha.includes(q))).slice(0, 8);
-  $("#p-opcoes").innerHTML = ops.length ? ops.map((p) => `<div class="opcao"><div><b class="num">${p.anilha}</b><div class="sub">${SEXO[p.sexo]} · ${p.cor || "—"}</div></div><button class="btn peq pri" data-ligar="${p.id}">Escolher</button></div>`).join("")
+  $("#p-opcoes").innerHTML = ops.length ? ops.map((p) => `<div class="opcao"><div><b class="num" style="color:var(--marinho)">${SIMB[p.sexo]} ${p.anilha}</b><div class="sub">${SEXO[p.sexo]} · ${p.cor || "—"}</div></div><button class="btn peq escuro" data-ligar="${p.id}">Escolher</button></div>`).join("")
     : `<div class="vazio" style="padding:24px 8px"><div>Nenhum pombo com <b>${q}</b>.</div><button class="btn peq" style="margin-top:10px" id="ir-novo">Cadastrar ${q || "novo"}</button></div>`;
 }
 function ligar(id) {
@@ -638,30 +846,138 @@ $("#p-form").addEventListener("submit", (e) => {
   $("#p-anilha").classList.toggle("invalida", !!erro);
   $("#p-erro").innerHTML = erro ? `<div class="erro-campo" role="alert">⚠ ${erro}</div>` : "";
   if (erro) return;
-  const id = add(an, alvo.papel === "pai" ? "M" : "F", $("#p-cor").value.trim(), "Ativo", P[alvo.filhoId].prop);
-  ligar(id);
+  ligar(add(an, alvo.papel === "pai" ? "M" : "F", $("#p-cor").value.trim(), "Ativo", P[alvo.filhoId].prop));
 });
 
-/* ---------- diálogo ---------- */
 let origemFoco = null;
-function dialogo(titulo, html, botoes) {
+function dialogo(titulo, html, botoes, largo) {
   origemFoco = document.activeElement;
+  $("#dialogo").classList.toggle("largo", !!largo);
   $("#dlg-t").textContent = titulo; $("#dlg-p").innerHTML = html; $("#dlg-b").innerHTML = "";
   for (const [txt, cls, fn] of botoes) { const b = document.createElement("button"); b.className = "btn " + cls; b.textContent = txt; b.onclick = () => { fecharTudo(); fn && fn(); }; $("#dlg-b").appendChild(b); }
   $("#veu").classList.add("aberto"); $("#dialogo").classList.add("aberto"); $("#dlg-b button:last-child").focus();
 }
 function fecharTudo() {
   $$(".veu,.painel,.dialogo,.mais-lista").forEach((x) => x.classList.remove("aberto"));
+  app.classList.remove("menu-aberto");
   if (origemFoco && document.contains(origemFoco)) origemFoco.focus(); origemFoco = null;
 }
 function excluir() {
   const p = P[atual], fs = filhos(atual);
-  if (fs.length) return dialogo(`Não é possível excluir ${p.anilha}`, `<p>Ele é pai/mãe de <b>${fs.length} pombo(s)</b>: ${fs.map((f) => `<b class="num">${f.anilha}</b>`).join(", ")}.</p><p>Altere o pai ou a mãe desses pombos antes de excluir.</p>`, [["Entendi", "pri"]]);
+  if (fs.length) return dialogo(`Não é possível excluir ${p.anilha}`, `<p>Ele é pai/mãe de <b>${fs.length} pombo(s)</b>: ${fs.map((f) => `<b class="num">${f.anilha}</b>`).join(", ")}.</p><p>Altere o pai ou a mãe desses pombos antes de excluir.</p>`, [["Entendi", "escuro"]]);
   dialogo(`Excluir ${p.anilha}?`, `<p>Os resultados dele também serão apagados. <b>Não dá para desfazer.</b></p>`,
     [["Cancelar", ""], ["Excluir pombo", "perigo", () => { delete P[atual]; ir("lista"); toast(`${p.anilha} excluído`); }]]);
 }
+/* ---------- reprodutores ---------- */
+function desenharRep() {
+  const reps = lista().filter((p) => p.sit === "Reprodutor");
+  const grupo = (sx, titulo) => {
+    const ps = reps.filter((p) => p.sexo === sx);
+    return `<div class="cartao"><div class="cab-col"><span class="sexo-g ${sx.toLowerCase()}">${SIMB[sx]}</span><h2>${titulo}</h2><span class="contagem-chip">${ps.length}</span></div>
+      ${ps.length ? ps.map((p) => `<div class="item-rep" data-abrir="${p.id}"><div><span class="lnk num">${p.anilha}</span><div class="info">${p.cor || "—"} · ${PROPS[p.prop] ?? "sem proprietário"}</div></div>
+        <span class="contagem-chip">${filhos(p.id).length} filho(s)</span></div>`).join("") : `<p class="sub">Nenhum reprodutor ${sx === "M" ? "macho" : "fêmea"}.</p>`}</div>`;
+  };
+  $("#rep-corpo").innerHTML = grupo("M", "Machos") + grupo("F", "Fêmeas");
+}
 
-/* ---------- formulário ---------- */
+/* ---------- proprietários ---------- */
+function desenharProp() {
+  $("#prop-corpo").innerHTML = PROPS.map((n, i) => {
+    if (!n) return "";
+    const uso = lista().filter((p) => p.prop === i).length;
+    const d = PINFO[i];
+    return `<tr><td><b>${n}</b>${d.end ? `<div class="sub">${d.end}</div>` : ""}${d.obs ? `<div class="sub" style="font-style:italic">${d.obs}</div>` : ""}</td>
+      <td class="so-desk">${d.pombal || "—"}</td><td class="so-desk num">${d.tel || "—"}${d.email ? `<div class="sub">${d.email}</div>` : ""}</td>
+      <td><span class="contagem-chip">${uso}</span></td>
+      <td style="text-align:right;white-space:nowrap"><button class="btn peq" data-prop-editar="${i}">Editar</button> <button class="btn peq fantasma" style="color:var(--perigo)" data-prop-excluir="${i}">Excluir</button></td></tr>`;
+  }).join("");
+}
+function formProp(i) {
+  const novo = i === undefined, d = novo ? { pombal: "", tel: "", end: "", email: "", obs: "" } : PINFO[i];
+  const v = (x) => (x || "").replace(/"/g, "&quot;");
+  dialogo(novo ? "Novo proprietário" : `Editar ${PROPS[i]}`, `<form id="f-prop-d" novalidate style="margin-top:12px" class="grade-form">
+      <div class="campo larga"><label for="pd-nome">Nome <span class="obr">*</span></label><input class="entrada" id="pd-nome" maxlength="200" value="${novo ? "" : v(PROPS[i])}"><div id="pd-erro"></div></div>
+      <div class="campo"><label for="pd-pombal">Pombal / colombódromo</label><input class="entrada" id="pd-pombal" maxlength="200" value="${v(d.pombal)}"></div>
+      <div class="campo"><label for="pd-tel">Telefone</label><input class="entrada" id="pd-tel" inputmode="tel" maxlength="50" value="${v(d.tel)}"></div>
+      <div class="campo larga"><label for="pd-end">Endereço</label><input class="entrada" id="pd-end" maxlength="300" value="${v(d.end)}" placeholder="Rua, número, bairro, cidade/UF"></div>
+      <div class="campo larga"><label for="pd-email">E-mail</label><input class="entrada" id="pd-email" type="email" maxlength="200" value="${v(d.email)}"></div>
+      <div class="campo larga"><label for="pd-obs">Observações</label><textarea class="entrada" id="pd-obs" maxlength="5000" placeholder="Títulos, especialidade, informações que aparecem no certificado">${d.obs || ""}</textarea>
+        <span class="dica">O pombal, o endereço, o telefone, o e-mail e as observações aparecem no cabeçalho do certificado.</span></div></form>`,
+    [["Cancelar", ""], ["Salvar", "pri", () => {}]], true);
+  $("#dlg-b button:last-child").onclick = () => {
+    const nome = $("#pd-nome").value.trim();
+    if (!nome) { $("#pd-nome").classList.add("invalida"); $("#pd-erro").innerHTML = '<div class="erro-campo" role="alert">⚠ Nome: obrigatório</div>'; return $("#pd-nome").focus(); }
+    const dados = { pombal: $("#pd-pombal").value.trim(), tel: $("#pd-tel").value.trim(), end: $("#pd-end").value.trim(), email: $("#pd-email").value.trim(), obs: $("#pd-obs").value.trim() };
+    if (novo) { PROPS.push(nome); PINFO.push(dados); } else { PROPS[i] = nome; PINFO[i] = dados; }
+    fecharTudo(); desenharProp(); toast(`${nome} salvo`);
+  };
+  $("#pd-nome").focus();
+}
+function excluirProp(i) {
+  const uso = lista().filter((p) => p.prop === i).length;
+  if (uso) return dialogo(`Não é possível excluir ${PROPS[i]}`, `<p>Ele é proprietário de <b>${uso} pombo(s)</b>. Troque o proprietário desses pombos antes de excluir.</p>`, [["Entendi", "escuro"]]);
+  dialogo(`Excluir ${PROPS[i]}?`, "<p>Nenhum pombo usa este proprietário.</p>", [["Cancelar", ""], ["Excluir", "perigo", () => { PROPS[i] = null; desenharProp(); toast("Proprietário excluído"); }]]);
+}
+
+/* ---------- compartilhar ---------- */
+function desenharComp() {
+  $("#concedidos").innerHTML = concedidos.length ? concedidos.map((l) => { const u = usuarioPor(l);
+    return `<div class="pessoa"><div class="linha" style="gap:12px"><span class="ini">${iniciais(u.nome)}</span><div><b>${u.nome}</b><div class="sub">${u.login}</div></div></div>
+      <button class="btn peq fantasma" style="color:var(--perigo)" data-parar="${l}">Parar de compartilhar</button></div>`; }).join("")
+    : `<p class="sub">Seu plantel não está compartilhado com ninguém.</p>`;
+  $("#recebidos").innerHTML = recebidos.length ? recebidos.map((u) => `<div class="pessoa"><div class="linha" style="gap:12px"><span class="ini">${iniciais(u.nome)}</span><div><b>${u.nome}</b><div class="sub">${u.login}</div></div></div>
+      <div class="linha" style="gap:6px"><button class="btn peq" data-ver-plantel="${u.login}">Ver pombos</button><button class="btn peq fantasma" data-deixar="${u.login}">Deixar de ver</button></div></div>`).join("")
+    : `<p class="sub">Ninguém compartilhou o plantel com você ainda.</p>`;
+}
+
+/* ---------- usuários (admin) ---------- */
+function desenharUsu() {
+  const ativos = USUARIOS.filter((u) => u.ativo).length, on = USUARIOS.filter((u) => u.acesso === "online").length;
+  $("#usu-resumo").textContent = `${ativos} ativos · ${on} online agora`;
+  $("#usu-corpo").innerHTML = USUARIOS.map((u, i) => `<div class="usuario-cartao ${u.ativo ? "" : "inativo"}">
+    <div class="linha entre" style="align-items:flex-start">
+      <div class="linha" style="gap:12px;align-items:flex-start"><span class="ini" style="width:40px;height:40px;border-radius:50%;background:#e8edf5;color:var(--marinho);display:grid;place-items:center;font-weight:700">${iniciais(u.nome)}</span>
+        <div><div class="linha" style="gap:6px"><b>${u.nome}</b>${u.eu ? '<span class="sub">(você)</span>' : ""}${u.admin ? '<span class="selo reprodutor">admin</span>' : ""}${u.bloq ? '<span class="selo" style="background:var(--perigo-f);color:var(--perigo);border-color:var(--perigo-b)" title="5 senhas erradas nos últimos 15 minutos">bloqueado</span>' : ""}${u.ativo ? "" : '<span class="selo falecido" style="text-decoration:none">desativado</span>'}</div>
+        <div class="sub">${u.login} · ${u.pombos} pombos</div></div></div>
+      <div>${u.acesso === "online" ? '<span class="online"><i></i>Online</span>' : `<span class="sub">${u.acesso}</span>`}</div>
+    </div>
+    <div class="acoes-peq"><button class="btn peq" data-u-senha="${i}">Redefinir senha</button>${u.bloq ? `<button class="btn peq" style="color:var(--perigo)" data-u-desbloq="${i}">Desbloquear</button>` : ""}
+      ${u.eu ? "" : `<button class="btn peq" data-u-admin="${i}">${u.admin ? "Tirar admin" : "Tornar admin"}</button><button class="btn peq ${u.ativo ? "fantasma" : ""}" style="${u.ativo ? "color:var(--perigo)" : ""}" data-u-ativo="${i}">${u.ativo ? "Desativar" : "Reativar"}</button>`}</div>
+  </div>`).join("");
+}
+function novoUsuario() {
+  dialogo("Novo usuário", `<form novalidate style="margin-top:12px;display:grid;gap:12px">
+    <div class="campo"><label for="nu-nome">Nome completo <span class="obr">*</span></label><input class="entrada" id="nu-nome" placeholder="ex.: João da Silva"></div>
+    <div class="campo"><label for="nu-login">Login <span class="obr">*</span></label><input class="entrada" id="nu-login" autocapitalize="none" placeholder="ex.: joao.silva"></div>
+    <div class="campo"><label for="nu-senha">Senha (mínimo 8 caracteres) <span class="obr">*</span></label><input class="entrada" id="nu-senha" type="text" autocomplete="new-password"></div>
+    <label class="linha" style="gap:8px"><input type="checkbox" id="nu-admin"> Administrador (vê e edita tudo)</label><div id="nu-erro"></div></form>`,
+    [["Cancelar", ""], ["Criar", "pri", () => {}]]);
+  $("#dlg-b button:last-child").onclick = () => {
+    const nome = $("#nu-nome").value.trim().replace(/\s+/g, " "), login = $("#nu-login").value.trim().toLowerCase(), senha = $("#nu-senha").value;
+    const erro = nome.split(" ").length < 2 ? "Informe o nome completo (nome e sobrenome)" : !/^[a-z0-9._-]{3,50}$/.test(login) ? "Login: 3 a 50 caracteres (letras sem acento, números, . _ -)" : usuarioPor(login) ? "Já existe um usuário com esse login" : senha.length < 8 ? "A senha precisa ter pelo menos 8 caracteres" : "";
+    if (erro) { $("#nu-erro").innerHTML = `<div class="erro-campo" role="alert">⚠ ${erro}</div>`; return; }
+    USUARIOS.push({ login, nome, admin: $("#nu-admin").checked, ativo: true, acesso: "Nunca entrou", pombos: 0, bloq: false });
+    fecharTudo(); desenharUsu(); toast(`Usuário ${login} criado — passe o login e a senha para ${nome}`);
+  };
+  $("#nu-nome").focus();
+}
+
+/* ---------- certificado: escolher as gerações (o layout do PDF não muda) ---------- */
+function gerarCertificado() {
+  const p = P[atual], padrao = +$("#d-ger").value;
+  dialogo(`Certificado de ${p.anilha}`, `<p style="margin-top:6px">Quantas gerações de ancestrais vão no PDF?</p>
+    <div class="ger-opcoes" role="radiogroup" aria-label="Gerações no certificado">
+      ${[2, 3, 4, 5, 6].map((g) => `<button type="button" role="radio" aria-checked="${g === padrao}" data-ger-pdf="${g}"><b>${g}</b><span>${["", "", "até avós", "até bisavós", "até tataravós", "até a 5ª geração", "até a 6ª geração"][g]}</span></button>`).join("")}
+    </div>
+    <p class="dica" style="margin-top:10px">Mesmo layout de hoje (A4 deitado). Com mais gerações, as caixas mais distantes mostram menos detalhes para caber na página.</p>`,
+    [["Cancelar", ""], [`Baixar PDF (${padrao} gerações)`, "pri", () => {}]]);
+  $("#dlg-b button:last-child").onclick = () => {
+    const g = $("[data-ger-pdf][aria-checked=true]").dataset.gerPdf;
+    fecharTudo(); toast(`Certificado de ${p.anilha} baixado — ${g} gerações`);
+  };
+  $("[data-ger-pdf][aria-checked=true]").focus();
+}
+
 let editando = null;
 function opcoesSelect(el, filtro, vazio, valor) {
   el.innerHTML = `<option value="">${vazio}</option>` + lista().filter(filtro).sort((a, b) => a.anilha.localeCompare(b.anilha, "pt", { numeric: true }))
@@ -670,18 +986,36 @@ function opcoesSelect(el, filtro, vazio, valor) {
 function abrirForm(id, manter) {
   editando = id || null; const p = id ? P[id] : manter || {};
   $("#form-titulo").textContent = id ? `Editar ${p.anilha}` : "Novo pombo";
+  $("#form-migalha").textContent = id ? `Editar ${p.anilha}` : "Novo pombo";
   $("#btn-outro").style.display = id ? "none" : "";
-  $("#c-anilha").value = id ? p.anilha : ""; $("#c-sexo").value = p.sexo || "D"; $("#c-cor").value = p.cor || "";
-  $("#c-sit").value = p.sit || "Ativo"; $("#c-origem").value = ""; $("#c-obs").value = "";
+  $("#c-anilha").value = id ? p.anilha : "";
+  $$("input[name=sexo]").forEach((r) => (r.checked = r.value === (p.sexo || "D")));
+  $("#c-cor").value = p.cor || ""; $("#c-sit").value = p.sit || "Ativo"; $("#c-origem").value = ""; $("#c-obs").value = id ? p.obs : "";
   opcoesSelect($("#c-pai"), (x) => x.id !== id && x.sexo !== "F", "Desconhecido", p.pai);
   opcoesSelect($("#c-mae"), (x) => x.id !== id && x.sexo !== "M", "Desconhecida", p.mae);
-  $("#c-prop").innerHTML = `<option value="">Sem proprietário</option>` + PROPS.map((n, i) => `<option value="${i}" ${p.prop === i ? "selected" : ""}>${n}</option>`).join("");
+  $("#c-prop").innerHTML = `<option value="">Sem proprietário</option>` + PROPS.map((n, i) => n ? `<option value="${i}" ${p.prop === i ? "selected" : ""}>${n}</option>` : "").join("");
   const cores = [...new Set(lista().map((x) => x.cor).filter(Boolean))];
   $("#cores").innerHTML = cores.map((c) => `<option value="${c}">`).join("");
   $("#chips-cor").innerHTML = cores.slice(0, 5).map((c) => `<button type="button" class="chip">${c}</button>`).join("");
   $("#e-anilha").innerHTML = ""; $("#c-anilha").classList.remove("invalida");
-  ir("form"); setTimeout(() => $("#c-anilha").focus(), 30);
+  ir("form"); $("#c-anilha").focus();
 }
+$("#form-comp").addEventListener("submit", (e) => {
+  e.preventDefault(); const l = $("#c-login").value.trim().toLowerCase(), u = usuarioPor(l);
+  const erro = !l ? "Informe o login" : !u || !u.ativo ? "Usuário não encontrado" : u.eu ? "Você não pode compartilhar com você mesmo" : concedidos.includes(l) ? `${u.nome} já vê o seu plantel` : "";
+  $("#c-login").classList.toggle("invalida", !!erro);
+  $("#e-login").innerHTML = erro ? `<div class="erro-campo" role="alert">⚠ ${erro}</div>` : "";
+  if (erro) return;
+  concedidos.push(l); $("#c-login").value = ""; desenharComp(); toast(`${u.nome} agora vê o seu plantel`);
+});
+$("#form-res").addEventListener("submit", (e) => {
+  e.preventDefault(); const ano = +$("#r-ano").value || null, prova = $("#r-prova").value.trim(), km = $("#r-km").value === "" ? null : +$("#r-km").value;
+  const erro = !prova ? "Prova: obrigatório" : ano && (ano < 1900 || ano > 2027) ? "O ano deve estar entre 1900 e 2027" : km !== null && (km < 0 || km > 5000) ? "Distância: de 0 a 5000 km" : "";
+  $("#e-res").innerHTML = erro ? `<div class="erro-campo" role="alert">⚠ ${erro}</div>` : "";
+  if (erro) return;
+  P[atual].res.push({ ano: ano || "—", prova, km: km ?? "—", col: $("#r-col").value.trim() || "—" });
+  e.target.reset(); desenharDetalhe(); abaDet("resultados"); toast("Resultado adicionado");
+});
 $("#chips-cor").addEventListener("click", (e) => { if (e.target.classList.contains("chip")) $("#c-cor").value = e.target.textContent; });
 $("#form").addEventListener("submit", (e) => {
   e.preventDefault(); const acao = e.submitter?.dataset.acao, an = $("#c-anilha").value.trim();
@@ -689,7 +1023,7 @@ $("#form").addEventListener("submit", (e) => {
   $("#c-anilha").classList.toggle("invalida", !!erro);
   $("#e-anilha").innerHTML = erro ? `<div class="erro-campo" role="alert">⚠ ${erro}${dup && dup.id !== editando ? ` — <button type="button" class="lnk" data-abrir="${dup.id}">abrir ${dup.anilha}</button>` : ""}</div>` : "";
   if (erro) return $("#c-anilha").focus();
-  const dados = { anilha: an, sexo: $("#c-sexo").value, cor: $("#c-cor").value.trim(), sit: $("#c-sit").value,
+  const dados = { anilha: an, sexo: $("input[name=sexo]:checked").value, cor: $("#c-cor").value.trim(), sit: $("#c-sit").value,
     pai: +$("#c-pai").value || null, mae: +$("#c-mae").value || null, prop: $("#c-prop").value === "" ? undefined : +$("#c-prop").value };
   let id = editando;
   if (id) Object.assign(P[id], dados); else id = add(dados.anilha, dados.sexo, dados.cor, dados.sit, dados.prop, dados.pai, dados.mae);
@@ -697,20 +1031,20 @@ $("#form").addEventListener("submit", (e) => {
   toast(`${an} salvo`); abrir(id);
 });
 
-/* ---------- eventos gerais ---------- */
 document.addEventListener("click", (e) => {
   const t = e.target;
   const ab = t.closest("[data-abrir]"); if (ab) { e.preventDefault(); return abrir(ab.dataset.abrir); }
-  const novo = t.closest("[data-novo]"); if (novo) return abrirForm(null);
+  if (t.closest("[data-novo]")) return abrirForm(null);
   const na = t.closest("[data-novo-anilha]"); if (na) { abrirForm(null); $("#c-anilha").value = na.dataset.novoAnilha; return; }
   const ir_ = t.closest("[data-ir]"); if (ir_) return ir(ir_.dataset.ir);
   if (t.closest("[data-voltar]")) { historico.pop(); return ir(historico.pop() || "lista"); }
   if (t.closest("[data-fora]")) return toast("Fora do escopo deste protótipo");
-  const tb = t.closest("[data-tela-btn]"); if (tb) return tb.dataset.telaBtn === "form" ? abrirForm(null) : ir(tb.dataset.telaBtn);
+  const tb = t.closest("[data-tela-btn]"); if (tb) return tb.dataset.telaBtn === "form" ? abrirForm(null) : (tb.dataset.telaBtn === "detalhe" ? abrir(atual) : ir(tb.dataset.telaBtn));
   const est = t.closest("[data-estado]"); if (est) { estadoLista = est.dataset.estado; $$(".proto [data-estado]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.estado === estadoLista)); return ir("lista"); }
   if (t.closest("#ordenar")) { ordemAsc = !ordemAsc; return desenharLista(); }
   if (t.closest("[data-fechar]") || t.id === "veu") return fecharTudo();
   const aba = t.closest("[data-aba]"); if (aba) { trocarAba(aba.dataset.aba); if (aba.dataset.aba === "novo") $("#p-anilha").focus(); return; }
+  const abd = t.closest("[data-aba-btn]"); if (abd) return abaDet(abd.dataset.abaBtn);
   if (t.closest("#ir-novo")) { trocarAba("novo"); $("#p-anilha").value = $("#p-busca").value; return $("#p-anilha").focus(); }
   const lg = t.closest("[data-ligar]"); if (lg) return ligar(lg.dataset.ligar);
   if (t.closest("#btn-mais")) { const m = $(".mais-lista"); m.classList.toggle("aberto"); $("#btn-mais").setAttribute("aria-expanded", m.classList.contains("aberto")); return; }
@@ -718,21 +1052,36 @@ document.addEventListener("click", (e) => {
   if (t.closest("#btn-excluir")) return excluir();
   if (t.closest("#btn-copiar-an")) { navigator.clipboard?.writeText(P[atual].anilha); return toast("Anilha copiada"); }
   if (t.closest("#btn-editar")) return abrirForm(atual);
-  if (t.closest("#btn-pdf")) return toast(`Certificado de ${P[atual].anilha} gerado (${$("#d-ger").value} gerações)`);
+  if (t.closest("#btn-pdf")) return gerarCertificado();
+  const gg = t.closest("[data-ger-pdf]"); if (gg) { $$("[data-ger-pdf]").forEach((b) => b.setAttribute("aria-checked", b === gg)); $("#dlg-b button:last-child").textContent = `Baixar PDF (${gg.dataset.gerPdf} gerações)`; return; }
   if (t.closest("#btn-copiar")) return dialogo(`Copiar ${P[atual].anilha} para o seu plantel?`, "<p>Vão junto os ancestrais e os resultados. A cópia é independente do original.</p>", [["Cancelar", ""], ["Copiar", "pri", () => toast("Copiado para o seu plantel")]]);
-  if (t.closest("#btn-res")) return toast("Formulário de resultado: ano, prova, km, colocação");
+  if (t.closest("#btn-res")) { const f = $("#form-res"); f.style.display = f.style.display === "none" ? "" : "none"; return f.style.display === "" && $("#r-ano").focus(); }
+  if (t.closest("#btn-novo-prop")) return formProp();
+  const pe = t.closest("[data-prop-editar]"); if (pe) return formProp(+pe.dataset.propEditar);
+  const px = t.closest("[data-prop-excluir]"); if (px) return excluirProp(+px.dataset.propExcluir);
+  const pa = t.closest("[data-parar]"); if (pa) { const u = usuarioPor(pa.dataset.parar); return dialogo(`Parar de compartilhar com ${u.nome}?`, "<p>A pessoa deixa de ver os seus pombos na hora. As cópias que ela já fez continuam com ela.</p>", [["Cancelar", ""], ["Parar de compartilhar", "perigo", () => { concedidos = concedidos.filter((l) => l !== u.login); desenharComp(); toast("Compartilhamento removido"); }]]); }
+  const dx = t.closest("[data-deixar]"); if (dx) { recebidos = recebidos.filter((u) => u.login !== dx.dataset.deixar); desenharComp(); return toast("Você deixou de ver esse plantel"); }
+  const vp = t.closest("[data-ver-plantel]"); if (vp) { leitura = true; $("#p-leitura").setAttribute("aria-pressed", "true"); toast(`Plantel de ${usuarioPor(vp.dataset.verPlantel).nome} — só leitura`); return ir("lista"); }
+  if (t.closest("#btn-novo-usu")) return novoUsuario();
+  const us = t.closest("[data-u-senha]"); if (us) { const u = USUARIOS[+us.dataset.uSenha]; dialogo(`Redefinir a senha de ${u.nome}`, `<div class="campo" style="margin-top:12px"><label for="ns">Nova senha (mínimo 8 caracteres)</label><input class="entrada" id="ns" type="text" autocomplete="new-password"></div><p>${u.eu ? "Você continua conectado." : "Todas as sessões abertas dessa pessoa serão encerradas."}</p>`, [["Cancelar", ""], ["Salvar senha", "pri", () => { u.bloq = false; desenharUsu(); toast("Senha alterada"); }]]); return $("#ns").focus(); }
+  const ud = t.closest("[data-u-desbloq]"); if (ud) { USUARIOS[+ud.dataset.uDesbloq].bloq = false; desenharUsu(); return toast("Usuário desbloqueado"); }
+  const ua = t.closest("[data-u-admin]"); if (ua) { const u = USUARIOS[+ua.dataset.uAdmin]; return dialogo(u.admin ? `Tirar o admin de ${u.nome}?` : `Tornar ${u.nome} administrador?`, u.admin ? "<p>A pessoa volta a ver só o próprio plantel e os compartilhados.</p>" : "<p>Ele(a) vai ver e editar os pombos de todos e gerenciar usuários.</p>", [["Cancelar", ""], ["Confirmar", "pri", () => { u.admin = !u.admin; desenharUsu(); }]]); }
+  const uv = t.closest("[data-u-ativo]"); if (uv) { const u = USUARIOS[+uv.dataset.uAtivo]; if (!u.ativo) { u.ativo = true; desenharUsu(); return toast(`${u.nome} reativado`); } return dialogo(`Desativar ${u.nome}?`, "<p>O plantel é mantido, mas a pessoa não consegue mais entrar e as sessões abertas caem na hora.</p>", [["Cancelar", ""], ["Desativar", "perigo", () => { u.ativo = false; desenharUsu(); toast(`${u.nome} desativado`); }]]); }
   if (t.closest("#abrir-busca-cel")) { app.classList.add("buscando"); return $("#busca-topo input").focus(); }
+  if (t.closest("#abrir-menu-cel")) { const ab = app.classList.toggle("menu-aberto"); $("#abrir-menu-cel").setAttribute("aria-expanded", ab); return; }
 });
 ["#f-anilha", "#f-sexo", "#f-sit", "#f-prop"].forEach((s) => $(s).addEventListener("input", desenharLista));
 $("#f-prop").innerHTML += PROPS.map((n, i) => `<option value="${i}">${n}</option>`).join("");
 $("#d-ger").addEventListener("change", desenharDetalhe);
 function tamanho(cel) { app.classList.toggle("celular", cel); $("#p-cel").setAttribute("aria-pressed", cel); $("#p-desk").setAttribute("aria-pressed", !cel); if (cel) $("#d-ger").value = "4"; desenharDetalhe(); }
 $("#p-desk").onclick = () => tamanho(false); $("#p-cel").onclick = () => tamanho(true);
+$("#p-admin").onclick = (e) => { const a = app.classList.toggle("e-admin"); e.target.setAttribute("aria-pressed", a); };
 $("#p-leitura").onclick = (e) => { leitura = !leitura; e.target.setAttribute("aria-pressed", leitura); desenharDetalhe(); };
 const q = new URLSearchParams(location.search);
 if (q.get("tamanho") === "celular") tamanho(true);
-const inicial = location.hash.slice(1) || "detalhe";
-inicial === "form" ? abrirForm(null) : ir(inicial);
+const inicial = location.hash.slice(1) || "inicio";
+inicial === "form" ? abrirForm(null) : inicial === "detalhe" ? abrir(RAIZ) : ir(inicial);
+window.addEventListener("hashchange", () => { const h = location.hash.slice(1); h === "form" ? abrirForm(null) : h === "detalhe" ? abrir(atual) : ir(h || "inicio"); });
 </script>
 </body>
 </html>
