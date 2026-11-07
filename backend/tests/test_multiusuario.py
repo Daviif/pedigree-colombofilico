@@ -52,6 +52,9 @@ def test_plantel_compartilhado_e_so_leitura(cliente_de):
     assert resposta.status_code == 201
     assert [u["nome"] for u in resposta.json()["concedidos"]] == ["Maria"]
     assert [u["nome"] for u in maria.get("/compartilhamentos").json()["recebidos"]] == ["Joao"]
+    # O login aparece junto do nome para diferenciar pessoas com o mesmo nome.
+    assert [u["login"] for u in resposta.json()["concedidos"]] == ["maria"]
+    assert [u["login"] for u in maria.get("/compartilhamentos").json()["recebidos"]] == ["joao"]
 
     # pombo cadastrado depois do compartilhamento também aparece
     _criar_pombo(joao, "1002")

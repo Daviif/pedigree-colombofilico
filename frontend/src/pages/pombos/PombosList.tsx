@@ -48,7 +48,7 @@ export function PombosList() {
             <option value={usuario!.id}>Meu plantel</option>
             {outrosPlanteis.map((u) => (
               <option key={u.id} value={u.id}>
-                Plantel de {u.nome}
+                Plantel de {u.nome} ({u.login})
               </option>
             ))}
             <option value="todos">{usuario!.admin ? 'Todos os plantéis' : 'Todos os que vejo'}</option>

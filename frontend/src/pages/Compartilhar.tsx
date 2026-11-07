@@ -67,7 +67,10 @@ export function Compartilhar() {
         <ul className="divide-y divide-slate-100">
           {compartilhamentos?.concedidos.map((u) => (
             <li key={u.id} className="flex items-center justify-between gap-3 py-2 text-sm">
-              <span className="font-medium text-slate-700">{u.nome}</span>
+              <span>
+                <span className="font-medium text-slate-700">{u.nome}</span>{' '}
+                <span className="text-slate-400">({u.login})</span>
+              </span>
               <button
                 onClick={() => pararDeCompartilhar(u.id, u.nome)}
                 className="shrink-0 py-1 text-xs text-red-600 hover:underline"
@@ -87,9 +90,12 @@ export function Compartilhar() {
         <ul className="divide-y divide-slate-100">
           {compartilhamentos?.recebidos.map((u) => (
             <li key={u.id} className="flex items-center justify-between gap-3 py-2 text-sm">
-              <Link to={`/pombos?plantel=${u.id}`} className="font-medium text-blue-700 hover:underline">
-                {u.nome}
-              </Link>
+              <span>
+                <Link to={`/pombos?plantel=${u.id}`} className="font-medium text-blue-700 hover:underline">
+                  {u.nome}
+                </Link>{' '}
+                <span className="text-slate-400">({u.login})</span>
+              </span>
               <button
                 onClick={() => deixarDeVer(u.id, u.nome)}
                 className="shrink-0 py-1 text-xs text-red-600 hover:underline"
