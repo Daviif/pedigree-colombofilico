@@ -47,11 +47,11 @@
 
 | Item | Comando de conferência | Esperado | Resultado (data) |
 |---|---|---|---|
-| `.env` só do dono | `stat -c '%a %U' ~/pedigree/deploy/.env` | `600 ubuntu` | |
-| `rpcbind` desligado | `systemctl is-active rpcbind rpcbind.socket` | `inactive` nos dois | |
-| Portas | `sudo ss -ltnp \| grep -v 127.0.0` | só 22, 80, 443 | |
-| Pacotes em dia | `apt list --upgradable 2>/dev/null \| wc -l`; `ls /var/run/reboot-required` | 1 (só o cabeçalho); arquivo não existe | |
-| Atualizações automáticas | `systemctl is-enabled unattended-upgrades` | `enabled` | |
+| `.env` só do dono | `stat -c '%a %U' ~/pedigree/deploy/.env` | `600 ubuntu` | ⏳ estava `664` em 2026-11-09; `chmod 600` enviado, falta confirmar |
+| `rpcbind` desligado | `systemctl is-active rpcbind rpcbind.socket` | `inactive` nos dois | ✅ 2026-11-09: desligado e mascarado; porta 111 sumiu do `ss` e segue fechada de fora (antes já era filtrada pelo firewall) |
+| Portas | `sudo ss -ltnp \| grep -v 127.0.0` | só 22, 80, 443 | ✅ 2026-11-09: só 22, 80 e 443 (IPv4 e IPv6) |
+| Pacotes em dia | `apt list --upgradable 2>/dev/null \| wc -l`; `ls /var/run/reboot-required` | 1 (só o cabeçalho); arquivo não existe | ⏳ 2026-11-09: reiniciado (kernel pendente carregado, containers voltaram sozinhos, site 200); 27 pacotes ainda pendentes (apt ocupado pela atualização automática) |
+| Atualizações automáticas | `systemctl is-enabled unattended-upgrades` | `enabled` | ✅ 2026-11-09 |
 | Cabeçalhos depois do deploy | `./verificar.sh https://ppombo.duckdns.org` | `Tudo certo.` | |
 | Backend sem root | `docker compose exec backend id` | `uid=10001(pedigree)` | |
 
