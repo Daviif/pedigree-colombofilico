@@ -40,7 +40,7 @@
 | A12 | Vazamento do `.env` (segredos) | Arquivo só do dono (`chmod 600`); fora do Git; não vai para o backup (RO-09) | `ls -l ~/pedigree/deploy/.env` na VPS | Quem tem SSH na VPS lê. Chave SSH só no PC do responsável |
 | A13 | Perda de dados (erro, disco, VPS apagada pela Oracle) | Backup diário cifrado puxado pelo PC, rotação, alerta de atraso e teste de restauração (RO-01..10) | `docs/operacao.md` seção 3 | Teste com a chave do **pendrive** ainda pendente (RO-10). Conta Oracle grátis pode ser recuperada por ociosidade: **aceito por agora (D6)**, o backup no PC é a defesa |
 | A14 | Site fora do ar sem ninguém saber | UptimeRobot gratuito (D7) a cada 5 min em `/api/saude`, que só dá 200 com backend **e** banco no ar (RO-11) | Testes de `/api/saude`; alerta recebido ao configurar | Avisa em até ~5 min; só por e-mail no plano grátis |
-| A15 | Dados pessoais dos proprietários tratados sem regra | — | — | Política de privacidade simples na Fase 9 |
+| A15 | Dados pessoais dos proprietários tratados sem regra | `docs/privacidade.md` (o que se guarda, quem vê, retenção, direitos; o criador responde pela autorização dos proprietários que cadastra); logs com rotação (SG-07) | Política escrita (2026-11-09), sem declarar conformidade legal | Exclusão e exportação feitas à mão; revisão por profissional antes de ampliar (`docs/lancamento.md` §2) |
 | A16 | Disco cheio derrubar o banco ou o backup | Alerta do backup; `docker system prune` documentado | `df -h /` na rotina (`docs/operacao.md` seção 2) | Monitorar junto com A14 |
 
 ## 4. Checklist da VPS (o responsável executa; resultado anotado aqui)

@@ -1,5 +1,13 @@
+# SG-07: logs (têm IPs) giram em 3 arquivos de 10 MB por serviço, em vez de crescer para sempre.
+x-logs: &logs
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   db:
+    logging: *logs
     # SG-02: versão fixa (mesma 16: troca de patch não exige migração dos dados).
     image: postgres:16.15-alpine3.24
     restart: unless-stopped
@@ -16,6 +24,7 @@ services:
       retries: 10
 
   backend:
+    logging: *logs
     build: ../backend
     restart: unless-stopped
     # SG-01: disco só leitura (só /tmp, em memória), sem capacidades e sem ganho de privilégio.
@@ -35,6 +44,7 @@ services:
         condition: service_healthy
 
   web:
+    logging: *logs
     build: ../frontend
     restart: unless-stopped
     security_opt:

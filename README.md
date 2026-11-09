@@ -279,6 +279,7 @@ Ameaças e o que protege cada uma: `docs/ameacas.md`. Verificação depois de ca
 - **SG-04:** `index.html` não fica em cache (o navegador pega a versão nova logo depois de um deploy). Os arquivos de `/assets/`, que têm o conteúdo no nome, ficam em cache por 1 ano.
 - **SG-05:** dependências sem alertas conhecidos: `pip-audit -r backend/requirements-dev.txt` e `npm audit` zerados (2026-11-09). Refazer antes de cada deploy e uma vez por mês.
 - **SG-06:** a imagem de produção do backend leva só `requirements.txt`. Ferramentas de teste (`pytest`, `httpx`) ficam em `requirements-dev.txt`.
+- **SG-07:** os logs dos contêineres (que têm o IP de cada acesso) giram: no máximo **3 arquivos de 10 MB por serviço** (`logging` no `docker-compose.yml`). Sem isso, o Docker guarda para sempre e enche o disco da VPS.
 
 ## Estrutura
 
