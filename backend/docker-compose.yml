@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:16-alpine
+    image: postgres:16.15-alpine3.24  # mesma versão da produção (SG-02)
     restart: unless-stopped
     environment:
       POSTGRES_USER: pedigree

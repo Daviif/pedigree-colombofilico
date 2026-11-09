@@ -21,7 +21,7 @@ Sobe o Postgres na porta **5436** (ajustada para não conflitar com outros banco
 cd backend
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements-dev.txt   # inclui pytest; a imagem de produção usa só requirements.txt
 alembic upgrade head
 python -m app.criar_usuario admin --admin   # só na primeira vez: usuário para entrar no sistema
 uvicorn app.main:app --reload --port 8010
@@ -268,6 +268,17 @@ Detalhes em `docs/requisitos.md` (RF-xx). O redesenho completo é da Fase 7.
 
 1. Todo texto digitado pelos usuários (anilha, cor, observações, nomes, resultados, dados do proprietário) aparece no PDF **como texto**, nunca como HTML: `<b>` aparece escrito, não em negrito.
 2. Ao gerar o PDF, o servidor **não busca nenhum arquivo nem endereço** (`file://`, `http://`, etc.). O certificado não usa recursos externos: as fontes vêm do sistema. Qualquer tentativa de busca é recusada, e o PDF sai sem aquele recurso.
+
+## Segurança da implantação
+
+Ameaças e o que protege cada uma: `docs/ameacas.md`. Verificação depois de cada deploy: `deploy/verificar.sh https://SEU-DOMINIO`.
+
+- **SG-01:** o backend roda com um usuário **sem privilégio** (uid 10001). O código pertence ao root e só pode ser lido. O contêiner roda com o disco **só leitura** (só `/tmp` é gravável, em memória), **sem capacidades** do Linux (`cap_drop: ALL`) e sem ganho de privilégio (`no-new-privileges`).
+- **SG-02:** versões **fixas**: imagens `python:3.12.16-slim-trixie`, `node:22.23.4-alpine3.24`, `caddy:2.11.9-alpine` e `postgres:16.15-alpine3.24`; dependências com `==` (`requirements.txt`) e `package-lock.json`. Um rebuild recebe as correções da mesma versão, mas nunca troca de versão sozinho. Trocar WeasyPrint, Python ou Debian **só com o teste visual do PDF** (`backend/scripts/comparar_certificados.py`: mesmo número de páginas e nenhuma diferença além do horário impresso).
+- **SG-03:** o Caddy manda em toda resposta: `Strict-Transport-Security` (1 ano), `Content-Security-Policy` (só recursos do próprio site; nada de scripts, estilos, fontes ou imagens de fora; a página não pode ser exibida dentro de outra), `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` (sem câmera, microfone, localização e pagamento) e `Cross-Origin-Opener-Policy: same-origin`. O cabeçalho `Server` não é enviado.
+- **SG-04:** `index.html` não fica em cache (o navegador pega a versão nova logo depois de um deploy). Os arquivos de `/assets/`, que têm o conteúdo no nome, ficam em cache por 1 ano.
+- **SG-05:** dependências sem alertas conhecidos: `pip-audit -r backend/requirements-dev.txt` e `npm audit` zerados (2026-11-09). Refazer antes de cada deploy e uma vez por mês.
+- **SG-06:** a imagem de produção do backend leva só `requirements.txt`. Ferramentas de teste (`pytest`, `httpx`) ficam em `requirements-dev.txt`.
 
 ## Estrutura
 

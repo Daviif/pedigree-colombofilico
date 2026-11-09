@@ -38,6 +38,21 @@ deploy/backup-externo.sh*                          ~/.local/share/pedigree-backu
 | Todo mês | `./backup-pc/testar_restauracao.sh` (backup mais recente) e anotar o resultado na seção 3 |
 | A cada 6 meses | O mesmo teste **com a chave do pendrive**: `./backup-pc/testar_restauracao.sh "" /run/media/$USER/<PENDRIVE>/pedigree-chave-age.txt` |
 | A cada atualização da VPS | `df -h /` (backup e Docker crescem) e `tail -3 ~/pedigree/deploy/backups/backup.log` |
+| Todo mês e antes de cada deploy | No PC: `pip-audit -r backend/requirements-dev.txt` e `cd frontend && npm audit` (SG-05). Alerta novo → atualizar e testar antes de subir |
+| Depois de cada deploy | `./verificar.sh https://ppombo.duckdns.org` → `Tudo certo.` (SG-03/04) e o checklist de `docs/ameacas.md` seção 4 |
+
+## 2.1 Deploy (atualizar a produção)
+
+```bash
+cd ~/pedigree && git pull
+cd deploy && docker compose pull db          # só quando a versão do Postgres mudar no compose (SG-02)
+docker compose up -d --build                 # ~5 min na VPS
+docker compose ps                            # os três "Up"; backend sem reinício em loop
+docker compose logs --tail=30 backend        # "Application startup complete" e nenhum erro de permissão
+./verificar.sh https://ppombo.duckdns.org
+```
+- O backend roda **sem root e com o disco só leitura** (SG-01). Se aparecer `Permission denied` ou `Read-only file system` no log, algo novo está tentando gravar fora de `/tmp`: corrigir no código, não tirar a proteção.
+- Trocar WeasyPrint, Python ou Debian só depois do teste visual do PDF (`backend/scripts/comparar_certificados.py`).
 
 ## 3. Registro dos testes de restauração (RO-07)
 

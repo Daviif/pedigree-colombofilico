@@ -14,7 +14,7 @@ ARQUIVO_DIR="${PEDIGREE_BACKUP_DIR:-$HOME/backups-pedigree/externos}/arquivo"
 ARQUIVO="${1:-$(ls -1 "$ARQUIVO_DIR"/pedigree-*.sql.gz.age 2> /dev/null | sort | tail -n 1)}"
 CHAVE="${2:-$HOME/.config/pedigree-backup/chave-age.txt}"
 NOME="pedigree-restauracao-$$"
-IMAGEM="postgres:16-alpine"
+IMAGEM="postgres:16.15-alpine3.24"  # mesma versão da produção (SG-02)
 
 [ -n "$ARQUIVO" ] && [ -f "$ARQUIVO" ] || { echo "Backup não encontrado: '$ARQUIVO'"; exit 1; }
 [ -f "$CHAVE" ] || { echo "Chave não encontrada: $CHAVE"; exit 1; }
