@@ -38,8 +38,8 @@
 | A10 | Atualização automática de imagem quebrar o sistema ou o PDF | Versões fixas de Python/Debian, Node, Caddy e Postgres (SG-02); teste visual do PDF antes de trocar | `backend/scripts/comparar_certificados.py` (WeasyPrint 63 → 70: idêntico) | — |
 | A11 | Porta esquecida aberta na VPS | Só 22, 80 e 443; iptables e security list da Oracle; desligar o `rpcbind` (porta 111) | `sudo ss -ltnp` e `sudo iptables -L -v` na VPS (seção 4) | — |
 | A12 | Vazamento do `.env` (segredos) | Arquivo só do dono (`chmod 600`); fora do Git; não vai para o backup (RO-09) | `ls -l ~/pedigree/deploy/.env` na VPS | Quem tem SSH na VPS lê. Chave SSH só no PC do responsável |
-| A13 | Perda de dados (erro, disco, VPS apagada pela Oracle) | Backup diário cifrado puxado pelo PC, rotação, alerta de atraso e teste de restauração (RO-01..10) | `docs/operacao.md` seção 3 | Teste com a chave do **pendrive** ainda pendente (RO-10). Conta Oracle grátis pode ser recuperada por ociosidade: decidir Pay As You Go |
-| A14 | Site fora do ar sem ninguém saber | — (decisão pendente) | — | **Aberto:** monitor externo gratuito (Fase 8, decisão do responsável) |
+| A13 | Perda de dados (erro, disco, VPS apagada pela Oracle) | Backup diário cifrado puxado pelo PC, rotação, alerta de atraso e teste de restauração (RO-01..10) | `docs/operacao.md` seção 3 | Teste com a chave do **pendrive** ainda pendente (RO-10). Conta Oracle grátis pode ser recuperada por ociosidade: **aceito por agora (D6)**, o backup no PC é a defesa |
+| A14 | Site fora do ar sem ninguém saber | UptimeRobot gratuito (D7) a cada 5 min em `/api/saude`, que só dá 200 com backend **e** banco no ar (RO-11) | Testes de `/api/saude`; alerta recebido ao configurar | Avisa em até ~5 min; só por e-mail no plano grátis |
 | A15 | Dados pessoais dos proprietários tratados sem regra | — | — | Política de privacidade simples na Fase 9 |
 | A16 | Disco cheio derrubar o banco ou o backup | Alerta do backup; `docker system prune` documentado | `df -h /` na rotina (`docs/operacao.md` seção 2) | Monitorar junto com A14 |
 
@@ -47,10 +47,10 @@
 
 | Item | Comando de conferência | Esperado | Resultado (data) |
 |---|---|---|---|
-| `.env` só do dono | `stat -c '%a %U' ~/pedigree/deploy/.env` | `600 ubuntu` | ⏳ estava `664` em 2026-11-09; `chmod 600` enviado, falta confirmar |
+| `.env` só do dono | `stat -c '%a %U' ~/pedigree/deploy/.env` | `600 ubuntu` | ✅ 2026-11-09: era `664`, agora `600 ubuntu` |
 | `rpcbind` desligado | `systemctl is-active rpcbind rpcbind.socket` | `inactive` nos dois | ✅ 2026-11-09: desligado e mascarado; porta 111 sumiu do `ss` e segue fechada de fora (antes já era filtrada pelo firewall) |
 | Portas | `sudo ss -ltnp \| grep -v 127.0.0` | só 22, 80, 443 | ✅ 2026-11-09: só 22, 80 e 443 (IPv4 e IPv6) |
-| Pacotes em dia | `apt list --upgradable 2>/dev/null \| wc -l`; `ls /var/run/reboot-required` | 1 (só o cabeçalho); arquivo não existe | ⏳ 2026-11-09: reiniciado (kernel pendente carregado, containers voltaram sozinhos, site 200); 27 pacotes ainda pendentes (apt ocupado pela atualização automática) |
+| Pacotes em dia | `apt list --upgradable 2>/dev/null \| wc -l`; `ls /var/run/reboot-required` | 1 (só o cabeçalho); arquivo não existe | ✅ 2026-11-09: reiniciado (kernel pendente carregado; containers voltaram sozinhos), 27 pacotes atualizados, nada pendente |
 | Atualizações automáticas | `systemctl is-enabled unattended-upgrades` | `enabled` | ✅ 2026-11-09 |
 | Cabeçalhos depois do deploy | `./verificar.sh https://ppombo.duckdns.org` | `Tudo certo.` | |
 | Backend sem root | `docker compose exec backend id` | `uid=10001(pedigree)` | |

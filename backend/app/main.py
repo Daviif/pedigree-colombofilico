@@ -3,9 +3,13 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
 
 from app.auth import usuario_atual
 from app.config import settings
+from app.database import get_db
 from app.routers import auth, certificado, compartilhamentos, pombos, proprietarios, resultados, usuarios
 
 
@@ -70,4 +74,14 @@ app.include_router(usuarios.router, prefix="/api", dependencies=protegido)
 
 @app.get("/api/health")
 def health():
+    return {"status": "ok"}
+
+
+@app.get("/api/saude")
+def saude(db: Session = Depends(get_db)):
+    """RO-11: para o monitor externo. 200 só se o banco responde; nada de versão ou dados."""
+    try:
+        db.execute(text("SELECT 1"))
+    except SQLAlchemyError:
+        return JSONResponse(status_code=503, content={"status": "banco indisponível"})
     return {"status": "ok"}

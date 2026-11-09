@@ -14,6 +14,9 @@
 | D3 | Backup externo vai para o **PC do responsável** |
 | D5 | O responsável **não usa gerenciador de senhas**, e o PC fica ligado a maior parte do tempo (2026-11-07). Ajustes em RO-03, RO-04 e RO-10 |
 | D4 | Ninguém explorou a falha do PDF: a busca por HTML ou URL nos textos voltou vazia |
+| D6 | (2026-11-09) **Oracle Pay As You Go: agora não**, trocar depois. Risco aceito: a conta grátis pode ter a VPS recuperada por ociosidade; o backup no PC (RO-01..10) é a defesa. Rever antes de mais clientes |
+| D7 | (2026-11-09) **Monitor externo: sim**, UptimeRobot gratuito (a cada 5 min, aviso por e-mail) olhando `GET /api/saude` (RO-11), que só responde 200 com backend **e** banco funcionando |
+| D8 | (2026-11-09) **PDF de 6 gerações fica como está**: com ancestrais cheios de títulos, a legenda e o rodapé vão para uma 2ª página e caixas da última coluna se sobrepõem. Defeito antigo, o layout do PDF não muda |
 
 ---
 
@@ -86,6 +89,7 @@ Teste geral: um teste parametrizado que manda o limite e o limite + 1 de cada ca
 | RO-08 | **Objetivos:** RPO ≤ 24 h **se o PC ligar todo dia**. Com o PC desligado por N dias, o RPO vira N dias (limitação aceita da D3; o backup local da VPS continua diário). RTO ≤ 4 h (VPS nova + deploy + restauração), medido no RO-07 | Valores registrados após o RO-07 |
 | RO-10 | **Chave privada do age (D5):** gerada no PC (`~/.config/pedigree-backup/chave-age.txt`, permissão 600), **sem senha**: é uma linha só, que cabe num papel (uma chave com senha vira um bloco de texto que não dá para copiar à mão; e o PC já guarda os dados de dev). Cópias em **papel e pendrive**, guardadas longe do PC. O runbook diz onde estão e como testar a cópia | Teste de restauração usando a cópia do pendrive |
 | RO-09 | Os segredos (`.env`) **não** vão no backup e **não são necessários** para recuperar: numa VPS nova, geram-se segredos novos (todos fazem login de novo) e o dump é restaurado no banco novo. O runbook descreve o passo a passo | Revisão do script; ensaio no RO-07 |
+| RO-11 | **Saúde para o monitor (D7):** `GET /api/saude`, sem login, responde **200** `{"status": "ok"}` só se o backend consegue fazer `SELECT 1` no banco; se o banco não responder, **503** `{"status": "banco indisponível"}`. Não revela versão, contagens nem dados. O monitor externo olha esse endereço a cada 5 min | Testes: 200 com banco; 503 com o banco falhando; sem login |
 
 ## 6. Frontend mínimo desta etapa (RF)
 
@@ -120,7 +124,7 @@ O redesenho é da Fase 7. Aqui entra só o necessário para as regras acima func
 
 - Pedigree interativo, redesenho e sistema visual → Fase 7.
 - Endurecimento da VPS (`.env` 600, rpcbind, atualizações, contêiner sem root, versões fixas, cabeçalhos do Caddy, WeasyPrint 70) → Fase 8.
-- Oracle Pay As You Go e monitor de disponibilidade externo → decisão pendente do responsável (Fase 8).
+- Oracle Pay As You Go → D6 (agora não). Monitor externo → D7 (sim, RO-11).
 - Revogar a sessão no logout → P3, aceito.
 
 ## 9. Plano de migração e reversão

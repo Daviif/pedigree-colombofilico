@@ -39,5 +39,8 @@ checar "API responde (401 sem login)" '^HTTP/[0-9.]+ 401' "$api"
 checar "API com os cabeçalhos" "^content-security-policy: default-src 'self'" "$api"
 ausente "API sem cabeçalho Server" '^server:' "$api"
 
+saude=$(curl -sS -m 15 "$URL/api/saude")
+checar "saúde com banco (RO-11, o que o monitor olha)" '"status": ?"ok"' "$saude"
+
 echo
 if [ "$falhas" -eq 0 ]; then echo "Tudo certo."; else echo "$falhas verificação(ões) falharam."; exit 1; fi
