@@ -13,6 +13,7 @@ import type {
   Proprietario,
   ProprietarioInput,
   Resultado,
+  ResultadoRecente,
   ResultadoInput,
   Usuario,
   UsuarioAdmin,
@@ -203,6 +204,14 @@ export function useRemoverResultado(pomboId: number) {
   return useMutation({
     mutationFn: async (id: number) => api.delete(`/pombos/${pomboId}/resultados/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['resultados', pomboId] }),
+  })
+}
+
+/** IN-04: últimos resultados do próprio plantel. */
+export function useResultadosRecentes(limite = 5) {
+  return useQuery({
+    queryKey: ['resultados-recentes', limite],
+    queryFn: async () => (await api.get<ResultadoRecente[]>('/resultados/recentes', { params: { limite } })).data,
   })
 }
 

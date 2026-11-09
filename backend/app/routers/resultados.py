@@ -1,14 +1,33 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.auth import usuario_atual
 from app.database import get_db
-from app.models import Resultado, Usuario
+from app.models import Pombo, Resultado, Usuario
 from app.routers.pombos import buscar_pombo_ou_404
-from app.schemas import ResultadoCreate, ResultadoRead, ResultadoUpdate
+from app.schemas import ResultadoCreate, ResultadoRead, ResultadoRecente, ResultadoUpdate
 
 router = APIRouter(prefix="/pombos/{pombo_id}/resultados", tags=["resultados"])
+# Rota própria (fora de /pombos) para não colidir com /pombos/{pombo_id}.
+router_recentes = APIRouter(prefix="/resultados", tags=["resultados"])
+
+
+@router_recentes.get("/recentes", response_model=list[ResultadoRecente])
+def resultados_recentes(
+    limite: int = Query(default=5, ge=1, le=20),
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(usuario_atual),
+):
+    """IN-04: últimos resultados do PRÓPRIO plantel (também para o admin), para o Início."""
+    stmt = (
+        select(Resultado.id, Resultado.pombo_id, Pombo.anilha, Resultado.ano, Resultado.competicao, Resultado.colocacao)
+        .join(Pombo, Pombo.id == Resultado.pombo_id)
+        .where(Pombo.usuario_id == usuario.id)
+        .order_by(Resultado.ano.desc().nullslast(), Resultado.id.desc())
+        .limit(limite)
+    )
+    return [ResultadoRecente(**linha._mapping) for linha in db.execute(stmt)]
 
 
 @router.get("", response_model=list[ResultadoRead])

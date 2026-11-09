@@ -107,6 +107,17 @@ class ResultadoUpdate(ResultadoInput):
     pass
 
 
+class ResultadoRecente(BaseModel):
+    """Resultado com a anilha do pombo, para a lista do Início (IN-04)."""
+
+    id: int
+    pombo_id: int
+    anilha: str
+    ano: int | None = None
+    competicao: str
+    colocacao: str | None = None
+
+
 class ResultadoRead(ResultadoBase):
     model_config = ConfigDict(from_attributes=True)
 

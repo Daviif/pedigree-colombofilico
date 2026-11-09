@@ -12,8 +12,8 @@ const SIMBOLO = { M: '♂', F: '♀', DESCONHECIDO: '?' } as const
 export type BuscaGlobalRef = { focar: () => void }
 
 /** Busca por anilha no topo (NV-03 a NV-05). Combobox acessível: ↑ ↓ Enter Esc. */
-export const BuscaGlobal = forwardRef<BuscaGlobalRef, { escura?: boolean; aoAbrir?: () => void }>(function BuscaGlobal(
-  { escura = true, aoAbrir },
+export const BuscaGlobal = forwardRef<BuscaGlobalRef, { escura?: boolean; grande?: boolean; aoAbrir?: () => void }>(function BuscaGlobal(
+  { escura = true, grande = false, aoAbrir },
   ref,
 ) {
   const [texto, setTexto] = useState('')
@@ -80,7 +80,7 @@ export const BuscaGlobal = forwardRef<BuscaGlobalRef, { escura?: boolean; aoAbri
         aria-autocomplete="list"
         aria-activedescendant={mostrar && opcoes > 0 ? `${idLista}-${selecionado}` : undefined}
         autoComplete="off"
-        placeholder="Buscar anilha…"
+        placeholder={grande ? 'Digite a anilha (ex.: 4272402)' : 'Buscar anilha…'}
         value={texto}
         onChange={(e) => {
           setTexto(e.target.value)
@@ -101,10 +101,10 @@ export const BuscaGlobal = forwardRef<BuscaGlobalRef, { escura?: boolean; aoAbri
             entrada.current?.blur()
           }
         }}
-        className={`h-10 w-full rounded-[10px] border pl-10 pr-10 focus:outline-none ${
+        className={`${grande ? 'h-12 text-base' : 'h-10'} w-full rounded-[10px] border pl-10 pr-10 focus:outline-none ${
           escura
             ? 'border-white/20 bg-white/10 text-white placeholder:text-[#a9b6cc] focus:border-dourado focus:bg-white focus:text-slate-900 focus:ring-3 focus:ring-dourado/35'
-            : 'border-borda bg-white focus:border-link focus:ring-3 focus:ring-blue-100'
+            : 'border-transparent bg-white shadow-sm focus:border-link focus:ring-3 focus:ring-blue-100'
         }`}
       />
       <kbd aria-hidden className={`pointer-events-none absolute right-2.5 top-1/2 hidden -translate-y-1/2 rounded border px-1.5 font-mono text-[11px] ${texto ? '' : 'sm:block'} ${escura ? 'border-white/25 text-[#a9b6cc]' : 'border-borda text-slate-400'}`}>

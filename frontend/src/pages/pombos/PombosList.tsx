@@ -1,11 +1,28 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 
 import { useCompartilhamentos, usePombos, useProprietarios, useUsuarioAtual } from '../../api/hooks'
+import type { Pombo, PombosFiltro, Sexo, StatusPombo } from '../../api/types'
 import { FalhaAoCarregar } from '../../components/FalhaAoCarregar'
-import { Migalhas } from '../../components/ui'
-import type { PombosFiltro, Sexo, StatusPombo } from '../../api/types'
+import { Aviso, Botao, Campo, Carregando, Migalhas, SeloSituacao, SexoRotulo, Vazio, classeBotao, classeEntrada } from '../../components/ui'
 
+/** LI-03: compara anilhas como números (2/24 antes de 10/24). */
+const ordemAnilha = new Intl.Collator('pt-BR', { numeric: true })
+
+function LinkPombo({ pombo, neutro }: { pombo?: { id: number; anilha: string } | null; neutro?: boolean }) {
+  if (!pombo) return <span className="text-slate-400">—</span>
+  return (
+    <Link
+      to={`/pombos/${pombo.id}`}
+      onClick={(e) => e.stopPropagation()}
+      className={`tabular-nums hover:underline ${neutro ? 'text-slate-600 hover:text-link' : 'font-semibold text-link'}`}
+    >
+      {pombo.anilha}
+    </Link>
+  )
+}
+
+/** Lista de pombos (LI-01..06). */
 export function PombosList() {
   const { data: usuario } = useUsuarioAtual()
   const { data: compartilhamentos } = useCompartilhamentos()
@@ -13,9 +30,12 @@ export function PombosList() {
   const [searchParams, setSearchParams] = useSearchParams()
   const plantel = searchParams.get('plantel') ?? String(usuario!.id)
   const meuPlantel = plantel === String(usuario!.id)
+  const soIncompletos = searchParams.get('incompleto') === '1'
   const outrosPlanteis = compartilhamentos?.recebidos ?? []
+  const escolhePlantel = usuario!.admin || outrosPlanteis.length > 0
 
   const [filtro, setFiltro] = useState<PombosFiltro>({})
+  const [crescente, setCrescente] = useState(true)
   const { data: pombos, isLoading, isError, error, refetch } = usePombos({
     ...filtro,
     // proprietários são do próprio plantel: o filtro só vale nele
@@ -24,159 +44,221 @@ export function PombosList() {
   })
   const { data: proprietarios } = useProprietarios()
 
-  function atualizarFiltro(campo: keyof PombosFiltro, valor: string) {
+  const lista = useMemo(() => {
+    const base: Pombo[] = (pombos ?? []).filter((p) => !soIncompletos || !p.pai_id || !p.mae_id)
+    return [...base].sort((a, b) => (crescente ? 1 : -1) * ordemAnilha.compare(a.anilha, b.anilha))
+  }, [pombos, soIncompletos, crescente])
+
+  const temFiltro = Object.values(filtro).some(Boolean) || soIncompletos
+
+  function atualizarFiltro<K extends keyof PombosFiltro>(campo: K, valor: string) {
     setFiltro((f) => ({ ...f, [campo]: valor || undefined }))
   }
 
+  function limparFiltros() {
+    setFiltro({})
+    const p = new URLSearchParams(searchParams)
+    p.delete('incompleto')
+    setSearchParams(p)
+  }
+
+  function tirarIncompleto() {
+    const p = new URLSearchParams(searchParams)
+    p.delete('incompleto')
+    setSearchParams(p)
+  }
+
+  const nomePlantel = meuPlantel
+    ? 'no seu plantel'
+    : plantel === 'todos'
+      ? 'em todos os plantéis que você vê'
+      : `no plantel de ${outrosPlanteis.find((u) => String(u.id) === plantel)?.nome ?? 'outro criador'} (só leitura)`
+
   return (
     <div className="space-y-4">
-      <Migalhas itens={[{ rotulo: 'Início', para: '/' }, { rotulo: 'Meus pombos' }]} />
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold text-marinho">Meus pombos</h1>
-        <Link
-          to="/pombos/novo"
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-        >
-          + Novo pombo
-        </Link>
+      <div>
+        <Migalhas itens={[{ rotulo: 'Início', para: '/' }, { rotulo: 'Meus pombos' }]} />
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 className="text-[26px] font-bold text-marinho">Meus pombos</h1>
+            <p className="text-sm text-slate-600" aria-live="polite">
+              {isLoading ? 'Carregando…' : `${lista.length} ${lista.length === 1 ? 'pombo' : 'pombos'} ${nomePlantel}`}
+            </p>
+          </div>
+          <Link to="/pombos/novo" className={classeBotao('primaria')}>
+            <span aria-hidden>+</span> Novo pombo
+          </Link>
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:grid-cols-6 sm:gap-3 sm:p-4">
-        {(usuario!.admin || outrosPlanteis.length > 0) && (
-          <select
-            value={plantel}
-            className="col-span-2 rounded border border-slate-300 px-2 py-1 text-sm sm:col-span-6"
-            onChange={(e) => setSearchParams(e.target.value === String(usuario!.id) ? {} : { plantel: e.target.value })}
-          >
-            <option value={usuario!.id}>Meu plantel</option>
-            {outrosPlanteis.map((u) => (
-              <option key={u.id} value={u.id}>
-                Plantel de {u.nome} ({u.login})
-              </option>
-            ))}
-            <option value="todos">{usuario!.admin ? 'Todos os plantéis' : 'Todos os que vejo'}</option>
-          </select>
-        )}
-        <input
-          placeholder="Anilha"
-          className="rounded border border-slate-300 px-2 py-1 text-sm"
-          onChange={(e) => atualizarFiltro('anilha', e.target.value)}
-        />
-        <input
-          placeholder="Cor"
-          className="rounded border border-slate-300 px-2 py-1 text-sm"
-          onChange={(e) => atualizarFiltro('cor', e.target.value)}
-        />
-        <select
-          className="rounded border border-slate-300 px-2 py-1 text-sm"
-          onChange={(e) => atualizarFiltro('sexo', e.target.value as Sexo)}
-        >
-          <option value="">Sexo (todos)</option>
-          <option value="M">Macho</option>
-          <option value="F">Fêmea</option>
-          <option value="DESCONHECIDO">Desconhecido</option>
-        </select>
-        <select
-          className="rounded border border-slate-300 px-2 py-1 text-sm"
-          onChange={(e) => atualizarFiltro('status', e.target.value as StatusPombo)}
-        >
-          <option value="">Status (todos)</option>
-          <option value="ATIVO">Ativo</option>
-          <option value="REPRODUTOR">Reprodutor</option>
-          <option value="VENDIDO">Vendido</option>
-          <option value="FALECIDO">Falecido</option>
-        </select>
-        <select
-          disabled={!meuPlantel}
-          className="col-span-2 rounded border border-slate-300 px-2 py-1 text-sm disabled:opacity-50 sm:col-span-2"
-          onChange={(e) => atualizarFiltro('proprietario_id', e.target.value)}
-        >
-          <option value="">Proprietário (todos)</option>
-          {proprietarios?.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.nome}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {isError && <FalhaAoCarregar erro={error} oQue="os pombos" onTentar={refetch} />}
-
-      {/* Celular: lista de cartões */}
-      <ul className="divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white shadow-sm sm:hidden">
-        {isLoading && <li className="px-4 py-4 text-sm text-slate-500">Carregando...</li>}
-        {!isLoading && pombos?.length === 0 && (
-          <li className="px-4 py-4 text-sm text-slate-500">Nenhum pombo encontrado.</li>
-        )}
-        {pombos?.map((pombo) => (
-          <li key={pombo.id}>
-            <Link to={`/pombos/${pombo.id}`} className="block px-4 py-3 text-sm active:bg-slate-50">
-              <div className="flex items-baseline justify-between gap-3">
-                <span className="break-all font-medium text-blue-700">{pombo.anilha}</span>
-                <span className="shrink-0 text-xs text-slate-500">{pombo.status}</span>
-              </div>
-              <div className="text-slate-600">
-                {pombo.sexo} · {pombo.cor ?? '—'}
-                {pombo.proprietario ? ` · ${pombo.proprietario.nome}` : ''}
-              </div>
-              {!meuPlantel && <div className="text-xs text-amber-700">Plantel de {pombo.dono.nome}</div>}
-              <div className="text-xs text-slate-400">
-                Pai: {pombo.pai?.anilha ?? '—'} · Mãe: {pombo.mae?.anilha ?? '—'}
-              </div>
-            </Link>
-          </li>
-        ))}
-      </ul>
-
-      {/* Telas maiores: tabela */}
-      <div className="hidden overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm sm:block">
-        <table className="w-full text-sm">
-          <thead className="bg-slate-100 text-left text-slate-600">
-            <tr>
-              <th className="px-4 py-2">Anilha</th>
-              <th className="px-4 py-2">Sexo</th>
-              <th className="px-4 py-2">Cor</th>
-              <th className="px-4 py-2">Status</th>
-              <th className="px-4 py-2">Proprietário</th>
-              <th className="px-4 py-2">Pai / Mãe</th>
-              {!meuPlantel && <th className="px-4 py-2">Plantel</th>}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {isLoading && (
-              <tr>
-                <td className="px-4 py-4 text-slate-500" colSpan={meuPlantel ? 6 : 7}>
-                  Carregando...
-                </td>
-              </tr>
+      <section aria-label="Filtros" className="rounded-[10px] border border-borda-suave bg-white p-4 shadow-sm">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+          {escolhePlantel && (
+            <Campo rotulo="Plantel" className="col-span-2 md:col-span-3 xl:col-span-1">
+              {(c) => (
+                <select
+                  {...c}
+                  value={plantel}
+                  className={classeEntrada()}
+                  onChange={(e) => {
+                    setFiltro((f) => ({ ...f, proprietario_id: undefined }))
+                    setSearchParams(e.target.value === String(usuario!.id) ? {} : { plantel: e.target.value })
+                  }}
+                >
+                  <option value={usuario!.id}>Meu plantel</option>
+                  {outrosPlanteis.map((u) => (
+                    <option key={u.id} value={u.id}>
+                      Plantel de {u.nome} ({u.login})
+                    </option>
+                  ))}
+                  <option value="todos">{usuario!.admin ? 'Todos os plantéis' : 'Todos os que vejo'}</option>
+                </select>
+              )}
+            </Campo>
+          )}
+          <Campo rotulo="Anilha">
+            {(c) => <input {...c} inputMode="numeric" placeholder="contém…" value={filtro.anilha ?? ''} className={classeEntrada()} onChange={(e) => atualizarFiltro('anilha', e.target.value)} />}
+          </Campo>
+          <Campo rotulo="Cor">
+            {(c) => <input {...c} placeholder="contém…" value={filtro.cor ?? ''} className={classeEntrada()} onChange={(e) => atualizarFiltro('cor', e.target.value)} />}
+          </Campo>
+          <Campo rotulo="Sexo">
+            {(c) => (
+              <select {...c} value={filtro.sexo ?? ''} className={classeEntrada()} onChange={(e) => atualizarFiltro('sexo', e.target.value as Sexo)}>
+                <option value="">Todos</option>
+                <option value="M">♂ Macho</option>
+                <option value="F">♀ Fêmea</option>
+                <option value="DESCONHECIDO">Desconhecido</option>
+              </select>
             )}
-            {!isLoading && pombos?.length === 0 && (
-              <tr>
-                <td className="px-4 py-4 text-slate-500" colSpan={meuPlantel ? 6 : 7}>
-                  Nenhum pombo encontrado.
-                </td>
-              </tr>
+          </Campo>
+          <Campo rotulo="Situação">
+            {(c) => (
+              <select {...c} value={filtro.status ?? ''} className={classeEntrada()} onChange={(e) => atualizarFiltro('status', e.target.value as StatusPombo)}>
+                <option value="">Todas</option>
+                <option value="ATIVO">Ativo</option>
+                <option value="REPRODUTOR">Reprodutor</option>
+                <option value="VENDIDO">Vendido</option>
+                <option value="FALECIDO">Falecido</option>
+              </select>
             )}
-            {pombos?.map((pombo) => (
-              <tr key={pombo.id} className="hover:bg-slate-50">
-                <td className="px-4 py-2">
-                  <Link to={`/pombos/${pombo.id}`} className="font-medium text-blue-700 hover:underline">
-                    {pombo.anilha}
+          </Campo>
+          {meuPlantel && (
+            <Campo rotulo="Proprietário" className="col-span-2 md:col-span-1">
+              {(c) => (
+                <select {...c} value={filtro.proprietario_id ?? ''} className={classeEntrada()} onChange={(e) => atualizarFiltro('proprietario_id', e.target.value)}>
+                  <option value="">Todos</option>
+                  {proprietarios?.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.nome}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </Campo>
+          )}
+        </div>
+        {temFiltro && (
+          <Botao variante="fantasma" pequeno className="mt-2" onClick={limparFiltros}>
+            Limpar filtros
+          </Botao>
+        )}
+      </section>
+
+      {soIncompletos && (
+        <Aviso tom="alerta">
+          Mostrando só pombos <b>sem pai ou sem mãe</b> cadastrados.{' '}
+          <button type="button" onClick={tirarIncompleto} className="min-h-11 font-semibold underline sm:min-h-0">
+            Ver todos
+          </button>
+        </Aviso>
+      )}
+
+      {isError ? (
+        <FalhaAoCarregar erro={error} oQue="os pombos" onTentar={refetch} />
+      ) : isLoading ? (
+        <div className="rounded-[10px] border border-borda-suave bg-white px-5 shadow-sm">
+          <Carregando linhas={6} rotulo="Carregando os pombos…" />
+        </div>
+      ) : lista.length === 0 ? (
+        <div className="rounded-[10px] border border-borda-suave bg-white shadow-sm">
+          {temFiltro ? (
+            <Vazio titulo="Nenhum pombo com esses filtros" acao={<Botao onClick={limparFiltros}>Limpar filtros</Botao>}>
+              Tente outra anilha ou outra cor.
+            </Vazio>
+          ) : (
+            <Vazio
+              titulo={meuPlantel ? 'Nenhum pombo cadastrado ainda' : 'Este plantel ainda não tem pombos'}
+              acao={meuPlantel && <Link to="/pombos/novo" className={classeBotao('primaria')}>+ Cadastrar o primeiro</Link>}
+            >
+              {meuPlantel && 'Comece pelo primeiro. Pai e mãe podem ser ligados depois, direto na árvore.'}
+            </Vazio>
+          )}
+        </div>
+      ) : (
+        <>
+          {/* Celular: cartões */}
+          <ul className="divide-y divide-borda-suave overflow-hidden rounded-[10px] border border-borda-suave bg-white shadow-sm sm:hidden">
+            {lista.map((p) => (
+              <li key={p.id} className="px-4 py-3.5">
+                <div className="flex items-center justify-between gap-3">
+                  <Link to={`/pombos/${p.id}`} className="inline-flex min-h-11 items-center break-all text-[15px] font-semibold text-link tabular-nums">
+                    {p.anilha}
                   </Link>
-                </td>
-                <td className="px-4 py-2">{pombo.sexo}</td>
-                <td className="px-4 py-2">{pombo.cor ?? '—'}</td>
-                <td className="px-4 py-2">{pombo.status}</td>
-                <td className="px-4 py-2">{pombo.proprietario?.nome ?? '—'}</td>
-                <td className="px-4 py-2 text-slate-500">
-                  {pombo.pai?.anilha ?? '—'} / {pombo.mae?.anilha ?? '—'}
-                </td>
-                {!meuPlantel && <td className="px-4 py-2 text-slate-500">{pombo.dono.nome}</td>}
-              </tr>
+                  <SeloSituacao situacao={p.status} />
+                </div>
+                <div className="text-sm text-slate-700">
+                  <SexoRotulo sexo={p.sexo} /> · {p.cor || 'cor não informada'}
+                  {p.proprietario && <span className="text-slate-500"> · {p.proprietario.nome}</span>}
+                </div>
+                {!meuPlantel && <div className="text-xs text-amber-800">Plantel de {p.dono.nome}</div>}
+                <div className="mt-0.5 text-[13px] text-slate-500">
+                  Pai <LinkPombo pombo={p.pai} neutro /> · Mãe <LinkPombo pombo={p.mae} neutro />
+                </div>
+              </li>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </ul>
+
+          {/* Telas maiores: tabela */}
+          <div className="hidden overflow-x-auto rounded-[10px] border border-borda-suave bg-white shadow-sm sm:block">
+            <table className="w-full text-sm">
+              <thead className="bg-[#f8fafd] text-left text-xs font-semibold text-slate-500">
+                <tr>
+                  <th scope="col" aria-sort={crescente ? 'ascending' : 'descending'} className="px-4 py-3">
+                    <button type="button" onClick={() => setCrescente((c) => !c)} className="inline-flex items-center gap-1 font-semibold hover:text-marinho">
+                      Anilha <span aria-hidden>{crescente ? '▲' : '▼'}</span>
+                      <span className="sr-only">(clique para inverter a ordem)</span>
+                    </button>
+                  </th>
+                  <th scope="col" className="px-4 py-3">Sexo</th>
+                  <th scope="col" className="px-4 py-3">Cor</th>
+                  <th scope="col" className="px-4 py-3">Situação</th>
+                  <th scope="col" className="px-4 py-3">Proprietário</th>
+                  <th scope="col" className="px-4 py-3">Pai / Mãe</th>
+                  {!meuPlantel && <th scope="col" className="px-4 py-3">Plantel</th>}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-borda-suave">
+                {lista.map((p) => (
+                  <tr key={p.id} className="hover:bg-[#f8fafd]">
+                    <td className="px-4 py-3">
+                      <LinkPombo pombo={p} />
+                    </td>
+                    <td className="px-4 py-3"><SexoRotulo sexo={p.sexo} /></td>
+                    <td className="px-4 py-3">{p.cor || '—'}</td>
+                    <td className="px-4 py-3"><SeloSituacao situacao={p.status} /></td>
+                    <td className="px-4 py-3">{p.proprietario?.nome ?? '—'}</td>
+                    <td className="px-4 py-3">
+                      <LinkPombo pombo={p.pai} neutro /> <span className="text-slate-400">/</span> <LinkPombo pombo={p.mae} neutro />
+                    </td>
+                    {!meuPlantel && <td className="px-4 py-3 text-slate-600">{p.dono.nome}</td>}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
     </div>
   )
 }

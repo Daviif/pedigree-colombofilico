@@ -62,6 +62,7 @@ protegido = [Depends(usuario_atual)]
 app.include_router(proprietarios.router, prefix="/api", dependencies=protegido)
 app.include_router(pombos.router, prefix="/api", dependencies=protegido)
 app.include_router(resultados.router, prefix="/api", dependencies=protegido)
+app.include_router(resultados.router_recentes, prefix="/api", dependencies=protegido)
 app.include_router(certificado.router, prefix="/api", dependencies=protegido)
 app.include_router(compartilhamentos.router, prefix="/api", dependencies=protegido)
 app.include_router(usuarios.router, prefix="/api", dependencies=protegido)

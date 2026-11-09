@@ -138,3 +138,13 @@ export interface UsuarioNovo {
   senha: string
   admin: boolean
 }
+
+/** IN-04: resultado com a anilha do pombo, para o Início. */
+export interface ResultadoRecente {
+  id: number
+  pombo_id: number
+  anilha: string
+  ano?: number | null
+  competicao: string
+  colocacao?: string | null
+}

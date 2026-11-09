@@ -180,6 +180,20 @@ Desenho em `docs/ux/fluxos.md` e no protótipo `docs/ux/prototipos/alta-fidelida
 - **NV-05:** sem resultado, a busca oferece "Cadastrar <anilha>", que abre o formulário de novo pombo já com a anilha preenchida. Só aparece se o texto for uma anilha válida (números e `/`).
 - **NV-06:** as páginas mostram o caminho no topo ("Início › Meus pombos › 4272402/24"). O último item é a página atual e não é link.
 
+## Início e lista de pombos
+
+- **IN-01:** o Início cumprimenta pelo primeiro nome e pela hora do dia ("Bom dia, Davi!") e tem a busca grande por anilha (mesmas regras NV-04/05) e o botão "Cadastrar novo pombo".
+- **IN-02:** três números do **próprio plantel**: pombos, reprodutores (situação Reprodutor) e **pedigree incompleto** (sem pai ou sem mãe). Cada número leva à lista correspondente.
+- **IN-03:** últimos 5 pombos cadastrados no próprio plantel, com sexo, cor e situação.
+- **IN-04:** últimos 5 resultados do próprio plantel (`GET /api/resultados/recentes`): os mais recentes por ano (os sem ano por último) e, no mesmo ano, os registrados por último. Só o próprio plantel, inclusive para o admin. O parâmetro `limite` vai de 1 a 20 (padrão 5).
+- **IN-05:** a foto do pombo-correio tem licença CC BY-SA 2.0, e o crédito ao autor aparece no rodapé do Início (exigência da licença; `docs/ux/prototipos/img/CREDITOS.md`).
+- **LI-01:** filtros com rótulo visível: Plantel (só quando há outros plantéis para ver), Anilha, Cor, Sexo, Situação e Proprietário (só no próprio plantel). "Limpar filtros" aparece quando há algum filtro ativo.
+- **LI-02:** contagem do que está na tela ("24 pombos").
+- **LI-03:** a lista vem em ordem de anilha, comparando números como números (2/24 antes de 10/24). Clicar no cabeçalho "Anilha" inverte a ordem.
+- **LI-04:** sexo com ♂/♀ e nome, situação como selo, e pai e mãe como links para os pombos. Pai ou mãe desconhecidos aparecem como "—".
+- **LI-05:** estados: carregando (esqueleto), erro (Tentar de novo), plantel vazio ("Cadastrar o primeiro") e nenhum resultado para os filtros ("Limpar filtros").
+- **LI-06:** `?incompleto=1` mostra só pombos sem pai ou sem mãe (vindo do número do Início), com um aviso que permite tirar o filtro.
+
 ## Mensagens e falhas na tela
 
 Detalhes em `docs/requisitos.md` (RF-xx). O redesenho completo é da Fase 7.
