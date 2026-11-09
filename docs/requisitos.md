@@ -17,6 +17,7 @@
 | D6 | (2026-11-09) **Oracle Pay As You Go: agora não**, trocar depois. Risco aceito: a conta grátis pode ter a VPS recuperada por ociosidade; o backup no PC (RO-01..10) é a defesa. Rever antes de mais clientes |
 | D7 | (2026-11-09) **Monitor externo: sim**, UptimeRobot gratuito (a cada 5 min, aviso por e-mail) olhando `GET /api/saude` (RO-11), que só responde 200 com backend **e** banco funcionando |
 | D8 | (2026-11-09) **PDF de 6 gerações fica como está**: com ancestrais cheios de títulos, a legenda e o rodapé vão para uma 2ª página e caixas da última coluna se sobrepõem. Defeito antigo, o layout do PDF não muda |
+| D9 | (2026-11-09) O responsável sobe os backups **cifrados** (`.age`) do PC para o **Google Drive**: uma 3ª cópia, fora de casa. A chave privada do age **nunca** vai para a mesma conta (quem entrasse teria backup e chave juntos); ela fica no papel/pendrive (RO-10) |
 
 ---
 

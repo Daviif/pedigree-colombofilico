@@ -13,7 +13,7 @@
 | 3 | PDF consistente | Layout igual pixel a pixel entre WeasyPrint 63 e 70, dentro dos contêineres (Fase 8); segurança do PDF (7 testes). Limitação aceita: com 6 gerações e muitos títulos, o rodapé vai para a 2ª página (D8) | ✅ |
 | 4 | Isolamento de dados | `test_multiusuario.py`, `test_genitor.py` (PE-01); invisível = 404, só leitura = 403 | ✅ |
 | 5 | Compartilhamento e cópia testados | Regras RC e CP; `test_copia.py`; `grupo6.test.tsx` | ✅ |
-| 6 | Backup externo | Diário, cifrado (age), puxado pelo PC com 3 tentativas (RO-01..11); alerta com 48 h sem cópia | ✅ |
+| 6 | Backup externo | Diário, cifrado (age), puxado pelo PC com 3 tentativas (RO-01..11); alerta com 48 h sem cópia; 3ª cópia dos `.age` no Google Drive (D9) | ✅ |
 | 7 | Restauração comprovada | `docs/operacao.md` §3: restaurado com a chave do PC em 2026-11-07 e 2026-11-09 (já na versão 16.15 do Postgres) | ✅ chave do PC · ⏳ **com a chave do pendrive (RO-10)** |
 | 8 | HTTPS e autenticação verificados | HTTPS automático (Caddy); limite de login (RA-01..08, testes); cookie httpOnly/Secure; HSTS e CSP | 🔁 `./verificar.sh` depois do deploy · ✅ RA-06 no Caddy local e **na VPS** (2026-11-09: com `X-Forwarded-For: 1.2.3.4`, o log mostrou o IP público real do PC) |
 | 9 | Mensagens de erro claras | Regras RF, CA-02, UI-01 (sem `alert`/`confirm`); estados de erro conferidos na 7.8 | ✅ |
@@ -22,7 +22,7 @@
 | 12 | Privacidade | `docs/privacidade.md` (o que o sistema guarda, quem vê, retenção, direitos), logs com rotação (SG-07) | ✅ responsável, região (São Paulo) e prazo (15 dias) · ⏳ número do WhatsApp na cópia entregue · 🔁 SG-07 |
 | 13 | Atualização e reversão | Seção 4 deste documento | ✅ escrito · 🔁 primeiro uso na Fase 10 |
 | 14 | O PDF aguenta a VPS | `deploy/carga_pdf.sh` (seção 6) | ✅ 2026-11-09 (pombo 154, 6 gerações): 13/13 HTTP 200; 2,5 s cada em sequência; 3 simultâneos, o mais lento 13,2 s; backend no máximo 236 MiB; mínimo de 401 MiB livres; nenhum reinício |
-| 15 | Saber quando cai | UptimeRobot em `/api/saude` (D7, RO-11) | ⏳ configurar (agora na página inicial; depois do deploy, em `/api/saude`) |
+| 15 | Saber quando cai | UptimeRobot em `/api/saude` (D7, RO-11) | ✅ configurado na página inicial (2026-11-09) · 🔁 trocar para `/api/saude` depois do deploy |
 
 ## 2. Pode esperar até ampliar a base de usuários
 
@@ -109,7 +109,48 @@ docker compose logs --tail=3 backend
 ```
 Aprovado se a última linha mostra o **seu IP público**, e não `1.2.3.4`.
 
-## 7. Registro
+## 7. Roteiro do lançamento (Fase 10)
+
+Horário calmo; ~20 min; o site fica fora só alguns segundos na troca dos contêineres.
+
+**No PC** (o responsável faz o merge):
+```bash
+git checkout main && git pull
+git merge --ff-only dev            # a main está contida na dev: avança sem commit de merge
+git tag -a v1.0 -m "Primeira versão comercial (fases 1–9)"
+git push origin main --tags
+git checkout dev
+```
+
+**Na VPS** (`ssh -o IdentitiesOnly=yes -i ~/.ssh/oracle-pedigree.key ubuntu@164.152.47.212`):
+```bash
+cd ~/pedigree/deploy
+./backup-externo.sh && ls -lt backups | head -3                       # 1. backup do momento
+git -C ~/pedigree rev-parse --short HEAD > ~/pedigree/versao-anterior.txt   # 2. para a reversão
+df -h / | tail -1                                                     # 3. espaço para o build (> 3 GB livres)
+git -C ~/pedigree status --short                                      # 3b. só devem aparecer arquivos fora do Git (?? backup-externo.sh, carga_pdf.sh, backups/…); um " M" = alteração local: me avise antes de seguir
+rm -f carga_pdf.sh                                                    # 4a. a cópia feita com scp: o pull traz o mesmo arquivo e recusaria sobrescrever
+cd ~/pedigree && git pull && cd deploy                                # 4b. código novo
+diff -q backup.sh backup-externo.sh && echo "backup.sh igual ao externo"  # 5. o script do Git é o que já roda
+docker compose pull db && docker compose up -d --build                # 6. build (~5 min) e troca
+docker compose ps                                                     # 7. três "Up", db "healthy"
+docker compose logs --tail=20 backend                                 # 8. "Application startup complete", sem erro de permissão
+docker compose logs --tail=20 db | grep -i -E "error|collation" || echo "db sem erros"
+docker compose exec backend id                                        # 9. uid=10001(pedigree)
+./verificar.sh https://ppombo.duckdns.org                             # 10. "Tudo certo."
+crontab -l | sed 's#backup-externo.sh #backup.sh #' | crontab - && crontab -l   # 11. cron volta ao backup.sh
+rm backup-externo.sh
+./backup.sh && tail -2 backups/backup.log                             # 12. backup pelo script do Git funcionando
+```
+
+**Depois:**
+- No navegador (computador e celular): entrar, abrir um pombo, gerar um PDF.
+- UptimeRobot: trocar o endereço para `https://ppombo.duckdns.org/api/saude`.
+- No dia seguinte: o PC trouxe o backup das 03h (`ls ~/backups-pedigree/externos/arquivo | tail -1`).
+- Algo errado e sem correção rápida: seção 4 (reverter).
+- Marcar a Fase 10 no registro abaixo e marcar os 🔁 deste documento.
+
+## 8. Registro
 
 | Data | O quê | Resultado |
 |---|---|---|
