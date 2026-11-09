@@ -2,7 +2,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import type { AxiosRequestConfig } from 'axios'
+import { AxiosError, type AxiosRequestConfig } from 'axios'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -150,6 +150,19 @@ describe('Lista de pombos', () => {
     expect(linha).toHaveTextContent('Ativo')
     expect(within(linha).getByRole('link', { name: '10/20' })).toHaveAttribute('href', '/pombos/1')
     expect(within(linha).getByRole('link', { name: '2/20' })).toHaveAttribute('href', '/pombos/2')
+  })
+
+  it('LI-02 no erro de carregamento não mostra "0 pombos"', async () => {
+    mockApi()
+    const get = vi.mocked(api.get)
+    const original = get.getMockImplementation()!
+    get.mockImplementation(async (url: string, cfg?: unknown) => {
+      if (url === '/pombos') throw new AxiosError('Network Error', 'ERR_NETWORK')
+      return original(url, cfg as never)
+    })
+    montar(<PombosList />, '/pombos')
+    expect(await screen.findByRole('button', { name: 'Tentar de novo' })).toBeInTheDocument()
+    expect(screen.queryByText(/\d+ pombos?\b/)).toBeNull()
   })
 
   it('LI-05 plantel vazio oferece cadastrar o primeiro', async () => {

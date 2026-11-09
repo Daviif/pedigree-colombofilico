@@ -179,6 +179,15 @@ Detalhes e testes em `docs/requisitos.md` (RV-xx). Nenhuma entrada do usuário p
 - **RV-06:** senha de 8 a 72 bytes (limite do bcrypt). No login, senha maior conta como senha errada.
 - **RV-07:** mensagens de validação em português, com o nome do campo.
 
+## Tela de login
+
+- **LG-01:** a tela segue a identidade do sistema: faixa azul-marinho com a pomba do logo, o nome e a foto de pombo-correio do Início (com o crédito da licença). No computador, a faixa fica à esquerda e o formulário à direita. No celular, a faixa fica no topo e o formulário embaixo, sem rolagem lateral.
+- **LG-02:** campos **Usuário** e **Senha** com rótulo visível e o preenchimento automático do navegador (`username`, `current-password`). O usuário não ganha maiúscula automática nem correção. O botão **Mostrar/Ocultar** a senha diz o estado para o leitor de tela.
+- **LG-03:** campo vazio mostra o erro embaixo dele ("Usuário: obrigatório", "Senha: obrigatória") e o cursor vai para ele, sem chamar o servidor.
+- **LG-04:** a recusa do servidor aparece no topo do formulário, anunciada ao leitor de tela: senha errada ("Usuário ou senha incorretos.", RA-05), muitas tentativas ("Tente de novo em N minutos", RA-01) e sem conexão ("Sem conexão com o servidor. Confira a internet."). Depois de uma recusa, o usuário digitado fica, a senha é apagada e o cursor vai para a senha.
+- **LG-05:** enquanto entra, o botão mostra "Entrando…" e não envia duas vezes.
+- **LG-06:** não há "esqueci a senha" automático (não há e-mail no cadastro): a tela diz "Esqueceu a senha? Peça ao administrador do sistema", que redefine pela tela Usuários.
+
 ## Navegação e busca
 
 Desenho em `docs/ux/fluxos.md` e no protótipo `docs/ux/prototipos/alta-fidelidade.html`.
@@ -186,7 +195,7 @@ Desenho em `docs/ux/fluxos.md` e no protótipo `docs/ux/prototipos/alta-fidelida
 - **NV-01:** menu superior azul-marinho com Início, Meus pombos, Reprodutores, Proprietários e Compartilhar. **Usuários só aparece para o admin** (e a rota só existe para ele). O item da página atual fica sublinhado em dourado e marcado com `aria-current="page"`.
 - **NV-02:** o menu completo aparece a partir de 1280 px de largura. Abaixo disso, vira a gaveta ☰, com itens de 48 px de altura, que fecha ao escolher um item ou com Esc. Entre 640 e 1279 px, a busca continua visível no topo; abaixo de 640 px (celular), ela abre pela lupa.
 - **NV-03:** busca por anilha sempre visível no topo. A tecla `/` leva o cursor até ela, a não ser que já se esteja digitando em outro campo. No celular, a busca abre pela lupa.
-- **NV-04:** a busca procura nos pombos que o usuário pode ver (o próprio plantel e os compartilhados; o admin vê todos) e mostra até 8 resultados, com sexo e cor. Pombos de outro plantel mostram também "Plantel de <dono>", porque a mesma anilha pode existir em plantéis diferentes. ↑ ↓ escolhem, Enter abre o escolhido (o primeiro, se nenhum foi escolhido) e Esc limpa.
+- **NV-04:** a busca procura nos pombos que o usuário pode ver (o próprio plantel e os compartilhados; o admin vê todos) e mostra até 8 resultados, com sexo e cor. **Os do próprio plantel vêm primeiro** (depois os dos outros), cada grupo em ordem numérica de anilha, e só então é feito o corte em 8. Assim, Enter abre o seu pombo, e não a cópia de outra pessoa com a mesma anilha. Pombos de outro plantel mostram também "Plantel de <dono>", porque a mesma anilha pode existir em plantéis diferentes. ↑ ↓ escolhem, Enter abre o escolhido (o primeiro, se nenhum foi escolhido) e Esc limpa.
 - **NV-05:** sem resultado, a busca oferece "Cadastrar <anilha>", que abre o formulário de novo pombo já com a anilha preenchida. Só aparece se o texto for uma anilha válida (números e `/`).
 - **NV-06:** as páginas mostram o caminho no topo ("Início › Meus pombos › 4272402/24"). O último item é a página atual e não é link.
 
@@ -198,7 +207,7 @@ Desenho em `docs/ux/fluxos.md` e no protótipo `docs/ux/prototipos/alta-fidelida
 - **IN-04:** últimos 5 resultados do próprio plantel (`GET /api/resultados/recentes`): os mais recentes por ano (os sem ano por último) e, no mesmo ano, os registrados por último. Só o próprio plantel, inclusive para o admin. O parâmetro `limite` vai de 1 a 20 (padrão 5).
 - **IN-05:** a foto do pombo-correio tem licença CC BY-SA 2.0, e o crédito ao autor aparece no rodapé do Início (exigência da licença; `docs/ux/prototipos/img/CREDITOS.md`).
 - **LI-01:** filtros com rótulo visível: Plantel (só quando há outros plantéis para ver), Anilha, Cor, Sexo, Situação e Proprietário (só no próprio plantel). "Limpar filtros" aparece quando há algum filtro ativo.
-- **LI-02:** contagem do que está na tela ("24 pombos").
+- **LI-02:** contagem do que está na tela ("24 pombos"). Se a lista não carregou (erro), a contagem não aparece: nunca "0 pombos" no lugar de "não sei".
 - **LI-03:** a lista vem em ordem de anilha, comparando números como números (2/24 antes de 10/24). Clicar no cabeçalho "Anilha" inverte a ordem.
 - **LI-04:** sexo com ♂/♀ e nome, situação como selo, e pai e mãe como links para os pombos. Pai ou mãe desconhecidos aparecem como "—".
 - **LI-05:** estados: carregando (esqueleto), erro (Tentar de novo), plantel vazio ("Cadastrar o primeiro") e nenhum resultado para os filtros ("Limpar filtros").

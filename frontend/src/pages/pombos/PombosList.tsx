@@ -82,7 +82,7 @@ export function PombosList() {
           <div>
             <h1 className="text-[26px] font-bold text-marinho">Meus pombos</h1>
             <p className="text-sm text-slate-600" aria-live="polite">
-              {isLoading ? 'Carregando…' : `${lista.length} ${lista.length === 1 ? 'pombo' : 'pombos'} ${nomePlantel}`}
+              {isLoading ? 'Carregando…' : isError ? '' : `${lista.length} ${lista.length === 1 ? 'pombo' : 'pombos'} ${nomePlantel}`}
             </p>
           </div>
           <Link to="/pombos/novo" className={classeBotao('primaria')}>

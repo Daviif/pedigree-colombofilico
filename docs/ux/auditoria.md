@@ -97,3 +97,35 @@ Metas para a medição "depois" (7.8), a validar nos protótipos:
 - S5 em ≤ 5 ações, sem sair da árvore;
 - S1 em série com "+1 ação" por pombo seguinte;
 - árvore legível no celular.
+
+## 6. Validação — "depois" (7.8, 2026-11-09)
+
+Executado com `docs/ux/scripts/cenarios_depois.py`, com a **mesma contagem** da linha de base (campo comum = 1 ação; seletor de pai/mãe = clicar + digitar + escolher), o mesmo usuário `auditoria` e os mesmos dados (plantel do admin compartilhado e cópia dos pombos 15, 44 e 39). Os 20 cenários terminaram com sucesso. Fotos em `docs/ux/depois/`, com os mesmos nomes de `docs/ux/antes/`.
+
+| Cenário | Desktop antes → depois | Celular antes → depois | Observação |
+|---|---|---|---|
+| S1 Cadastrar um pombo | 6 → **5** | 7 → **5** | "Cadastrar agora" já no Início |
+| S1 em série (cada pombo seguinte) | +8 → **+3** | +8 → **+3** | anilha, sexo, "Salvar e cadastrar outro"; pai, mãe, proprietário, cor e situação ficam |
+| S2 Cadastrar com pai e mãe | 10 → **9** | 11 → **9** | — |
+| S3 Encontrar pela anilha | 3 → **2** | 4 → **2** | busca do Início + Enter; também só com teclado: `/`, anilha, Enter (3) |
+| S4 Corrigir um dado | 6 → **5** | 7 → **5** | — |
+| S5 Adicionar o pai desconhecido | 9 → **6** (4 a partir da árvore) | 10 → **6** (4 da árvore) | **sem sair da página**; antes saía da árvore para o formulário |
+| S5 o avô, em seguida | +2 e perda de contexto → **4 da árvore** | → **5 da árvore** (+1 toque para subir) | sem sair da página |
+| S6 Gerar o PDF | 4 → **4** | 5 → **4** | o passo a mais agora é a janela que **diz e deixa escolher** as gerações (pedido do responsável) |
+| S7 Árvore no celular | ilegível (UX-01) | **legível** | página com 390 px (sem rolagem lateral), caixa de 328 px, anilha a 14 px, trilha "Principal › Pai › Avô paterno" |
+
+**Metas da linha de base (seção 5):**
+- S3 em 2 ações pela busca: **atingida** (2, no desktop e no celular).
+- S5 em ≤ 5 ações sem sair da árvore: **atingida a partir da árvore** (4). Contando desde o Início são 6, porque achar o pombo custa 2.
+- S1 em série com "+1 ação" por pombo: **não atingida** (+3). O sexo precisa ser escolhido a cada pombo e a sugestão automática da próxima anilha (fluxos.md, fluxo 2) não foi feita. Fica como melhoria possível, não como defeito.
+- Árvore legível no celular: **atingida**.
+
+**Defeitos achados na validação e corrigidos (com teste e contraprova):**
+- A busca listava pombos de plantéis compartilhados antes dos do próprio plantel (a API ordena só pela anilha). Com a mesma anilha nos dois, Enter abria a cópia **de outra pessoa** e, com mais de 8 resultados, o seu podia sumir da lista. Agora o próprio plantel vem primeiro (NV-04).
+- No erro de rede, a lista mostrava "0 pombos no seu plantel" acima do aviso de falha. Agora não mostra contagem quando não carregou (LI-02).
+
+**Login** (esquecido nos grupos 1–6 e feito na 7.8, regras LG-01..06): mesma identidade das outras telas (faixa azul-marinho com a pomba e a foto), campos com rótulo, mostrar/ocultar senha, erro no campo sem chamar o servidor, recusa do servidor (senha errada, muitas tentativas, sem conexão) no topo com a senha apagada e o cursor na senha, e "peça ao administrador" no lugar de um "esqueci a senha" que o sistema não tem.
+
+**Estados conferidos** (desktop e celular, sem rolagem lateral): login e login com erro, cadastro, lista, detalhe do próprio plantel, detalhe só leitura, "Pombo não encontrado" e erro de rede com "Tentar de novo".
+
+**Limites desta validação:** as ações e o tempo são de máquina, com dados de teste; **não houve teste com pessoas**. Ajuda, hesitação e erros de quem usa só aparecem com usuários reais. Recomendação: observar o cliente fazendo S1, S3 e S5 na primeira semana de uso.

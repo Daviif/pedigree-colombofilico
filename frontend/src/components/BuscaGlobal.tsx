@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 import { useUsuarioAtual } from '../api/hooks'
 import type { Pombo } from '../api/types'
+import { ordemAnilha } from '../formatadores'
 import { NOME_SEXO } from './ui'
 
 const MAX_RESULTADOS = 8
@@ -35,8 +36,12 @@ export const BuscaGlobal = forwardRef<BuscaGlobalRef, { escura?: boolean; grande
   }, [texto])
 
   const { data: achados = [], isFetching } = useQuery({
-    queryKey: ['busca-anilha', termo],
-    queryFn: async () => (await api.get<Pombo[]>('/pombos', { params: { anilha: termo } })).data.slice(0, MAX_RESULTADOS),
+    queryKey: ['busca-anilha', termo, eu?.id],
+    // NV-04: o próprio plantel primeiro, depois os outros, em ordem numérica; só então o corte
+    queryFn: async () =>
+      (await api.get<Pombo[]>('/pombos', { params: { anilha: termo } })).data
+        .sort((a, b) => Number(a.usuario_id !== eu?.id) - Number(b.usuario_id !== eu?.id) || ordemAnilha.compare(a.anilha, b.anilha))
+        .slice(0, MAX_RESULTADOS),
     enabled: termo.length > 0,
     staleTime: 10_000,
   })

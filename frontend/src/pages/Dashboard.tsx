@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { usePombos, useResultadosRecentes, useUsuarioAtual } from '../api/hooks'
 import fotoPombo from '../assets/pombo-correio.webp'
 import { BuscaGlobal } from '../components/BuscaGlobal'
+import { CreditoFoto } from '../components/CreditoFoto'
 import { FalhaAoCarregar } from '../components/FalhaAoCarregar'
 import { Carregando, LogoPomba, SeloSituacao, SexoRotulo, classeBotao } from '../components/ui'
 
@@ -155,17 +156,7 @@ export function Dashboard() {
         </div>
       </div>
 
-      <p className="mt-6 text-center text-[11.5px] text-slate-500">
-        Foto:{' '}
-        <a href="https://commons.wikimedia.org/wiki/File:Racing_pigeon_rataedl.jpg" target="_blank" rel="noopener noreferrer" className="underline">
-          “Racing pigeon”, RATAEDL
-        </a>
-        ,{' '}
-        <a href="https://creativecommons.org/licenses/by-sa/2.0/" target="_blank" rel="noopener noreferrer" className="underline">
-          CC BY-SA 2.0
-        </a>
-        , recortada.
-      </p>
+      <CreditoFoto className="mt-6 text-center text-slate-500" />
     </div>
   )
 }

@@ -159,6 +159,19 @@ describe('NV-03/04 busca por anilha', () => {
     expect(opcoes[1]).toHaveTextContent('Plantel de João Lima')
   })
 
+  it('o próprio plantel vem primeiro: Enter abre o meu, mesmo com o de outro antes na API', async () => {
+    const outros = Array.from({ length: 9 }, (_, i) => ({ id: 20 + i, anilha: `4272402/${10 + i}`, sexo: 'M' as const, cor: null, usuario_id: 7, dono: { id: 7, nome: 'João Lima' } }))
+    mockApi(false, [...outros, { ...POMBOS[0], anilha: '4272402/24' }])
+    montar()
+    await userEvent.type(screen.getAllByRole('combobox')[0], '4272402')
+    const opcoes = await screen.findAllByRole('option')
+    expect(opcoes).toHaveLength(8)
+    expect(opcoes[0]).not.toHaveTextContent('Plantel de') // o meu, apesar de vir por último e além do 8º
+    expect(opcoes[1]).toHaveTextContent('4272402/10')
+    await userEvent.keyboard('{Enter}')
+    expect(screen.getByTestId('onde')).toHaveTextContent(`/pombos/${POMBOS[0].id}`)
+  })
+
   it('mostra no máximo 8 resultados', async () => {
     mockApi(false, Array.from({ length: 12 }, (_, i) => ({ id: i + 1, anilha: `1${i}/26`, sexo: 'M' as const, cor: null, usuario_id: 1, dono: { id: 1, nome: 'Davi Fonseca' } })))
     montar()
