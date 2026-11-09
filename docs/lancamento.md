@@ -21,12 +21,12 @@
 | 11 | Processo de suporte | Seção 3 deste documento | ✅ WhatsApp, seg–sex em horário comercial |
 | 12 | Privacidade | `docs/privacidade.md` (o que o sistema guarda, quem vê, retenção, direitos), logs com rotação (SG-07) | ✅ responsável, região (São Paulo) e prazo (15 dias) · ⏳ número do WhatsApp na cópia entregue · 🔁 SG-07 |
 | 13 | Atualização e reversão | Seção 4 deste documento | ✅ escrito · 🔁 primeiro uso na Fase 10 |
-| 14 | O PDF aguenta a VPS | `deploy/carga_pdf.sh` (seção 6) | ⏳ rodar na VPS |
+| 14 | O PDF aguenta a VPS | `deploy/carga_pdf.sh` (seção 6) | ✅ 2026-11-09 (pombo 154, 6 gerações): 13/13 HTTP 200; 2,5 s cada em sequência; 3 simultâneos, o mais lento 13,2 s; backend no máximo 236 MiB; mínimo de 401 MiB livres; nenhum reinício |
 | 15 | Saber quando cai | UptimeRobot em `/api/saude` (D7, RO-11) | ⏳ configurar (agora na página inicial; depois do deploy, em `/api/saude`) |
 
 ## 2. Pode esperar até ampliar a base de usuários
 
-- Conta Oracle Pay As You Go (D6, adiada) ou VPS maior / ARM A1, conforme o teste de carga.
+- Conta Oracle Pay As You Go (D6, adiada) e VPS ARM A1 (grátis, mais CPU): o teste de carga mostrou 2,5 s por PDF de 6 gerações, mas 13 s quando 3 saem juntos (CPU da micro). Trocar quando houver mais criadores gerando PDFs ao mesmo tempo.
 - Monitor com aviso no Telegram ou celular (o grátis avisa só por e-mail).
 - Termos de uso / contrato de assinatura escrito, e revisão da política de privacidade por um profissional.
 - Botão de excluir conta e exportar os dados (hoje feito à mão pelo responsável).
@@ -114,6 +114,7 @@ Aprovado se a última linha mostra o **seu IP público**, e não `1.2.3.4`.
 | Data | O quê | Resultado |
 |---|---|---|
 | 2026-11-09 | Teste de carga do PDF (1ª tentativa) | ❌ inválido: rodado com `ID` literal, tudo 422 (nenhum PDF gerado). O script passou a recusar id não numérico e a parar no 1º erro. Refazer com o id 154 |
+| 2026-11-09 | Teste de carga do PDF | ✅ aprovado: 10 em sequência 2,3–2,9 s; 3 ao mesmo tempo, o mais lento 13,2 s (fila nos 2 workers + CPU com burst da micro); pico do backend 236 MiB; mínimo de 401 MiB livres; contêineres sem reinício |
 | 2026-11-09 | RA-06 na VPS | ✅ o log mostrou o IP público real do PC, não o `1.2.3.4` enviado |
 | | Restauração com a chave do pendrive (RO-10) | |
 | | Monitor configurado | |
