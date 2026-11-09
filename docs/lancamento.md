@@ -14,15 +14,15 @@
 | 4 | Isolamento de dados | `test_multiusuario.py`, `test_genitor.py` (PE-01); invisível = 404, só leitura = 403 | ✅ |
 | 5 | Compartilhamento e cópia testados | Regras RC e CP; `test_copia.py`; `grupo6.test.tsx` | ✅ |
 | 6 | Backup externo | Diário, cifrado (age), puxado pelo PC com 3 tentativas (RO-01..11); alerta com 48 h sem cópia; 3ª cópia dos `.age` no Google Drive (D9) | ✅ |
-| 7 | Restauração comprovada | `docs/operacao.md` §3: restaurado com a chave do PC em 2026-11-07 e 2026-11-09 (já na versão 16.15 do Postgres) | ✅ chave do PC · ⏳ **com a chave do pendrive (RO-10)** |
-| 8 | HTTPS e autenticação verificados | HTTPS automático (Caddy); limite de login (RA-01..08, testes); cookie httpOnly/Secure; HSTS e CSP | 🔁 `./verificar.sh` depois do deploy · ✅ RA-06 no Caddy local e **na VPS** (2026-11-09: com `X-Forwarded-For: 1.2.3.4`, o log mostrou o IP público real do PC) |
+| 7 | Restauração comprovada | `docs/operacao.md` §3: restaurado com a chave do PC em 2026-11-07 e 2026-11-09 (já na versão 16.15 do Postgres) | ✅ chave do PC · ✅ cópia em papel guardada (falta conferir com o teste) · ⏳ pendrive |
+| 8 | HTTPS e autenticação verificados | HTTPS automático (Caddy); limite de login (RA-01..08, testes); cookie httpOnly/Secure; HSTS e CSP | ✅ `./verificar.sh` em produção: 16/16 (2026-11-09) · ✅ RA-06 no Caddy local e na VPS · ✅ CSP sem violação no login de produção (computador e celular) |
 | 9 | Mensagens de erro claras | Regras RF, CA-02, UI-01 (sem `alert`/`confirm`); estados de erro conferidos na 7.8 | ✅ |
 | 10 | Documentação mínima | `docs/guia-do-usuario.md` (cliente), `docs/operacao.md` (manutenção), `docs/ameacas.md` (segurança) | ✅ · ⏳ só o número do WhatsApp, na cópia entregue |
 | 11 | Processo de suporte | Seção 3 deste documento | ✅ WhatsApp, seg–sex em horário comercial |
-| 12 | Privacidade | `docs/privacidade.md` (o que o sistema guarda, quem vê, retenção, direitos), logs com rotação (SG-07) | ✅ responsável, região (São Paulo) e prazo (15 dias) · ⏳ número do WhatsApp na cópia entregue · 🔁 SG-07 |
-| 13 | Atualização e reversão | Seção 4 deste documento | ✅ escrito · 🔁 primeiro uso na Fase 10 |
+| 12 | Privacidade | `docs/privacidade.md` (o que o sistema guarda, quem vê, retenção, direitos), logs com rotação (SG-07) | ✅ responsável, região (São Paulo) e prazo (15 dias) · ⏳ número do WhatsApp na cópia entregue · ✅ SG-07 em produção |
+| 13 | Atualização e reversão | Seção 4 deste documento | ✅ escrito e usado no lançamento (2026-11-09); versão anterior anotada na VPS para a reversão |
 | 14 | O PDF aguenta a VPS | `deploy/carga_pdf.sh` (seção 6) | ✅ 2026-11-09 (pombo 154, 6 gerações): 13/13 HTTP 200; 2,5 s cada em sequência; 3 simultâneos, o mais lento 13,2 s; backend no máximo 236 MiB; mínimo de 401 MiB livres; nenhum reinício |
-| 15 | Saber quando cai | UptimeRobot em `/api/saude` (D7, RO-11) | ✅ configurado na página inicial (2026-11-09) · 🔁 trocar para `/api/saude` depois do deploy |
+| 15 | Saber quando cai | UptimeRobot em `/api/saude` (D7, RO-11) | ✅ configurado (2026-11-09) · ⏳ trocar o endereço para `/api/saude` (já responde 200 em produção) |
 
 ## 2. Pode esperar até ampliar a base de usuários
 
@@ -54,7 +54,7 @@
 **Antes de atualizar** (na VPS):
 ```bash
 cd ~/pedigree/deploy
-./backup-externo.sh                   # backup do momento (depois do merge final: ./backup.sh)
+./backup.sh                           # backup do momento
 git -C ~/pedigree rev-parse --short HEAD > ~/pedigree/versao-anterior.txt
 ```
 **Atualizar:** `docs/operacao.md` §2.1 (pull, build, `docker compose ps`, logs, `./verificar.sh`).
@@ -111,6 +111,8 @@ Aprovado se a última linha mostra o **seu IP público**, e não `1.2.3.4`.
 
 ## 7. Roteiro do lançamento (Fase 10)
 
+> **Executado em 2026-11-09** (registro na seção 8). Fica como histórico: nos próximos deploys use a seção 4 e `docs/operacao.md` §2.1 (o `backup-externo.sh` não existe mais).
+
 Horário calmo; ~20 min; o site fica fora só alguns segundos na troca dos contêineres.
 
 **No PC** (o responsável faz o merge):
@@ -157,6 +159,7 @@ rm backup-externo.sh
 | 2026-11-09 | Teste de carga do PDF (1ª tentativa) | ❌ inválido: rodado com `ID` literal, tudo 422 (nenhum PDF gerado). O script passou a recusar id não numérico e a parar no 1º erro. Refazer com o id 154 |
 | 2026-11-09 | Teste de carga do PDF | ✅ aprovado: 10 em sequência 2,3–2,9 s; 3 ao mesmo tempo, o mais lento 13,2 s (fila nos 2 workers + CPU com burst da micro); pico do backend 236 MiB; mínimo de 401 MiB livres; contêineres sem reinício |
 | 2026-11-09 | RA-06 na VPS | ✅ o log mostrou o IP público real do PC, não o `1.2.3.4` enviado |
+| 2026-11-09 | **Lançamento (Fase 10)** | ✅ `main` = `dev` (v1.0); na VPS: backup antes, versão anterior anotada, build ok, 3 contêineres no ar (Postgres 16.15), backend `uid=10001`, `verificar.sh` 16/16, `/api/saude` 200, CSP sem violação no navegador, cron de volta ao `backup.sh` e backup manual ok (`pedigree-2026-11-09-1858`) |
 | | Restauração com a chave do pendrive (RO-10) | |
 | | Monitor configurado | |
 | | Aceitação com o cliente | |

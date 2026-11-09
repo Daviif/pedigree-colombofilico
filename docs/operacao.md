@@ -9,13 +9,13 @@
 
 ```
 VPS (03h, cron)                                    PC do responsável (04h, 16h e ao ligar)
-deploy/backup-externo.sh*                          ~/.local/share/pedigree-backup/puxar_backups.py
+deploy/backup.sh*                                  ~/.local/share/pedigree-backup/puxar_backups.py
  ├─ backups/pedigree-…sql.gz      (sem cifra, 30 d)
  └─ backups/externo/…sql.gz.age   (cifrado, 30 d) ──rsync, chave só-leitura──▶ ~/backups-pedigree/externos/
                                                       ├─ espelho/  (= VPS)
                                                       └─ arquivo/  (14 diários + 8 semanais + 12 mensais)
 ```
-\* Enquanto a `dev` não volta para a `main`, a VPS roda o script novo com o nome `backup-externo.sh` (arquivo fora do Git). **No merge final:** `crontab -l | sed 's#backup-externo.sh #backup.sh #' | crontab -` e `rm ~/pedigree/deploy/backup-externo.sh`.
+\* Até o lançamento (2026-11-09) a VPS rodava uma cópia chamada `backup-externo.sh`; desde então o cron usa o `deploy/backup.sh` do Git.
 
 | O quê | Onde |
 |---|---|
@@ -92,10 +92,10 @@ Formato: **detectar → conter → recuperar → verificar**. Anote cada inciden
 |---|---|---|---|
 | Site fora do ar | O site não abre; `docker compose ps` | `docker compose up -d`; ver `docker compose logs --tail 100 backend web` | Login e abrir um pombo |
 | Banco indisponível | Erro 500 em tudo; `db` não aparece como `healthy` | `docker compose restart db`; com o disco cheio, ver a próxima linha | `docker compose ps` e login |
-| Disco cheio | `df -h /` acima de 90%; backup com `ERRO` | `docker system prune -f` (imagens e cache de build sem uso); conferir o tamanho de `backups/` | `df -h /`; `./backup-externo.sh` sem erro |
+| Disco cheio | `df -h /` acima de 90%; backup com `ERRO` | `docker system prune -f` (imagens e cache de build sem uso); conferir o tamanho de `backups/` | `df -h /`; `./backup.sh` sem erro |
 | HTTPS não renova | Aviso de certificado no navegador | `docker compose logs web \| grep -i acme`; conferir o DuckDNS (IP) e as portas 80/443 na Oracle | Cadeado válido |
 | Atualização não sobe | Contêiner reiniciando; erro de migração no log | `git log` → `git checkout <commit anterior>` → `docker compose up -d --build`. Se a migração já rodou: `docker compose exec backend alembic downgrade -1` **antes** de voltar o código | Login, pombo, PDF |
-| Backup inválido | `ERRO` no `backup.log`, notificação no PC ou teste de restauração falhando | Ler o motivo no log; rodar `./backup-externo.sh` à mão; testar a restauração | Seção 3 |
+| Backup inválido | `ERRO` no `backup.log`, notificação no PC ou teste de restauração falhando | Ler o motivo no log; rodar `./backup.sh` à mão; testar a restauração | Seção 3 |
 | Dados corrompidos ou apagados por engano | Usuário avisa | **Não restaurar por cima.** Restaurar o backup anterior num contêiner descartável (`MANTER=1 ./backup-pc/testar_restauracao.sh ARQUIVO.age`) e copiar só os registros afetados | Conferir com o usuário |
 | Conta de usuário comprometida | Acesso estranho; usuário avisa | Tela Usuários → **Desativar** (derruba as sessões na hora) → **Redefinir senha** | Último acesso |
 | Vazamento de segredo (`.env`) | Arquivo exposto, VPS invadida | Trocar a `SECRET_KEY` e a senha do banco (comandos no hotfix de 2026-11-07, no histórico do projeto) → `docker compose up -d` | Sessões antigas recebem 401 |

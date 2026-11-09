@@ -52,8 +52,8 @@
 | Portas | `sudo ss -ltnp \| grep -v 127.0.0` | só 22, 80, 443 | ✅ 2026-11-09: só 22, 80 e 443 (IPv4 e IPv6) |
 | Pacotes em dia | `apt list --upgradable 2>/dev/null \| wc -l`; `ls /var/run/reboot-required` | 1 (só o cabeçalho); arquivo não existe | ✅ 2026-11-09: reiniciado (kernel pendente carregado; containers voltaram sozinhos), 27 pacotes atualizados, nada pendente |
 | Atualizações automáticas | `systemctl is-enabled unattended-upgrades` | `enabled` | ✅ 2026-11-09 |
-| Cabeçalhos depois do deploy | `./verificar.sh https://ppombo.duckdns.org` | `Tudo certo.` | |
-| Backend sem root | `docker compose exec backend id` | `uid=10001(pedigree)` | |
+| Cabeçalhos depois do deploy | `./verificar.sh https://ppombo.duckdns.org` | `Tudo certo.` | ✅ 2026-11-09: 16/16, na VPS e de fora |
+| Backend sem root | `docker compose exec backend id` | `uid=10001(pedigree)` | ✅ 2026-11-09 |
 
 ## 5. Fora do escopo agora (anotado de propósito)
 
