@@ -62,9 +62,9 @@ Pendrive:  cp "$CHAVE_AGE" /run/media/\$USER/<PENDRIVE>/pedigree-chave-age.txt
 ================ 2a. AQUI NO PC: envia o script novo para a VPS ================
 # Vai com outro nome (backup-externo.sh): a VPS segue na main e o git dela não vê este
 # arquivo. No merge final da dev, o cron volta para o backup.sh (docs/operacao.md).
-scp -i ~/.ssh/oracle-pedigree.key "$(dirname "$AQUI")/deploy/backup.sh" ubuntu@$VPS_IP:pedigree/deploy/backup-externo.sh
+scp -o IdentitiesOnly=yes -i ~/.ssh/oracle-pedigree.key "$(dirname "$AQUI")/deploy/backup.sh" ubuntu@$VPS_IP:pedigree/deploy/backup-externo.sh
 
-================ 2b. RODE NA VPS (ssh -i ~/.ssh/oracle-pedigree.key ubuntu@$VPS_IP) ================
+================ 2b. RODE NA VPS (ssh -o IdentitiesOnly=yes -i ~/.ssh/oracle-pedigree.key ubuntu@$VPS_IP) ================
 sudo apt-get install -y age rsync
 ls -l /usr/bin/rrsync        # precisa existir (vem com o rsync no Ubuntu 24.04)
 echo '$PUB_AGE' > ~/pedigree/deploy/backup.pub

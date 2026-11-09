@@ -3,6 +3,8 @@
 > Manual curto para quem mantém o sistema sozinho. Regras em `docs/requisitos.md` (RO-xx).
 > Produção: VPS Oracle AMD micro (Ubuntu 24.04), `~/pedigree/deploy`, domínio `ppombo.duckdns.org`.
 
+**Entrar na VPS:** `ssh -o IdentitiesOnly=yes -i ~/.ssh/oracle-pedigree.key ubuntu@164.152.47.212`. Sem o `IdentitiesOnly`, o SSH oferece antes as chaves carregadas no agente; se a chave do backup estiver lá, a VPS aceita essa e a sessão cai no `rrsync` ("Not invoked via sshd"), que só lê os backups. Isso é a restrição funcionando, não defeito.
+
 ## 1. Como o backup funciona
 
 ```
