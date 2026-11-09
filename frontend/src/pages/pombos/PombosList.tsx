@@ -4,10 +4,10 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { useCompartilhamentos, usePombos, useProprietarios, useUsuarioAtual } from '../../api/hooks'
 import type { Pombo, PombosFiltro, Sexo, StatusPombo } from '../../api/types'
 import { FalhaAoCarregar } from '../../components/FalhaAoCarregar'
+import { ordemAnilha } from '../../formatadores'
 import { Aviso, Botao, Campo, Carregando, Migalhas, SeloSituacao, SexoRotulo, Vazio, classeBotao, classeEntrada } from '../../components/ui'
 
 /** LI-03: compara anilhas como números (2/24 antes de 10/24). */
-const ordemAnilha = new Intl.Collator('pt-BR', { numeric: true })
 
 function LinkPombo({ pombo, neutro }: { pombo?: { id: number; anilha: string } | null; neutro?: boolean }) {
   if (!pombo) return <span className="text-slate-400">—</span>

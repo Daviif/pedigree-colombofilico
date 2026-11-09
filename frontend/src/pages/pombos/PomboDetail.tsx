@@ -6,6 +6,7 @@ import type { PomboDetail as TPombo } from '../../api/types'
 import { ArvoreGenealogica } from '../../components/arvore/ArvoreGenealogica'
 import type { Papel } from '../../components/arvore/montagem'
 import { PainelGenitor } from '../../components/arvore/PainelGenitor'
+import { rotuloPombal } from '../../formatadores'
 import { FalhaAoCarregar } from '../../components/FalhaAoCarregar'
 import { IrmaosSection } from '../../components/IrmaosSection'
 import { ResultadosSection } from '../../components/ResultadosSection'
@@ -109,7 +110,7 @@ function Detalhe({ pombo }: { pombo: TPombo }) {
             {pombo.proprietario ? (
               <>
                 Proprietário: <b className="text-white">{pombo.proprietario.nome}</b>
-                {pombo.proprietario.colombodromo && ` · Pombal ${pombo.proprietario.colombodromo}`}
+                {pombo.proprietario.colombodromo && ` · ${rotuloPombal(pombo.proprietario.colombodromo)}`}
               </>
             ) : (
               'Sem proprietário'

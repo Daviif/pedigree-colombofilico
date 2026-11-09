@@ -75,7 +75,12 @@ export function useCriarProprietario() {
   return useMutation({
     mutationFn: async (dados: ProprietarioInput) =>
       (await api.post<Proprietario>('/proprietarios', dados)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['proprietarios'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['proprietarios'] })
+      // PR-02: o nome do proprietário aparece no pombo e na lista
+      qc.invalidateQueries({ queryKey: ['pombos'] })
+      qc.invalidateQueries({ queryKey: ['pombo'] })
+    },
   })
 }
 
@@ -84,7 +89,12 @@ export function useAtualizarProprietario() {
   return useMutation({
     mutationFn: async ({ id, dados }: { id: number; dados: ProprietarioInput }) =>
       (await api.put<Proprietario>(`/proprietarios/${id}`, dados)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['proprietarios'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['proprietarios'] })
+      // PR-02: o nome do proprietário aparece no pombo e na lista
+      qc.invalidateQueries({ queryKey: ['pombos'] })
+      qc.invalidateQueries({ queryKey: ['pombo'] })
+    },
   })
 }
 
@@ -92,7 +102,12 @@ export function useRemoverProprietario() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (id: number) => api.delete(`/proprietarios/${id}`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['proprietarios'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['proprietarios'] })
+      // PR-02: o nome do proprietário aparece no pombo e na lista
+      qc.invalidateQueries({ queryKey: ['pombos'] })
+      qc.invalidateQueries({ queryKey: ['pombo'] })
+    },
   })
 }
 

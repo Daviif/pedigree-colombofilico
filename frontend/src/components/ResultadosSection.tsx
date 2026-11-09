@@ -137,7 +137,7 @@ export function ResultadosSection({ pomboId, somenteLeitura = false }: { pomboId
                   <td className="hidden py-2.5 pr-3 md:table-cell">{r.premio ?? '—'}</td>
                   {!somenteLeitura && (
                     <td className="py-1 text-right">
-                      <Botao variante="fantasma" pequeno className="text-red-700" aria-label={`Remover ${r.competicao}`} onClick={() => setRemovendo({ id: r.id, nome: r.competicao })}>
+                      <Botao variante="fantasmaPerigo" pequeno aria-label={`Remover ${r.competicao}`} onClick={() => setRemovendo({ id: r.id, nome: r.competicao })}>
                         Remover
                       </Botao>
                     </td>

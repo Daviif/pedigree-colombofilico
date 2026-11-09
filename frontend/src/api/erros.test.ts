@@ -45,4 +45,12 @@ describe('separarErros (CA-02)', () => {
     expect(separarErros(erroApi(500, 'erro estranho'), CAMPOS, 'x').geral).toBe('erro estranho')
     expect(separarErros(new Error('rede'), CAMPOS, 'Erro ao salvar o pombo.').geral).toBe('Erro ao salvar o pombo.')
   })
+
+  it('US-01: no formulário de usuário, login e senha vão para o campo; pombo não ganha esses campos', () => {
+    const USU = ['nome', 'login', 'senha'] as const
+    expect(separarErros(erroApi(409, 'Já existe um usuário com esse login'), USU, 'x').campos.login).toBe('Já existe um usuário com esse login')
+    expect(separarErros(erroApi(400, 'A senha precisa ter pelo menos 8 caracteres'), USU, 'x').campos.senha).toBeDefined()
+    // formulário de pombo não tem "login": a mensagem vai para o topo
+    expect(separarErros(erroApi(409, 'Já existe um usuário com esse login'), CAMPOS, 'x').geral).toBe('Já existe um usuário com esse login')
+  })
 })

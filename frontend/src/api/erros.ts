@@ -11,6 +11,10 @@ const PISTAS: [RegExp, string][] = [
   [/\bpai\b/i, 'pai_id'],
   [/propriet[áa]rio/i, 'proprietario_id'],
   [/\bsexo\b|n[ãa]o pode ser (f[êe]mea|macho)/i, 'sexo'],
+  // US-01: formulário de usuário
+  [/\blogin\b/i, 'login'],
+  [/\bsenha\b/i, 'senha'],
+  [/\bnome\b/i, 'nome'],
 ]
 
 /**

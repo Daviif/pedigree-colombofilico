@@ -233,6 +233,20 @@ Desenho em `docs/ux/fluxos.md` e no protótipo `docs/ux/prototipos/alta-fidelida
   Usa `POST /pombos/{id}/genitor` (PE-xx). A árvore recarrega **no mesmo lugar**, sem sair da página, e aparece o aviso "4272402/24 ligado como pai de …". Erros do servidor aparecem dentro do painel.
 - **AR-06:** clicar num ancestral cadastrado abre a página dele.
 
+## Reprodutores, proprietários, compartilhar e usuários
+
+- **RP-01:** Reprodutores mostra os pombos **do próprio plantel** com situação "Reprodutor", em dois cartões, **Machos** e **Fêmeas**, cada um com a contagem. Reprodutor de sexo desconhecido aparece num terceiro cartão, só quando houver.
+- **RP-02:** cada reprodutor mostra a anilha (abre o pombo), a cor, o proprietário (ou "sem proprietário") e quantos **filhos** ele tem no plantel. A ordem é numérica pela anilha, como na lista (LI-04).
+- **RP-03:** sem reprodutores, a tela explica como marcar um: no pombo, **Editar → Situação: Reprodutor**.
+- **PR-01:** Proprietários lista nome (com endereço e observações embaixo), pombal, contato (telefone e e-mail) e **quantos pombos** usam cada um. No celular, pombal, contato e número de pombos vão para baixo do nome. O pombal aparece como "Pombal Bons Amigos", sem repetir a palavra quando o nome já começa com "Pombal".
+- **PR-02:** novo e editar abrem uma janela com **nome** (obrigatório), pombal, telefone, endereço, e-mail e observações, com os limites do servidor (200, 200, 50, 300, 200 e 5000 caracteres). Os erros aparecem embaixo do campo. Uma dica avisa que esses dados aparecem no cabeçalho do certificado. Ao salvar, o pombo e a lista mostram o nome novo sem recarregar a página.
+- **PR-03:** excluir um proprietário que algum pombo usa não é oferecido: a janela explica "é proprietário de N pombo(s)" e só tem "Entendi". Sem uso, pede confirmação. Se o servidor recusar mesmo assim (RG-10), a mensagem aparece dentro da janela.
+- **CP-01:** Compartilhar pede o **login do criador** num campo com rótulo. Erro do servidor (login inexistente, você mesmo) aparece embaixo do campo. Ao compartilhar, aparece o aviso "Plantel compartilhado com Nome (login)".
+- **CP-02:** as duas listas mostram iniciais, nome e login. "Quem vê o meu plantel" tem **Parar de compartilhar**; "Compartilhados comigo" tem **Ver pombos** (abre a lista com aquele plantel) e **Deixar de ver**. Parar e deixar de ver pedem confirmação numa janela que diz o efeito.
+- **US-01:** Usuários (só admin) mostra cartões com iniciais, nome, login, número de pombos, selos (admin, bloqueado, desativado) e último acesso (regras 1–9 acima). **Novo usuário** abre uma janela, com os erros do servidor embaixo do campo certo (nome, login, senha). Ao criar, o aviso lembra de passar o login e a senha para a pessoa.
+- **US-02:** editar nome e redefinir senha abrem uma janela. Tornar/tirar admin e desativar pedem confirmação numa janela que diz o efeito. Reativar e desbloquear são diretos, com aviso.
+- **UI-01:** nenhuma tela usa `alert()`, `confirm()` ou `prompt()` do navegador (UX-09). Há um teste que procura esses usos no código.
+
 ## Mensagens e falhas na tela
 
 Detalhes em `docs/requisitos.md` (RF-xx). O redesenho completo é da Fase 7.

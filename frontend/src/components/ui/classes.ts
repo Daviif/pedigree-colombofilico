@@ -2,7 +2,7 @@
 // Ficam fora dos .tsx para o Fast Refresh do Vite funcionar (só componentes nos .tsx).
 import type { Sexo } from '../../api/types'
 
-export type VarianteBotao = 'primaria' | 'escura' | 'secundaria' | 'fantasma' | 'perigo' | 'vidro'
+export type VarianteBotao = 'primaria' | 'escura' | 'secundaria' | 'fantasma' | 'fantasmaPerigo' | 'perigo' | 'vidro'
 
 const VARIANTES: Record<VarianteBotao, string> = {
   // ação principal: dourado com texto marinho (8,2:1)
@@ -10,6 +10,9 @@ const VARIANTES: Record<VarianteBotao, string> = {
   escura: 'bg-marinho border-marinho text-white hover:bg-marinho-2',
   secundaria: 'bg-white border-borda text-slate-800 hover:bg-fundo',
   fantasma: 'bg-transparent border-transparent text-slate-600 hover:bg-fundo hover:text-slate-900',
+  // ação destrutiva discreta (Excluir na linha); a cor vem da variante, não de className,
+  // porque text-red-700 por fora perde para o text-slate-600 da fantasma na ordem do CSS
+  fantasmaPerigo: 'bg-transparent border-transparent text-red-700 hover:bg-red-50 hover:text-red-800',
   perigo: 'bg-red-700 border-red-700 text-white hover:bg-red-800',
   // sobre fundo marinho (faixa do pombo)
   vidro: 'bg-white/10 border-white/25 text-white hover:bg-white/20',

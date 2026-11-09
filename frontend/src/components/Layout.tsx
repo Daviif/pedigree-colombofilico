@@ -2,6 +2,7 @@ import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 
 import { useLogout, useUsuarioAtual } from '../api/hooks'
+import { iniciais } from '../formatadores'
 import { BuscaGlobal, type BuscaGlobalRef } from './BuscaGlobal'
 import { Logo } from './ui'
 
@@ -15,15 +16,6 @@ const linksBase: ItemMenu[] = [
   { to: '/compartilhar', label: 'Compartilhar' },
 ]
 
-function iniciais(nome?: string) {
-  return (nome ?? '')
-    .split(' ')
-    .filter(Boolean)
-    .map((p) => p[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase()
-}
 
 /** Menu superior azul-marinho (NV-01), gaveta no celular (NV-02) e busca global (NV-03). */
 export function Layout({ children }: { children: ReactNode }) {
