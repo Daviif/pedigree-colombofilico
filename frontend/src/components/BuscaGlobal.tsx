@@ -3,6 +3,7 @@ import { forwardRef, useEffect, useId, useImperativeHandle, useRef, useState } f
 import { useNavigate } from 'react-router-dom'
 
 import { api } from '../api/client'
+import { useUsuarioAtual } from '../api/hooks'
 import type { Pombo } from '../api/types'
 import { NOME_SEXO } from './ui'
 
@@ -22,6 +23,7 @@ export const BuscaGlobal = forwardRef<BuscaGlobalRef, { escura?: boolean; grande
   const [aberto, setAberto] = useState(false)
   const entrada = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
+  const { data: eu } = useUsuarioAtual()
   const idLista = useId()
 
   useImperativeHandle(ref, () => ({ focar: () => entrada.current?.focus() }), [])
@@ -104,7 +106,8 @@ export const BuscaGlobal = forwardRef<BuscaGlobalRef, { escura?: boolean; grande
         className={`${grande ? 'h-12 text-base' : 'h-10'} w-full rounded-[10px] border pl-10 pr-10 focus:outline-none ${
           escura
             ? 'border-white/20 bg-white/10 text-white placeholder:text-[#a9b6cc] focus:border-dourado focus:bg-white focus:text-slate-900 focus:ring-3 focus:ring-dourado/35'
-            : 'border-transparent bg-white shadow-sm focus:border-link focus:ring-3 focus:ring-blue-100'
+            : // cor explícita: dentro da faixa azul-marinho o texto herdado é branco (sumiria no fundo branco)
+              'border-transparent bg-white text-slate-900 shadow-sm placeholder:text-slate-500 focus:border-link focus:ring-3 focus:ring-blue-100'
         }`}
       />
       <kbd aria-hidden className={`pointer-events-none absolute right-2.5 top-1/2 hidden -translate-y-1/2 rounded border px-1.5 font-mono text-[11px] ${texto ? '' : 'sm:block'} ${escura ? 'border-white/25 text-[#a9b6cc]' : 'border-borda text-slate-400'}`}>
@@ -134,8 +137,9 @@ export const BuscaGlobal = forwardRef<BuscaGlobalRef, { escura?: boolean; grande
                 className={`flex cursor-pointer justify-between gap-3 px-4 py-2.5 ${i === selecionado ? 'bg-blue-50' : ''}`}
               >
                 <b className="tabular-nums">{p.anilha}</b>
-                <span className="text-sm text-slate-600">
+                <span className="text-right text-sm text-slate-600">
                   {SIMBOLO[p.sexo]} {NOME_SEXO[p.sexo]} · {p.cor || '—'}
+                  {eu && p.usuario_id !== eu.id && <span className="block text-xs text-amber-800">Plantel de {p.dono.nome}</span>}
                 </span>
               </li>
             ))

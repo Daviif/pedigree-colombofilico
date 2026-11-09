@@ -12,8 +12,8 @@ import { Layout } from './Layout'
 import { Migalhas } from './ui'
 
 const POMBOS: Partial<Pombo>[] = [
-  { id: 1, anilha: '4272402/24', sexo: 'M', cor: 'Escama' },
-  { id: 2, anilha: '4272403/24', sexo: 'F', cor: 'Azul' },
+  { id: 1, anilha: '4272402/24', sexo: 'M', cor: 'Escama', usuario_id: 1, dono: { id: 1, nome: 'Davi Fonseca' } },
+  { id: 2, anilha: '4272403/24', sexo: 'F', cor: 'Azul', usuario_id: 1, dono: { id: 1, nome: 'Davi Fonseca' } },
 ]
 
 function usuario(admin: boolean) {
@@ -147,8 +147,20 @@ describe('NV-03/04 busca por anilha', () => {
     expect(screen.queryByRole('listbox')).toBeNull()
   })
 
+  it('mesma anilha em outro plantel mostra de quem é', async () => {
+    mockApi(false, [
+      POMBOS[0],
+      { id: 9, anilha: '4272402/24', sexo: 'M', cor: 'Escama', usuario_id: 7, dono: { id: 7, nome: 'João Lima' } },
+    ])
+    montar()
+    await userEvent.type(screen.getAllByRole('combobox')[0], '4272402')
+    const opcoes = await screen.findAllByRole('option')
+    expect(opcoes[0]).not.toHaveTextContent('Plantel de')
+    expect(opcoes[1]).toHaveTextContent('Plantel de João Lima')
+  })
+
   it('mostra no máximo 8 resultados', async () => {
-    mockApi(false, Array.from({ length: 12 }, (_, i) => ({ id: i + 1, anilha: `1${i}/26`, sexo: 'M' as const, cor: null })))
+    mockApi(false, Array.from({ length: 12 }, (_, i) => ({ id: i + 1, anilha: `1${i}/26`, sexo: 'M' as const, cor: null, usuario_id: 1, dono: { id: 1, nome: 'Davi Fonseca' } })))
     montar()
     await userEvent.type(screen.getAllByRole('combobox')[0], '1')
     expect(await screen.findAllByRole('option')).toHaveLength(8)

@@ -176,7 +176,7 @@ Desenho em `docs/ux/fluxos.md` e no protótipo `docs/ux/prototipos/alta-fidelida
 - **NV-01:** menu superior azul-marinho com Início, Meus pombos, Reprodutores, Proprietários e Compartilhar. **Usuários só aparece para o admin** (e a rota só existe para ele). O item da página atual fica sublinhado em dourado e marcado com `aria-current="page"`.
 - **NV-02:** o menu completo aparece a partir de 1280 px de largura. Abaixo disso, vira a gaveta ☰, com itens de 48 px de altura, que fecha ao escolher um item ou com Esc. Entre 640 e 1279 px, a busca continua visível no topo; abaixo de 640 px (celular), ela abre pela lupa.
 - **NV-03:** busca por anilha sempre visível no topo. A tecla `/` leva o cursor até ela, a não ser que já se esteja digitando em outro campo. No celular, a busca abre pela lupa.
-- **NV-04:** a busca procura nos pombos que o usuário pode ver (o próprio plantel e os compartilhados; o admin vê todos) e mostra até 8 resultados, com sexo e cor. ↑ ↓ escolhem, Enter abre o escolhido (o primeiro, se nenhum foi escolhido) e Esc limpa.
+- **NV-04:** a busca procura nos pombos que o usuário pode ver (o próprio plantel e os compartilhados; o admin vê todos) e mostra até 8 resultados, com sexo e cor. Pombos de outro plantel mostram também "Plantel de <dono>", porque a mesma anilha pode existir em plantéis diferentes. ↑ ↓ escolhem, Enter abre o escolhido (o primeiro, se nenhum foi escolhido) e Esc limpa.
 - **NV-05:** sem resultado, a busca oferece "Cadastrar <anilha>", que abre o formulário de novo pombo já com a anilha preenchida. Só aparece se o texto for uma anilha válida (números e `/`).
 - **NV-06:** as páginas mostram o caminho no topo ("Início › Meus pombos › 4272402/24"). O último item é a página atual e não é link.
 
@@ -193,6 +193,16 @@ Desenho em `docs/ux/fluxos.md` e no protótipo `docs/ux/prototipos/alta-fidelida
 - **LI-04:** sexo com ♂/♀ e nome, situação como selo, e pai e mãe como links para os pombos. Pai ou mãe desconhecidos aparecem como "—".
 - **LI-05:** estados: carregando (esqueleto), erro (Tentar de novo), plantel vazio ("Cadastrar o primeiro") e nenhum resultado para os filtros ("Limpar filtros").
 - **LI-06:** `?incompleto=1` mostra só pombos sem pai ou sem mãe (vindo do número do Início), com um aviso que permite tirar o filtro.
+
+## Cadastro e edição de pombo
+
+- **CA-01:** um formulário único, que não é dividido em etapas. O sexo é escolhido em três botões (♂ Macho, ♀ Fêmea, Não sei), que também funcionam com as setas do teclado.
+- **CA-02:** os erros aparecem **embaixo do campo**: a anilha vazia (antes de enviar) e os erros do servidor que dizem respeito a um campo (anilha repetida, pai/mãe inválidos RG-01..08, sexo RG-06, limites RV). Os demais aparecem no topo. **O que foi digitado nunca se perde** num erro.
+- **CA-03:** sugestões de cor. As 6 cores mais usadas no plantel aparecem como atalhos, e há uma lista de sugestões enquanto se digita. Qualquer outra cor continua aceita.
+- **CA-04:** "Salvar e cadastrar outro" (só no cadastro): salva, avisa ("4272402/24 salvo"), limpa a anilha, o sexo, a origem e as observações, e **mantém pai, mãe, proprietário, cor e situação** (irmãos de ninhada costumam repetir esses campos). O cursor volta para a anilha.
+- **CA-05:** "Salvar" leva ao pombo com o aviso "Salvo". Enquanto salva, o botão mostra "Salvando…" e não salva duas vezes.
+- **CA-06:** na edição, o formulário só aparece depois que os dados do pombo chegam (antes, aparece o carregando), para não haver um formulário vazio que possa ser salvo por cima.
+- **CA-07:** "Cancelar" volta à página anterior sem salvar.
 
 ## Mensagens e falhas na tela
 
