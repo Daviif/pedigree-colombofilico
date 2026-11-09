@@ -1,5 +1,6 @@
 """Testes do backup no PC (RO-04..06). Rodar: backend/.venv/bin/python -m pytest backup-pc/"""
 
+import subprocess
 from datetime import datetime, timedelta
 
 import pytest
@@ -56,6 +57,7 @@ def ambiente(tmp_path, monkeypatch):
     monkeypatch.setattr(pb, "BASE", tmp_path / "pc")
     avisos = []
     monkeypatch.setattr(pb, "avisar", lambda t, x: avisos.append((t, x)))
+    monkeypatch.setattr(pb.time, "sleep", lambda s: None)  # novas tentativas sem esperar de verdade
     return vps, tmp_path / "pc", avisos
 
 
@@ -114,4 +116,41 @@ def test_falha_do_rsync_aparece_no_aviso(ambiente, monkeypatch):
     _, _, avisos = ambiente
     monkeypatch.setattr(pb, "ORIGEM", "/nao/existe/")
     assert pb.main(agora=HOJE) == 1
+    assert "Falha ao buscar na VPS" in avisos[-1][1]
+
+
+# RO-04: novas tentativas (PC voltando da suspensão sem rede)
+def _rsync_que_falha(vezes, chamadas):
+    real = subprocess.run
+
+    def falso(cmd, *a, **k):
+        chamadas.append(cmd[0])
+        if cmd[0] == "rsync" and len(chamadas) <= vezes:
+            raise subprocess.CalledProcessError(255, cmd)
+        return real(cmd, *a, **k)
+
+    return falso
+
+
+def test_rsync_tenta_de_novo_e_importa_na_terceira(ambiente, monkeypatch):
+    vps, pc, avisos = ambiente
+    _criar(vps, HOJE - timedelta(hours=3))
+    chamadas, esperas = [], []
+    monkeypatch.setattr(pb.subprocess, "run", _rsync_que_falha(2, chamadas))
+    monkeypatch.setattr(pb.time, "sleep", esperas.append)
+    assert pb.main(agora=HOJE) == 0
+    assert chamadas.count("rsync") == 3
+    assert esperas == [60, 60]
+    assert (pc / "arquivo" / _nome(HOJE - timedelta(hours=3))).exists()
+    assert avisos == []
+
+
+def test_rsync_desiste_depois_de_3_tentativas(ambiente, monkeypatch):
+    _, _, avisos = ambiente
+    chamadas, esperas = [], []
+    monkeypatch.setattr(pb.subprocess, "run", _rsync_que_falha(99, chamadas))
+    monkeypatch.setattr(pb.time, "sleep", esperas.append)
+    assert pb.main(agora=HOJE) == 1  # sem nenhum backup no PC: avisa
+    assert chamadas.count("rsync") == 3
+    assert esperas == [60, 60]
     assert "Falha ao buscar na VPS" in avisos[-1][1]

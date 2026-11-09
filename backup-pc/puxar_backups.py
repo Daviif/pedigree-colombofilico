@@ -17,6 +17,7 @@ import os
 import re
 import shutil
 import subprocess
+import time
 import sys
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -64,13 +65,24 @@ def manter(nomes: list[str]) -> set[str]:
     return ficam
 
 
+TENTATIVAS = 3  # RO-04: o PC pode ter acabado de voltar da suspensão, ainda sem rede
+ESPERA_S = 60
+
+
 def puxar(espelho: Path) -> None:
     espelho.mkdir(parents=True, exist_ok=True)
-    subprocess.run(
-        ["rsync", "-rt", "--delete", "--timeout=60", "--include=pedigree-*.sql.gz.age",
-         "--exclude=*", ORIGEM, f"{espelho}/"],
-        check=True,
-    )
+    for tentativa in range(1, TENTATIVAS + 1):
+        try:
+            subprocess.run(
+                ["rsync", "-rt", "--delete", "--timeout=60", "--include=pedigree-*.sql.gz.age",
+                 "--exclude=*", ORIGEM, f"{espelho}/"],
+                check=True,
+            )
+            return
+        except subprocess.CalledProcessError:
+            if tentativa == TENTATIVAS:
+                raise
+            time.sleep(ESPERA_S)
 
 
 def importar(espelho: Path, arquivo: Path, registro: Path) -> list[str]:
