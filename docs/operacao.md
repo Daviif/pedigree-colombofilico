@@ -19,7 +19,7 @@ deploy/backup-externo.sh*                          ~/.local/share/pedigree-backu
 
 | O quê | Onde |
 |---|---|
-| Chave **privada** do age (abre os backups) | `~/.config/pedigree-backup/chave-age.txt` no PC + **papel** + **pendrive** (anotar aqui onde estão guardados: ______) |
+| Chave **privada** do age (abre os backups) | `~/.config/pedigree-backup/chave-age.txt` no PC + **papel**, guardado no **armário** (2026-11-09; conferir a cópia com `testar_restauracao.sh "" ARQUIVO_DIGITADO`) + pendrive (ainda não feito). **Nunca** no Google Drive, onde estão os backups (D9) |
 | Chave pública do age | VPS: `~/pedigree/deploy/backup.pub` |
 | Chave SSH do PC (só lê `backups/externo`) | PC: `~/.ssh/pedigree-backup`; VPS: `~/.ssh/authorized_keys` com `rrsync -ro` |
 | Log do backup da VPS | VPS: `~/pedigree/deploy/backups/backup.log` (linhas `ERRO` em falha) |

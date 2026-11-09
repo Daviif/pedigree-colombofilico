@@ -1,2 +1,5 @@
 .claude/
 __pycache__/
+
+# criado no deploy para a reversão (docs/lancamento.md)
+versao-anterior.txt

@@ -2,3 +2,6 @@
 backups/
 backup.pub
 backup-externo.sh
+# cópias do .env têm segredos (o .env.example é público e fica no Git)
+.env.*
+!.env.example
