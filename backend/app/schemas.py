@@ -1,8 +1,8 @@
 import re
 from datetime import date, datetime
-from typing import Annotated
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, StringConstraints, field_validator
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, StringConstraints, field_validator, model_validator
 
 from app.models import Sexo, StatusPombo
 
@@ -163,6 +163,30 @@ class PomboInput(PomboBase):
             valor = valor.strip()
             valor = valor[:1].upper() + valor[1:]
         return valor or None
+
+
+class NovoGenitor(BaseModel):
+    """PE-04: pombo novo cadastrado direto da árvore (o sexo vem do papel)."""
+
+    anilha: Annotated[str, StringConstraints(max_length=50)]
+    cor: TextoOpcional(100) = None
+
+    _anilha = field_validator("anilha")(lambda v: PomboInput.validar_anilha(v))
+    _cor = field_validator("cor")(lambda v: PomboInput.capitalizar_cor(v))
+
+
+class GenitorInput(BaseModel):
+    """PE-xx: preencher a vaga de pai ou mãe pela árvore."""
+
+    papel: Literal["pai", "mae"]
+    genitor_id: int | None = None
+    novo: NovoGenitor | None = None
+
+    @model_validator(mode="after")
+    def exatamente_um(self) -> "GenitorInput":  # PE-05
+        if (self.genitor_id is None) == (self.novo is None):
+            raise ValueError("Informe um pombo existente ou os dados de um novo, não os dois")
+        return self
 
 
 class PomboCreate(PomboInput):

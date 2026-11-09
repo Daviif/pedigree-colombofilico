@@ -14,7 +14,7 @@ from app.genealogia import (
 )
 from app.models import Pombo, Proprietario, Resultado, Sexo, StatusPombo, Usuario
 from app.pedigree import montar_arvore
-from app.schemas import ArvoreNo, IrmaosResponse, PomboCreate, PomboDetail, PomboRead, PomboUpdate
+from app.schemas import ArvoreNo, GenitorInput, IrmaosResponse, PomboCreate, PomboDetail, PomboRead, PomboUpdate
 
 router = APIRouter(prefix="/pombos", tags=["pombos"])
 
@@ -152,6 +152,47 @@ def atualizar_pombo(
     for campo, valor in dados.model_dump().items():
         setattr(pombo, campo, valor)
     _gravar(db)
+    return buscar_pombo_ou_404(pombo_id, db, usuario)
+
+
+@router.post("/{pombo_id}/genitor", response_model=PomboRead)
+def preencher_genitor(
+    pombo_id: int,
+    dados: GenitorInput,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(usuario_atual),
+):
+    """Completar o pedigree pela árvore (PE-01..05): liga um pombo existente ou cadastra um
+    novo e liga, numa transação só. Só preenche vaga vazia; trocar é pelo Editar."""
+    pombo = buscar_pombo_ou_404(pombo_id, db, usuario, editar=True)  # PE-01
+    coluna = "pai_id" if dados.papel == "pai" else "mae_id"
+    rotulo = "pai" if dados.papel == "pai" else "mãe"
+    travar_plantel(pombo.usuario_id, db)  # RG-03
+    db.refresh(pombo)
+    if getattr(pombo, coluna) is not None:  # PE-02
+        raise HTTPException(
+            status_code=409,
+            detail=f"{pombo.anilha} já tem {rotulo} cadastrado(a). Para trocar, use o Editar.",
+        )
+
+    if dados.novo is not None:  # PE-04
+        if _anilha_em_uso(dados.novo.anilha, pombo.usuario_id, db):
+            raise HTTPException(status_code=400, detail="Já existe um pombo com essa anilha")
+        novo = Pombo(
+            usuario_id=pombo.usuario_id,
+            anilha=dados.novo.anilha,
+            cor=dados.novo.cor,
+            sexo=Sexo.M if dados.papel == "pai" else Sexo.F,
+        )
+        db.add(novo)
+        db.flush()
+        genitor_id = novo.id
+    else:
+        genitor_id = dados.genitor_id
+
+    validar_genitor(dados.papel, genitor_id, pombo.id, pombo.anilha, pombo.usuario_id, True, db)  # PE-03
+    setattr(pombo, coluna, genitor_id)
+    _gravar(db)  # tudo ou nada; corrida na anilha vira 409
     return buscar_pombo_ou_404(pombo_id, db, usuario)
 
 

@@ -23,17 +23,37 @@ export function useModal(
 ) {
   const ref = useRef<HTMLDivElement>(null)
   const origem = useRef<HTMLElement | null>(null)
+  // Último elemento focado ANTES de abrir: um autoFocus de dentro da janela já roubaria o
+  // activeElement no momento da abertura, e o foco não teria para onde voltar.
+  const ultimoFora = useRef<HTMLElement | null>(null)
   const fechar = useRef(aoFechar)
   useLayoutEffect(() => {
     fechar.current = aoFechar
   })
 
+  useEffect(() => {
+    if (aberto) return
+    ultimoFora.current = document.activeElement as HTMLElement | null
+    const guardar = (e: FocusEvent) => {
+      const alvo = e.target as HTMLElement
+      // o autoFocus do campo da própria janela dispara antes de este efeito ser desligado
+      if (alvo.closest?.('[aria-modal="true"]')) return
+      ultimoFora.current = alvo
+    }
+    document.addEventListener('focusin', guardar)
+    return () => document.removeEventListener('focusin', guardar)
+  }, [aberto])
+
   // useLayoutEffect: roda antes da pintura, então o foco chega junto com a janela.
   useLayoutEffect(() => {
     if (!aberto || !ref.current) return
-    origem.current = document.activeElement as HTMLElement | null
-    const alvo = focoInicial?.current ?? focaveis(ref.current)[0] ?? ref.current
-    alvo.focus()
+    const ativo = document.activeElement as HTMLElement | null
+    origem.current = ativo && !ref.current.contains(ativo) ? ativo : ultimoFora.current
+    // Um campo de dentro já pegou o foco (autoFocus)? Respeita: não joga o foco no "✕".
+    if (!ref.current.contains(document.activeElement)) {
+      const alvo = focoInicial?.current ?? focaveis(ref.current)[0] ?? ref.current
+      alvo.focus()
+    }
     return () => {
       const voltar = origem.current
       if (voltar && document.contains(voltar)) voltar.focus()

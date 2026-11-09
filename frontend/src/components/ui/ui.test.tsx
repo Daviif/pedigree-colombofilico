@@ -120,6 +120,29 @@ describe.each([
   })
 })
 
+describe('useModal com autoFocus', () => {
+  function ComAutoFocus() {
+    const [aberto, setAberto] = useState(false)
+    return (
+      <>
+        <button onClick={() => setAberto(true)}>Abrir</button>
+        <PainelLateral aberto={aberto} aoFechar={() => setAberto(false)} titulo="Painel">
+          <input aria-label="busca" autoFocus />
+        </PainelLateral>
+      </>
+    )
+  }
+
+  it('respeita o autoFocus de um campo de dentro (não joga o foco no ✕)', async () => {
+    render(<ComAutoFocus />)
+    const abrir = screen.getByText('Abrir')
+    await userEvent.click(abrir)
+    expect(screen.getByLabelText('busca')).toHaveFocus()
+    await userEvent.keyboard('{Escape}')
+    expect(abrir).toHaveFocus()
+  })
+})
+
 describe('DialogoConfirmacao', () => {
   it('é alertdialog, começa no Cancelar e a ação perigosa confirma', async () => {
     const confirmar = vi.fn()

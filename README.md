@@ -137,6 +137,16 @@ Detalhes, critérios e testes em `docs/requisitos.md` (códigos RG-xx). Os teste
 - **RG-10:** excluir um proprietário usado por algum pombo é bloqueado (409).
 - **RG-11:** ancestral desconhecido é simplesmente a ausência de pai ou mãe. O sistema nunca cria pombo fictício.
 
+## Completar o pedigree pela árvore
+
+`POST /api/pombos/{id}/genitor` com `{"papel": "pai"|"mae", "genitor_id": N}` (pombo já cadastrado) **ou** `{"papel": ..., "novo": {"anilha": "...", "cor": "..."}}` (cadastra e liga).
+
+- **PE-01:** exige poder editar o pombo (403 se o plantel é só leitura; 404 se nem pode vê-lo).
+- **PE-02:** só preenche uma vaga **vazia**. Se o pombo já tem pai (ou mãe), responde 409. Trocar um pai existente continua sendo feito pelo Editar, de propósito: um clique na árvore nunca troca um ancestral em silêncio.
+- **PE-03:** com pombo existente, valem as regras RG-01, 02, 04 e 08 (não ser ele mesmo, sem ciclo, sexo do papel, mesmo plantel), com a trava RG-03.
+- **PE-04:** com pombo novo, o sexo vem do papel (pai = macho, mãe = fêmea), e a anilha e a cor seguem RV-01/02 (anilha única no plantel). O pombo novo é criado no plantel do filho e ligado **na mesma transação**: se algo falha, nada é gravado.
+- **PE-05:** é preciso informar exatamente um entre `genitor_id` e `novo` (senão, 422).
+
 ## Cópia entre plantéis
 
 Detalhes e testes em `docs/requisitos.md` (RC-xx).
@@ -203,6 +213,25 @@ Desenho em `docs/ux/fluxos.md` e no protótipo `docs/ux/prototipos/alta-fidelida
 - **CA-05:** "Salvar" leva ao pombo com o aviso "Salvo". Enquanto salva, o botão mostra "Salvando…" e não salva duas vezes.
 - **CA-06:** na edição, o formulário só aparece depois que os dados do pombo chegam (antes, aparece o carregando), para não haver um formulário vazio que possa ser salvo por cima.
 - **CA-07:** "Cancelar" volta à página anterior sem salvar.
+
+## Detalhe do pombo e árvore
+
+- **DT-01:** faixa azul-marinho com a anilha em destaque, ♂/♀ e sexo, cor, situação e o proprietário numa linha (UX-04). Plantel de outra pessoa mostra o aviso "só leitura".
+- **DT-02:** ações: **Certificado PDF** (principal), **Editar** e **⋯** com "Copiar anilha" e "Excluir pombo…". Em plantel só leitura, no lugar de Editar e ⋯, aparece "Copiar para meu plantel".
+- **DT-03:** o certificado abre uma janela para escolher **2 a 6 gerações**, já marcada com as gerações da árvore. O layout do PDF não muda.
+- **DT-04:** excluir e copiar pedem confirmação numa janela do sistema (sem `confirm()`/`alert()`). Se o servidor recusar (pombo com filhos, RG-09; conflitos da cópia, RC-03), a mensagem aparece **dentro da janela**.
+- **DT-05:** abas **Pedigree · Resultados (n) · Observações**, que também funcionam com as setas do teclado. A aba Pedigree tem a árvore e os irmãos.
+- **DT-06:** resultados com ano, prova, km, colocação e prêmio, do mais recente para o mais antigo. O formulário de inclusão segue RV-04, com erros embaixo do campo. Remover pede confirmação.
+- **AR-01:** no desktop, uma coluna por geração (2 a 6, escolhidas no seletor), cada ancestral alinhado com o filho, com rótulo ("Avó paterna"), ♂/♀, anilha, sexo, cor e número de provas. A partir da 5ª geração, as caixas ficam compactas. Cada caixa ocupa a altura dos ancestrais dela (os dois pais somam a altura do filho), então ramos desconhecidos não deixam espaço vazio e 6 gerações não viram uma página enorme. Ao trocar o número de gerações, a árvore atual continua na tela até a nova chegar.
+- **AR-02:** no celular, uma geração por vez: o pombo e os pais dele. Tocar num dos pais sobe uma geração, e a trilha ("Principal › Pai › Avó paterna") leva de volta.
+- **AR-03:** onde o filho existe e falta pai ou mãe, aparece a vaga **"+ ♂ Pai" / "+ ♀ Mãe"** (só para quem pode editar). Para quem só lê, aparece "Desconhecido". Acima de uma vaga, o espaço fica vazio. **Nunca** aparece pombo fictício (RG-11).
+- **AR-04:** ancestral repetido (consanguinidade) com destaque e "⚠ repetido"; pai fêmea ou mãe macho de registros antigos com "⚠ sexo não confere" (RG-07).
+- **AR-05:** a vaga abre o painel lateral (de baixo para cima no celular) com duas abas:
+  - "Escolher do plantel": busca pela anilha, só com pombos do sexo do papel e sem o próprio pombo;
+  - "Cadastrar novo": anilha e cor, com o sexo fixado pelo papel.
+
+  Usa `POST /pombos/{id}/genitor` (PE-xx). A árvore recarrega **no mesmo lugar**, sem sair da página, e aparece o aviso "4272402/24 ligado como pai de …". Erros do servidor aparecem dentro do painel.
+- **AR-06:** clicar num ancestral cadastrado abre a página dele.
 
 ## Mensagens e falhas na tela
 

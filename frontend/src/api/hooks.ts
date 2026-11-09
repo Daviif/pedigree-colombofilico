@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 
 import { api } from './client'
@@ -154,12 +154,35 @@ export function useCopiarPombo() {
   })
 }
 
+export type GenitorInput =
+  | { papel: 'pai' | 'mae'; genitor_id: number }
+  | { papel: 'pai' | 'mae'; novo: { anilha: string; cor?: string | null } }
+
+/** PE-xx: preenche a vaga de pai ou mãe pela árvore (liga existente ou cadastra e liga). */
+export function usePreencherGenitor() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ filhoId, dados }: { filhoId: number; dados: GenitorInput }) =>
+      (await api.post<Pombo>(`/pombos/${filhoId}/genitor`, dados)).data,
+    onSuccess: () => {
+      for (const chave of ['arvore', 'pombo', 'pombos', 'irmaos']) qc.invalidateQueries({ queryKey: [chave] })
+    },
+  })
+}
+
+/**
+ * Árvore com as gerações que ela realmente tem. Ao trocar o número de gerações, a árvore
+ * anterior continua na tela até a nova chegar (sem piscar), desenhada com as gerações dela.
+ */
 export function useArvore(id: number | undefined, geracoes = 4) {
   return useQuery({
     queryKey: ['arvore', id, geracoes],
-    queryFn: async () =>
-      (await api.get<ArvoreNo>(`/pombos/${id}/arvore`, { params: { geracoes } })).data,
+    queryFn: async () => ({
+      raiz: (await api.get<ArvoreNo>(`/pombos/${id}/arvore`, { params: { geracoes } })).data,
+      geracoes,
+    }),
     enabled: id !== undefined,
+    placeholderData: keepPreviousData,
   })
 }
 
@@ -186,7 +209,11 @@ export function useCriarResultado(pomboId: number) {
   return useMutation({
     mutationFn: async (dados: ResultadoInput) =>
       (await api.post<Resultado>(`/pombos/${pomboId}/resultados`, dados)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['resultados', pomboId] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['resultados', pomboId] })
+      qc.invalidateQueries({ queryKey: ['arvore', pomboId] })
+      qc.invalidateQueries({ queryKey: ['resultados-recentes'] })
+    },
   })
 }
 
@@ -195,7 +222,11 @@ export function useAtualizarResultado(pomboId: number) {
   return useMutation({
     mutationFn: async ({ id, dados }: { id: number; dados: ResultadoInput }) =>
       (await api.put<Resultado>(`/pombos/${pomboId}/resultados/${id}`, dados)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['resultados', pomboId] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['resultados', pomboId] })
+      qc.invalidateQueries({ queryKey: ['arvore', pomboId] })
+      qc.invalidateQueries({ queryKey: ['resultados-recentes'] })
+    },
   })
 }
 
@@ -203,7 +234,11 @@ export function useRemoverResultado(pomboId: number) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (id: number) => api.delete(`/pombos/${pomboId}/resultados/${id}`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['resultados', pomboId] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['resultados', pomboId] })
+      qc.invalidateQueries({ queryKey: ['arvore', pomboId] })
+      qc.invalidateQueries({ queryKey: ['resultados-recentes'] })
+    },
   })
 }
 
