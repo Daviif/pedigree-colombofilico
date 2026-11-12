@@ -3,7 +3,7 @@ import { useMemo, useRef, useState } from 'react'
 import { separarErros } from '../../api/erros'
 import { usePombos, usePreencherGenitor } from '../../api/hooks'
 import { limparAnilha, capitalizarPrimeira } from '../../formatadores'
-import { Aviso, Botao, Campo, PainelLateral, classeEntrada, useNotificar } from '../ui'
+import { Aviso, Botao, BotaoBarra, Campo, PainelLateral, classeEntrada, useNotificar } from '../ui'
 import type { Papel } from './montagem'
 
 type Props = {
@@ -171,18 +171,21 @@ function Conteudo({ alvo, donoId, aoFechar }: { alvo: NonNullable<Props['alvo']>
           >
             <Campo rotulo="Anilha" obrigatorio erro={erros.anilha}>
               {(c) => (
-                <input
-                  {...c}
-                  ref={anilhaNovo}
-                  autoFocus
-                  inputMode="numeric"
-                  value={novo.anilha}
-                  onChange={(e) => {
-                    setNovo((n) => ({ ...n, anilha: limparAnilha(e.target.value) }))
-                    setErros((x) => ({ ...x, anilha: undefined }))
-                  }}
-                  className={`${classeEntrada(!!erros.anilha)} tabular-nums`}
-                />
+                <div className="flex gap-2">
+                  <input
+                    {...c}
+                    ref={anilhaNovo}
+                    autoFocus
+                    inputMode="numeric"
+                    value={novo.anilha}
+                    onChange={(e) => {
+                      setNovo((n) => ({ ...n, anilha: limparAnilha(e.target.value) }))
+                      setErros((x) => ({ ...x, anilha: undefined }))
+                    }}
+                    className={`${classeEntrada(!!erros.anilha)} tabular-nums`}
+                  />
+                  <BotaoBarra aoInserir={() => setNovo((n) => ({ ...n, anilha: limparAnilha(n.anilha + '/') }))} />
+                </div>
               )}
             </Campo>
             <div>

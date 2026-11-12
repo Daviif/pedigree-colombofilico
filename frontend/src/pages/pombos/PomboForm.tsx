@@ -14,7 +14,7 @@ import {
 import type { PomboDetail, PomboInput, Sexo, StatusPombo } from '../../api/types'
 import { FalhaAoCarregar } from '../../components/FalhaAoCarregar'
 import { PomboSelect } from '../../components/PomboSelect'
-import { Aviso, Botao, Campo, Carregando, Migalhas, Vazio, classeBotao, classeEntrada, useNotificar } from '../../components/ui'
+import { Aviso, Botao, BotaoBarra, Campo, Carregando, Migalhas, Vazio, classeBotao, classeEntrada, useNotificar } from '../../components/ui'
 import { capitalizarPrimeira, limparAnilha } from '../../formatadores'
 
 const CAMPOS = ['anilha', 'sexo', 'cor', 'status', 'proprietario_id', 'pai_id', 'mae_id', 'origem', 'observacoes'] as const
@@ -178,15 +178,18 @@ function FormularioPombo({ pombo, inicial, migalhas }: { pombo?: PomboDetail; in
         <div className="grid gap-x-5 gap-y-4 sm:grid-cols-2">
           <Campo rotulo="Anilha" obrigatorio erro={erros.anilha} dica="Só números e /, ex.: 4272402/24">
             {(c) => (
-              <input
-                {...c}
-                ref={anilhaRef}
-                autoFocus={!editando}
-                inputMode="numeric"
-                className={`${classeEntrada(!!erros.anilha)} tabular-nums`}
-                value={dados.anilha}
-                onChange={(e) => campo('anilha', limparAnilha(e.target.value))}
-              />
+              <div className="flex gap-2">
+                <input
+                  {...c}
+                  ref={anilhaRef}
+                  autoFocus={!editando}
+                  inputMode="numeric"
+                  className={`${classeEntrada(!!erros.anilha)} tabular-nums`}
+                  value={dados.anilha}
+                  onChange={(e) => campo('anilha', limparAnilha(e.target.value))}
+                />
+                <BotaoBarra aoInserir={() => campo('anilha', limparAnilha(dados.anilha + '/'))} />
+              </div>
             )}
           </Campo>
 

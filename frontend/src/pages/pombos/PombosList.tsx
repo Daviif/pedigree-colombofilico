@@ -5,7 +5,7 @@ import { useCompartilhamentos, usePombos, useProprietarios, useUsuarioAtual } fr
 import type { Pombo, PombosFiltro, Sexo, StatusPombo } from '../../api/types'
 import { FalhaAoCarregar } from '../../components/FalhaAoCarregar'
 import { ordemAnilha } from '../../formatadores'
-import { Aviso, Botao, Campo, Carregando, Migalhas, SeloSituacao, SexoRotulo, Vazio, classeBotao, classeEntrada } from '../../components/ui'
+import { Aviso, Botao, BotaoBarra, Campo, Carregando, Migalhas, SeloSituacao, SexoRotulo, Vazio, classeBotao, classeEntrada } from '../../components/ui'
 
 /** LI-03: compara anilhas como números (2/24 antes de 10/24). */
 
@@ -117,7 +117,12 @@ export function PombosList() {
             </Campo>
           )}
           <Campo rotulo="Anilha">
-            {(c) => <input {...c} inputMode="numeric" placeholder="contém…" value={filtro.anilha ?? ''} className={classeEntrada()} onChange={(e) => atualizarFiltro('anilha', e.target.value)} />}
+            {(c) => (
+              <div className="flex gap-2">
+                <input {...c} inputMode="numeric" placeholder="contém…" value={filtro.anilha ?? ''} className={classeEntrada()} onChange={(e) => atualizarFiltro('anilha', e.target.value)} />
+                <BotaoBarra aoInserir={() => atualizarFiltro('anilha', (filtro.anilha ?? '') + '/')} />
+              </div>
+            )}
           </Campo>
           <Campo rotulo="Cor">
             {(c) => <input {...c} placeholder="contém…" value={filtro.cor ?? ''} className={classeEntrada()} onChange={(e) => atualizarFiltro('cor', e.target.value)} />}

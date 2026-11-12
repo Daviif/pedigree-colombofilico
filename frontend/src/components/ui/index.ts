@@ -1,6 +1,7 @@
 // Componentes do sistema visual (docs/ux/sistema-visual.md §5).
 export { Aviso } from './Aviso'
 export { Botao } from './Botao'
+export { BotaoBarra } from './BotaoBarra'
 export { classeBotao, classeEntrada, NOME_SEXO } from './classes'
 export type { VarianteBotao } from './classes'
 export { Campo } from './Campo'
