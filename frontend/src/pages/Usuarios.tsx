@@ -1,11 +1,18 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 
-import { separarErros } from '../api/erros'
-import { mensagemDeErro, useAtualizarUsuario, useCriarUsuario, useDesbloquearUsuario, useRedefinirSenha, useUsuarioAtual, useUsuarios } from '../api/hooks'
+import {
+  mensagemDeErro,
+  useAtualizarUsuario,
+  useCriarUsuario,
+  useDesbloquearUsuario,
+  useRedefinirSenha,
+  useUsuarioAtual,
+  useUsuarios,
+} from '../api/hooks'
 import type { UsuarioAdmin, UsuarioNovo } from '../api/types'
 import { FalhaAoCarregar } from '../components/FalhaAoCarregar'
-import { Aviso, Botao, Campo, Carregando, Dialogo, DialogoConfirmacao, Migalhas, classeEntrada, useNotificar } from '../components/ui'
-import { iniciais } from '../formatadores'
+
+const VAZIO: UsuarioNovo = { login: '', nome: '', senha: '', admin: false }
 
 // O último acesso é gravado no máximo a cada 5 minutos; 10 minutos dá folga para "online".
 const ONLINE_MS = 10 * 60 * 1000
@@ -27,282 +34,313 @@ function descreverAcesso(iso: string | null | undefined, agora: number): string 
   return data.toLocaleDateString('pt-BR')
 }
 
-type Acao =
-  | { tipo: 'novo' }
-  | { tipo: 'nome' | 'senha' | 'admin' | 'desativar'; u: UsuarioAdmin }
+const inputCls = 'w-full rounded border border-slate-300 px-2 py-2 text-sm sm:py-1'
+const botaoSecundario =
+  'rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50'
 
-/** US-01 / US-02 (e regras 1–9 da tela Usuários). */
 export function Usuarios() {
-  const { data: usuarios, dataUpdatedAt: agora, isLoading, isError, error, refetch } = useUsuarios()
+  const { data: usuarios, dataUpdatedAt: agora, isError, error, refetch } = useUsuarios()
   const { data: eu } = useUsuarioAtual()
-  const atualizar = useAtualizarUsuario()
-  const desbloquear = useDesbloquearUsuario()
-  const notificar = useNotificar()
-  const [acao, setAcao] = useState<Acao | null>(null)
-  const [erroLista, setErroLista] = useState<string | null>(null)
+  const criar = useCriarUsuario()
+  const [novo, setNovo] = useState<UsuarioNovo>(VAZIO)
+  const [mostrarForm, setMostrarForm] = useState(false)
+  const [erro, setErro] = useState<string | null>(null)
+  const [aviso, setAviso] = useState<string | null>(null)
+
+  async function enviar(e: React.FormEvent) {
+    e.preventDefault()
+    setErro(null)
+    try {
+      const criado = await criar.mutateAsync(novo)
+      setAviso(`Usuário ${criado.login} criado. Passe o login e a senha para ${criado.nome}.`)
+      setNovo(VAZIO)
+      setMostrarForm(false)
+    } catch (err) {
+      setErro(mensagemDeErro(err, 'Erro ao criar o usuário.'))
+    }
+  }
 
   const ativos = usuarios?.filter((u) => u.ativo).length ?? 0
   const online = usuarios?.filter((u) => estaOnline(u.ultimo_acesso, agora)).length ?? 0
 
-  async function direto(fazer: () => Promise<unknown>, aviso: string) {
-    setErroLista(null)
-    try {
-      await fazer()
-      notificar(aviso)
-    } catch (err) {
-      setErroLista(mensagemDeErro(err, 'Não foi possível salvar.'))
-    }
-  }
-
   return (
-    <div className="max-w-3xl space-y-4">
-      <div>
-        <Migalhas itens={[{ rotulo: 'Início', para: '/' }, { rotulo: 'Usuários' }]} />
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h1 className="text-[26px] font-bold text-marinho">Usuários</h1>
-            {usuarios && (
-              <p className="text-sm text-slate-600">
-                {ativos} ativo{ativos === 1 ? '' : 's'} · {online} online agora
-              </p>
-            )}
-          </div>
-          <Botao variante="primaria" onClick={() => setAcao({ tipo: 'novo' })}>
-            + Novo usuário
-          </Botao>
+    <div className="max-w-3xl space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold text-slate-800">Usuários</h1>
+          {usuarios && (
+            <p className="text-sm text-slate-500">
+              {ativos} ativo{ativos === 1 ? '' : 's'} · {online} online agora
+            </p>
+          )}
         </div>
+        {!mostrarForm && (
+          <button
+            onClick={() => {
+              setMostrarForm(true)
+              setAviso(null)
+            }}
+            className="rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            + Novo usuário
+          </button>
+        )}
       </div>
 
-      {erroLista && <Aviso tom="erro">{erroLista}</Aviso>}
+      {aviso && <div className="rounded bg-green-50 px-3 py-2 text-sm text-green-800">{aviso}</div>}
+
+      {mostrarForm && (
+        <form
+          onSubmit={enviar}
+          className="space-y-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
+        >
+          <h2 className="text-lg font-medium text-slate-800">Novo usuário</h2>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="text-sm text-slate-600">
+              Nome completo
+              <input
+                required
+                placeholder="ex.: João da Silva"
+                className={inputCls}
+                value={novo.nome}
+                onChange={(e) => setNovo({ ...novo, nome: e.target.value })}
+              />
+            </label>
+            <label className="text-sm text-slate-600">
+              Login
+              <input
+                required
+                autoCapitalize="none"
+                autoComplete="off"
+                placeholder="ex.: joao.silva"
+                className={inputCls}
+                value={novo.login}
+                onChange={(e) => setNovo({ ...novo, login: e.target.value.toLowerCase() })}
+              />
+            </label>
+            <label className="text-sm text-slate-600">
+              Senha (mínimo 8 caracteres)
+              <input
+                required
+                minLength={8}
+                autoComplete="new-password"
+                className={inputCls}
+                value={novo.senha}
+                onChange={(e) => setNovo({ ...novo, senha: e.target.value })}
+              />
+            </label>
+            <label className="flex items-center gap-2 self-end pb-1 text-sm text-slate-600">
+              <input
+                type="checkbox"
+                checked={novo.admin}
+                onChange={(e) => setNovo({ ...novo, admin: e.target.checked })}
+              />
+              Administrador (vê e edita tudo)
+            </label>
+          </div>
+          {erro && <div className="rounded bg-red-50 px-3 py-2 text-sm text-red-700">{erro}</div>}
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              disabled={criar.isPending}
+              className="rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            >
+              Criar
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setMostrarForm(false)
+                setErro(null)
+              }}
+              className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700"
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      )}
+
       {isError && <FalhaAoCarregar erro={error} oQue="os usuários" onTentar={refetch} />}
-      {isLoading && <Carregando linhas={4} rotulo="Carregando os usuários…" />}
 
       <ul className="space-y-3">
-        {usuarios?.map((u) => {
-          const souEu = u.id === eu?.id
-          const on = estaOnline(u.ultimo_acesso, agora)
-          return (
-            <li key={u.id} className={`rounded-[10px] border border-borda-suave bg-white px-4 py-3.5 shadow-sm ${u.ativo ? '' : 'opacity-70'}`}>
-              <div className="flex flex-wrap items-start justify-between gap-2">
-                <div className="flex min-w-0 items-start gap-3">
-                  <span aria-hidden className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#e8edf5] font-bold text-marinho">
-                    {iniciais(u.nome)}
-                  </span>
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <b className="text-slate-900">{u.nome}</b>
-                      {souEu && <span className="text-sm text-slate-500">(você)</span>}
-                      {u.admin && <span className="rounded-full border border-amber-300 bg-dourado-claro px-2 py-px text-xs font-semibold text-dourado-texto">admin</span>}
-                      {u.bloqueado && (
-                        <span className="rounded-full border border-red-200 bg-red-50 px-2 py-px text-xs font-semibold text-red-700" title="Errou a senha 5 vezes nos últimos 15 minutos">
-                          bloqueado
-                        </span>
-                      )}
-                      {!u.ativo && <span className="rounded-full border border-slate-300 bg-slate-100 px-2 py-px text-xs font-semibold text-slate-600">desativado</span>}
-                    </div>
-                    <div className="text-[13px] text-slate-600">
-                      {u.login} · {u.total_pombos} pombo{u.total_pombos === 1 ? '' : 's'}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1.5 text-[13px]">
-                  {on ? (
-                    <span className="flex items-center gap-1.5 font-semibold text-green-700">
-                      <i aria-hidden className="h-2 w-2 rounded-full bg-green-500" />
-                      Online
-                    </span>
-                  ) : (
-                    <span className="text-slate-600">{descreverAcesso(u.ultimo_acesso, agora)}</span>
-                  )}
-                </div>
-              </div>
-              <div className="mt-2.5 flex flex-wrap gap-1.5">
-                <Botao pequeno onClick={() => setAcao({ tipo: 'nome', u })}>Editar nome</Botao>
-                <Botao pequeno onClick={() => setAcao({ tipo: 'senha', u })}>Redefinir senha</Botao>
-                {u.bloqueado && (
-                  <Botao pequeno carregando={desbloquear.isPending && desbloquear.variables === u.id} onClick={() => direto(() => desbloquear.mutateAsync(u.id), `${u.nome} pode tentar entrar de novo`)}>
-                    Desbloquear
-                  </Botao>
-                )}
-                {!souEu && (
-                  <>
-                    <Botao pequeno onClick={() => setAcao({ tipo: 'admin', u })}>{u.admin ? 'Tirar admin' : 'Tornar admin'}</Botao>
-                    {u.ativo ? (
-                      <Botao pequeno variante="fantasmaPerigo" onClick={() => setAcao({ tipo: 'desativar', u })}>
-                        Desativar
-                      </Botao>
-                    ) : (
-                      <Botao pequeno onClick={() => direto(() => atualizar.mutateAsync({ id: u.id, ativo: true }), `${u.nome} reativado(a)`)}>
-                        Reativar
-                      </Botao>
-                    )}
-                  </>
-                )}
-              </div>
-            </li>
-          )
-        })}
+        {usuarios?.map((u) => (
+          <LinhaUsuario key={u.id} usuario={u} souEu={u.id === eu?.id} agora={agora} />
+        ))}
       </ul>
-
-      {acao?.tipo === 'novo' && <NovoUsuario aoFechar={() => setAcao(null)} />}
-      {(acao?.tipo === 'nome' || acao?.tipo === 'senha') && <EditarUsuario key={`${acao.tipo}-${acao.u.id}`} modo={acao.tipo} u={acao.u} souEu={acao.u.id === eu?.id} aoFechar={() => setAcao(null)} />}
-      {(acao?.tipo === 'admin' || acao?.tipo === 'desativar') && <ConfirmarPerfil key={`${acao.tipo}-${acao.u.id}`} tipo={acao.tipo} u={acao.u} aoFechar={() => setAcao(null)} />}
     </div>
   )
 }
 
-const CAMPOS_NOVO = ['nome', 'login', 'senha'] as const
-
-function NovoUsuario({ aoFechar }: { aoFechar: () => void }) {
-  const criar = useCriarUsuario()
-  const notificar = useNotificar()
-  const [novo, setNovo] = useState<UsuarioNovo>({ login: '', nome: '', senha: '', admin: false })
-  const [erros, setErros] = useState<Partial<Record<(typeof CAMPOS_NOVO)[number], string>>>({})
-  const [erroGeral, setErroGeral] = useState<string | null>(null)
-
-  function mudar<K extends keyof UsuarioNovo>(c: K, v: UsuarioNovo[K]) {
-    setNovo((n) => ({ ...n, [c]: v }))
-    setErros((e) => ({ ...e, [c]: undefined }))
-  }
-
-  async function enviar(e?: React.FormEvent) {
-    e?.preventDefault()
-    setErroGeral(null)
-    try {
-      const criado = await criar.mutateAsync(novo)
-      notificar(`Usuário ${criado.login} criado — passe o login e a senha para ${criado.nome}`)
-      aoFechar()
-    } catch (err) {
-      const r = separarErros(err, CAMPOS_NOVO, 'Não foi possível criar o usuário.')
-      setErros(r.campos)
-      setErroGeral(r.geral)
-    }
-  }
-
-  return (
-    <Dialogo
-      aberto
-      aoFechar={aoFechar}
-      titulo="Novo usuário"
-      acoes={
-        <>
-          <Botao onClick={aoFechar}>Cancelar</Botao>
-          <Botao variante="primaria" carregando={criar.isPending} textoCarregando="Criando…" onClick={() => enviar()}>
-            Criar
-          </Botao>
-        </>
-      }
-    >
-      <form onSubmit={enviar} noValidate className="grid gap-4">
-        {erroGeral && <Aviso tom="erro">{erroGeral}</Aviso>}
-        <Campo rotulo="Nome completo" obrigatorio erro={erros.nome}>
-          {(c) => <input {...c} autoFocus maxLength={200} placeholder="ex.: João da Silva" value={novo.nome} onChange={(e) => mudar('nome', e.target.value)} className={classeEntrada(!!erros.nome)} />}
-        </Campo>
-        <Campo rotulo="Login" obrigatorio erro={erros.login} dica="3 a 50 caracteres: letras sem acento, números, . _ -">
-          {(c) => (
-            <input {...c} autoCapitalize="none" autoComplete="off" spellCheck={false} maxLength={50} placeholder="ex.: joao.silva" value={novo.login} onChange={(e) => mudar('login', e.target.value.toLowerCase())} className={classeEntrada(!!erros.login)} />
-          )}
-        </Campo>
-        <Campo rotulo="Senha" obrigatorio erro={erros.senha} dica="Mínimo 8 caracteres. Passe para a pessoa; ela pode pedir para trocar depois.">
-          {(c) => <input {...c} autoComplete="new-password" value={novo.senha} onChange={(e) => mudar('senha', e.target.value)} className={classeEntrada(!!erros.senha)} />}
-        </Campo>
-        <label className="flex min-h-11 items-center gap-2.5">
-          <input type="checkbox" className="h-5 w-5 accent-marinho" checked={novo.admin} onChange={(e) => mudar('admin', e.target.checked)} />
-          Administrador (vê e edita tudo e gerencia usuários)
-        </label>
-        <button type="submit" hidden />
-      </form>
-    </Dialogo>
-  )
-}
-
-function EditarUsuario({ modo, u, souEu, aoFechar }: { modo: 'nome' | 'senha'; u: UsuarioAdmin; souEu: boolean; aoFechar: () => void }) {
+function LinhaUsuario({
+  usuario: u,
+  souEu,
+  agora,
+}: {
+  usuario: UsuarioAdmin
+  souEu: boolean
+  agora: number
+}) {
   const atualizar = useAtualizarUsuario()
   const redefinir = useRedefinirSenha()
-  const notificar = useNotificar()
-  const [valor, setValor] = useState(modo === 'nome' ? u.nome : '')
+  const desbloquear = useDesbloquearUsuario()
+  const [modo, setModo] = useState<'nome' | 'senha' | null>(null)
+  const [valor, setValor] = useState('')
   const [erro, setErro] = useState<string | null>(null)
-  const campo = useRef<HTMLInputElement>(null)
+  const [aviso, setAviso] = useState<string | null>(null)
 
-  async function salvar(e?: React.FormEvent) {
-    e?.preventDefault()
+  const online = estaOnline(u.ultimo_acesso, agora)
+
+  function abrir(m: 'nome' | 'senha') {
+    setModo(m)
+    setValor(m === 'nome' ? u.nome : '')
     setErro(null)
+    setAviso(null)
+  }
+
+  async function executar(acao: () => Promise<unknown>, sucesso?: string) {
+    setErro(null)
+    setAviso(null)
     try {
-      if (modo === 'nome') {
-        await atualizar.mutateAsync({ id: u.id, nome: valor })
-        notificar('Nome alterado')
-      } else {
-        await redefinir.mutateAsync({ id: u.id, senha: valor })
-        notificar(souEu ? 'Senha alterada' : `Senha alterada — ${u.nome} precisa entrar com a nova senha`)
-      }
-      aoFechar()
+      await acao()
+      setModo(null)
+      if (sucesso) setAviso(sucesso)
     } catch (err) {
-      setErro(separarErros(err, [modo] as const, 'Não foi possível salvar.').campos[modo] ?? mensagemDeErro(err, 'Não foi possível salvar.'))
-      campo.current?.focus()
+      setErro(mensagemDeErro(err, 'Não foi possível salvar.'))
     }
   }
 
-  return (
-    <Dialogo
-      aberto
-      aoFechar={aoFechar}
-      titulo={modo === 'nome' ? `Editar o nome de ${u.login}` : `Redefinir a senha de ${u.nome}`}
-      acoes={
-        <>
-          <Botao onClick={aoFechar}>Cancelar</Botao>
-          <Botao variante="primaria" carregando={atualizar.isPending || redefinir.isPending} textoCarregando="Salvando…" onClick={() => salvar()}>
-            Salvar
-          </Botao>
-        </>
-      }
-    >
-      <form onSubmit={salvar} noValidate>
-        <Campo
-          rotulo={modo === 'nome' ? 'Nome completo' : 'Nova senha'}
-          obrigatorio
-          erro={erro}
-          dica={modo === 'senha' ? (souEu ? 'Mínimo 8 caracteres. Sua sessão atual continua.' : 'Mínimo 8 caracteres. As sessões abertas da pessoa são encerradas.') : 'Nome e sobrenome.'}
-        >
-          {(c) => <input {...c} ref={campo} autoFocus autoComplete={modo === 'senha' ? 'new-password' : 'off'} maxLength={200} value={valor} onChange={(e) => { setValor(e.target.value); setErro(null) }} className={classeEntrada(!!erro)} />}
-        </Campo>
-        <button type="submit" hidden />
-      </form>
-    </Dialogo>
-  )
-}
+  function salvar(e: React.FormEvent) {
+    e.preventDefault()
+    if (modo === 'nome') executar(() => atualizar.mutateAsync({ id: u.id, nome: valor }))
+    else
+      executar(
+        () => redefinir.mutateAsync({ id: u.id, senha: valor }),
+        souEu
+          ? 'Senha alterada.'
+          : `Senha alterada. ${u.nome} foi desconectado(a) e precisa entrar com a nova senha.`,
+      )
+  }
 
-function ConfirmarPerfil({ tipo, u, aoFechar }: { tipo: 'admin' | 'desativar'; u: UsuarioAdmin; aoFechar: () => void }) {
-  const atualizar = useAtualizarUsuario()
-  const notificar = useNotificar()
-  const [erro, setErro] = useState<string | null>(null)
-  const titulo = tipo === 'desativar' ? `Desativar ${u.nome}?` : u.admin ? `Tirar o perfil de administrador de ${u.nome}?` : `Tornar ${u.nome} administrador?`
-  const texto =
-    tipo === 'desativar'
-      ? 'O plantel é mantido, mas a pessoa não consegue mais entrar, as sessões abertas param na hora e ela some dos plantéis compartilhados. Dá para reativar depois.'
-      : u.admin
-        ? 'A pessoa volta a ver e editar só o próprio plantel e deixa de gerenciar usuários.'
-        : 'A pessoa vai ver e editar os pombos de todos e gerenciar usuários.'
+  function alternarAtivo() {
+    if (u.ativo && !confirm(`Desativar ${u.nome}? O plantel é mantido, mas a pessoa não consegue mais entrar.`))
+      return
+    executar(() => atualizar.mutateAsync({ id: u.id, ativo: !u.ativo }))
+  }
+
+  function alternarAdmin() {
+    const pergunta = u.admin
+      ? `Tirar o perfil de administrador de ${u.nome}?`
+      : `Tornar ${u.nome} administrador? Ele(a) vai ver e editar os pombos de todos e gerenciar usuários.`
+    if (!confirm(pergunta)) return
+    executar(() => atualizar.mutateAsync({ id: u.id, admin: !u.admin }))
+  }
+
+  const ocupado = atualizar.isPending || redefinir.isPending
 
   return (
-    <DialogoConfirmacao
-      aberto
-      aoFechar={aoFechar}
-      titulo={titulo}
-      textoConfirmar={tipo === 'desativar' ? 'Desativar' : u.admin ? 'Tirar admin' : 'Tornar admin'}
-      perigo={tipo === 'desativar' || u.admin}
-      carregando={atualizar.isPending}
-      aoConfirmar={async () => {
-        setErro(null)
-        try {
-          await atualizar.mutateAsync(tipo === 'desativar' ? { id: u.id, ativo: false } : { id: u.id, admin: !u.admin })
-          notificar(tipo === 'desativar' ? `${u.nome} desativado(a)` : u.admin ? `${u.nome} não é mais administrador(a)` : `${u.nome} agora é administrador(a)`)
-          aoFechar()
-        } catch (err) {
-          setErro(mensagemDeErro(err, 'Não foi possível salvar.')) // regras 8 e 9
-        }
-      }}
+    <li
+      className={`rounded-lg border bg-white p-4 shadow-sm ${u.ativo ? 'border-slate-200' : 'border-slate-200 opacity-60'}`}
     >
-      {erro ? <Aviso tom="erro">{erro}</Aviso> : <p>{texto}</p>}
-    </DialogoConfirmacao>
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-medium text-slate-800">{u.nome}</span>
+            {souEu && <span className="text-xs text-slate-400">(você)</span>}
+            {u.admin && (
+              <span className="rounded bg-purple-100 px-1.5 py-0.5 text-xs font-medium text-purple-700">admin</span>
+            )}
+            {u.bloqueado && (
+              <span
+                className="rounded bg-red-100 px-1.5 py-0.5 text-xs font-medium text-red-700"
+                title="Errou a senha 5 vezes nos últimos 15 minutos"
+              >
+                bloqueado
+              </span>
+            )}
+            {!u.ativo && (
+              <span className="rounded bg-slate-200 px-1.5 py-0.5 text-xs font-medium text-slate-600">
+                desativado
+              </span>
+            )}
+          </div>
+          <div className="text-sm text-slate-500">
+            {u.login} · {u.total_pombos} pombo{u.total_pombos === 1 ? '' : 's'}
+          </div>
+        </div>
+        <div className="flex items-center gap-1.5 text-sm text-slate-500">
+          {online && <span className="h-2 w-2 rounded-full bg-green-500" aria-hidden />}
+          {online ? 'Online' : descreverAcesso(u.ultimo_acesso, agora)}
+        </div>
+      </div>
+
+      {modo ? (
+        <form onSubmit={salvar} className="mt-3 flex flex-col gap-2 sm:flex-row">
+          <input
+            required
+            autoFocus
+            minLength={modo === 'senha' ? 8 : 1}
+            autoComplete={modo === 'senha' ? 'new-password' : 'off'}
+            placeholder={modo === 'senha' ? 'Nova senha (mínimo 8 caracteres)' : 'Nome completo'}
+            className="flex-1 rounded border border-slate-300 px-2 py-2 text-sm sm:py-1"
+            value={valor}
+            onChange={(e) => setValor(e.target.value)}
+          />
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              disabled={ocupado}
+              className="rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 sm:py-1"
+            >
+              Salvar
+            </button>
+            <button
+              type="button"
+              onClick={() => setModo(null)}
+              className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 sm:py-1"
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      ) : (
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button onClick={() => abrir('nome')} className={botaoSecundario}>
+            Editar nome
+          </button>
+          <button onClick={() => abrir('senha')} className={botaoSecundario}>
+            Redefinir senha
+          </button>
+          {u.bloqueado && (
+            <button
+              onClick={() =>
+                executar(() => desbloquear.mutateAsync(u.id), `${u.nome} pode tentar entrar de novo.`)
+              }
+              disabled={desbloquear.isPending}
+              className={`${botaoSecundario} text-red-700`}
+            >
+              Desbloquear
+            </button>
+          )}
+          {!souEu && (
+            <>
+              <button onClick={alternarAdmin} disabled={ocupado} className={botaoSecundario}>
+                {u.admin ? 'Tirar admin' : 'Tornar admin'}
+              </button>
+              <button
+                onClick={alternarAtivo}
+                disabled={ocupado}
+                className={`${botaoSecundario} ${u.ativo ? 'text-red-600' : 'text-green-700'}`}
+              >
+                {u.ativo ? 'Desativar' : 'Reativar'}
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
+      {erro && <div className="mt-2 rounded bg-red-50 px-3 py-2 text-sm text-red-700">{erro}</div>}
+      {aviso && <div className="mt-2 rounded bg-green-50 px-3 py-2 text-sm text-green-800">{aviso}</div>}
+    </li>
   )
 }

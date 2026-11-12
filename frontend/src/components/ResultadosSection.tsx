@@ -1,170 +1,95 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 
-import { separarErros } from '../api/erros'
-import { useCriarResultado, useRemoverResultado, useResultados } from '../api/hooks'
-import type { ResultadoInput } from '../api/types'
+import { mensagemDeErro, useCriarResultado, useRemoverResultado, useResultados } from '../api/hooks'
 import { FalhaAoCarregar } from './FalhaAoCarregar'
-import { Aviso, Botao, Campo, Carregando, DialogoConfirmacao, classeEntrada, useNotificar } from './ui'
 
-const CAMPOS = ['ano', 'competicao', 'distancia_km', 'colocacao', 'premio'] as const
-const VAZIO = { ano: '', competicao: '', distancia_km: '', colocacao: '', premio: '' }
-
-/** Resultados do pombo (DT-06): ano, prova, km, colocação e prêmio; do mais recente ao mais antigo. */
-export function ResultadosSection({ pomboId, somenteLeitura = false }: { pomboId: number; somenteLeitura?: boolean }) {
-  const { data: resultados, isLoading, isError, error, refetch } = useResultados(pomboId)
+export function ResultadosSection({
+  pomboId,
+  somenteLeitura = false,
+}: {
+  pomboId: number
+  somenteLeitura?: boolean
+}) {
+  const { data: resultados, isError, error, refetch } = useResultados(pomboId)
   const criar = useCriarResultado(pomboId)
   const remover = useRemoverResultado(pomboId)
-  const notificar = useNotificar()
-  const [aberto, setAberto] = useState(false)
-  const [form, setForm] = useState(VAZIO)
-  const [erros, setErros] = useState<Partial<Record<(typeof CAMPOS)[number], string>>>({})
-  const [erroGeral, setErroGeral] = useState<string | null>(null)
-  const [removendo, setRemovendo] = useState<{ id: number; nome: string } | null>(null)
-  const ano = useRef<HTMLInputElement>(null)
-
-  function campo(chave: keyof typeof VAZIO, valor: string) {
-    setForm((f) => ({ ...f, [chave]: valor }))
-    setErros((e) => ({ ...e, [chave]: undefined }))
-  }
+  const [competicao, setCompeticao] = useState('')
+  const [erro, setErro] = useState<string | null>(null)
 
   async function adicionar(e: React.FormEvent) {
     e.preventDefault()
-    setErroGeral(null)
-    if (!form.competicao.trim()) {
-      setErros({ competicao: 'Prova: obrigatória' })
-      return
-    }
-    const dados: ResultadoInput = {
-      ano: form.ano ? Number(form.ano) : null,
-      competicao: form.competicao,
-      distancia_km: form.distancia_km ? Number(form.distancia_km) : null,
-      colocacao: form.colocacao || null,
-      premio: form.premio || null,
-      observacao: null,
-    }
+    if (!competicao.trim()) return
+    setErro(null)
     try {
-      await criar.mutateAsync(dados)
-      notificar('Resultado adicionado')
-      setForm(VAZIO)
-      setErros({})
-      ano.current?.focus()
+      await criar.mutateAsync({
+        ano: undefined,
+        competicao,
+        distancia_km: undefined,
+        colocacao: null,
+        premio: null,
+        observacao: null,
+      })
+      setCompeticao('')
     } catch (err) {
-      const r = separarErros(err, CAMPOS, 'Não foi possível adicionar o resultado.')
-      setErros(r.campos)
-      setErroGeral(r.geral)
+      setErro(mensagemDeErro(err, 'Erro ao adicionar o resultado.'))
     }
   }
 
-  const ordenados = [...(resultados ?? [])].sort((a, b) => (b.ano ?? -1) - (a.ano ?? -1) || b.id - a.id)
+  async function removerResultado(id: number) {
+    setErro(null)
+    try {
+      await remover.mutateAsync(id)
+    } catch (err) {
+      setErro(mensagemDeErro(err, 'Erro ao remover o resultado.'))
+    }
+  }
 
   return (
-    <section aria-labelledby="titulo-resultados" className="rounded-[10px] border border-borda-suave bg-white p-4 shadow-sm sm:p-5">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <h2 id="titulo-resultados" className="text-[17px] font-semibold text-marinho">
-          Resultados
-        </h2>
-        {!somenteLeitura && !aberto && (
-          <Botao pequeno onClick={() => setAberto(true)}>
-            + Resultado
-          </Botao>
-        )}
-      </div>
+    <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+      <h2 className="mb-3 text-lg font-medium text-slate-800">Resultados / títulos</h2>
 
-      {aberto && (
-        <form onSubmit={adicionar} noValidate className="mb-4 rounded-[10px] border border-borda-suave bg-[#f8fafd] p-3.5">
-          {erroGeral && (
-            <Aviso tom="erro" className="mb-3">
-              {erroGeral}
-            </Aviso>
-          )}
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-[6rem_1fr_6rem_8rem_1fr]">
-            <Campo rotulo="Ano" erro={erros.ano}>
-              {(c) => <input {...c} ref={ano} autoFocus inputMode="numeric" placeholder="2025" value={form.ano} onChange={(e) => campo('ano', e.target.value.replace(/\D/g, '').slice(0, 4))} className={`${classeEntrada(!!erros.ano)} tabular-nums`} />}
-            </Campo>
-            <Campo rotulo="Prova" obrigatorio erro={erros.competicao} className="col-span-2 md:col-span-1">
-              {(c) => <input {...c} placeholder="ex.: Prova Navarro" value={form.competicao} onChange={(e) => campo('competicao', e.target.value)} className={classeEntrada(!!erros.competicao)} />}
-            </Campo>
-            <Campo rotulo="Km" erro={erros.distancia_km}>
-              {(c) => <input {...c} inputMode="numeric" value={form.distancia_km} onChange={(e) => campo('distancia_km', e.target.value.replace(/\D/g, '').slice(0, 5))} className={`${classeEntrada(!!erros.distancia_km)} tabular-nums`} />}
-            </Campo>
-            <Campo rotulo="Colocação" erro={erros.colocacao}>
-              {(c) => <input {...c} placeholder="ex.: 1º" value={form.colocacao} onChange={(e) => campo('colocacao', e.target.value)} className={classeEntrada(!!erros.colocacao)} />}
-            </Campo>
-            <Campo rotulo="Prêmio" erro={erros.premio} className="col-span-2 md:col-span-1">
-              {(c) => <input {...c} placeholder="ex.: Troféu" value={form.premio} onChange={(e) => campo('premio', e.target.value)} className={classeEntrada(!!erros.premio)} />}
-            </Campo>
-          </div>
-          <div className="mt-3 flex gap-2">
-            <Botao type="submit" variante="escura" carregando={criar.isPending}>
-              Adicionar
-            </Botao>
-            <Botao variante="fantasma" onClick={() => { setAberto(false); setForm(VAZIO); setErros({}); setErroGeral(null) }}>
-              Fechar
-            </Botao>
-          </div>
+      {!somenteLeitura && (
+        <form onSubmit={adicionar} className="mb-4 flex flex-col gap-2 sm:flex-row">
+          <input
+            required
+            placeholder="ex: 2021 — Prova Navarro 438 Km — 1º lugar"
+            className="flex-1 rounded border border-slate-300 px-2 py-2 text-sm sm:py-1"
+            value={competicao}
+            onChange={(e) => setCompeticao(e.target.value)}
+          />
+          <button
+            type="submit"
+            disabled={criar.isPending}
+            className="rounded-md bg-blue-600 px-3 py-2 text-sm sm:py-1 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          >
+            Adicionar
+          </button>
         </form>
       )}
 
-      {isLoading ? (
-        <Carregando linhas={3} />
-      ) : isError ? (
-        <FalhaAoCarregar erro={error} oQue="os resultados" onTentar={refetch} />
-      ) : ordenados.length === 0 ? (
-        <p className="text-slate-600">Nenhum resultado registrado.</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="text-left text-xs font-semibold text-slate-500">
-              <tr className="border-b border-borda-suave">
-                <th scope="col" className="py-2 pr-3">Ano</th>
-                <th scope="col" className="py-2 pr-3">Prova</th>
-                <th scope="col" className="hidden py-2 pr-3 sm:table-cell">Km</th>
-                <th scope="col" className="py-2 pr-3">Colocação</th>
-                <th scope="col" className="hidden py-2 pr-3 md:table-cell">Prêmio</th>
-                {!somenteLeitura && <th scope="col" className="py-2"><span className="sr-only">Ações</span></th>}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-borda-suave">
-              {ordenados.map((r) => (
-                <tr key={r.id}>
-                  <td className="py-2.5 pr-3 tabular-nums">{r.ano ?? '—'}</td>
-                  <td className="py-2.5 pr-3">
-                    {r.competicao}
-                    {r.observacao && <span className="block text-xs text-slate-500">{r.observacao}</span>}
-                  </td>
-                  <td className="hidden py-2.5 pr-3 tabular-nums sm:table-cell">{r.distancia_km ?? '—'}</td>
-                  <td className="py-2.5 pr-3 font-semibold">{r.colocacao ?? '—'}</td>
-                  <td className="hidden py-2.5 pr-3 md:table-cell">{r.premio ?? '—'}</td>
-                  {!somenteLeitura && (
-                    <td className="py-1 text-right">
-                      <Botao variante="fantasmaPerigo" pequeno aria-label={`Remover ${r.competicao}`} onClick={() => setRemovendo({ id: r.id, nome: r.competicao })}>
-                        Remover
-                      </Botao>
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      {erro && <div className="mb-3 rounded bg-red-50 px-3 py-2 text-sm text-red-700">{erro}</div>}
+      {isError && <FalhaAoCarregar erro={error} oQue="os resultados" onTentar={refetch} />}
+      {resultados?.length === 0 && <p className="text-sm text-slate-500">Nenhum resultado registrado.</p>}
 
-      <DialogoConfirmacao
-        aberto={removendo !== null}
-        aoFechar={() => setRemovendo(null)}
-        titulo={`Remover o resultado "${removendo?.nome ?? ''}"?`}
-        textoConfirmar="Remover"
-        perigo
-        carregando={remover.isPending}
-        aoConfirmar={async () => {
-          if (!removendo) return
-          await remover.mutateAsync(removendo.id)
-          setRemovendo(null)
-          notificar('Resultado removido')
-        }}
-      >
-        <p>Não dá para desfazer.</p>
-      </DialogoConfirmacao>
-    </section>
+      <ul className="divide-y divide-slate-100">
+        {resultados?.map((r) => (
+          <li key={r.id} className="flex items-start justify-between gap-3 py-2 text-sm">
+            <div>
+              {r.ano && <span className="font-medium">{r.ano} — </span>}
+              {r.competicao}
+              {r.distancia_km ? ` (${r.distancia_km} km)` : ''}
+              {r.colocacao ? ` · ${r.colocacao}` : ''}
+              {r.premio ? ` · ${r.premio}` : ''}
+              {r.observacao && <div className="whitespace-pre-line text-slate-400">{r.observacao}</div>}
+            </div>
+            {!somenteLeitura && (
+              <button onClick={() => removerResultado(r.id)} className="shrink-0 py-1 text-xs text-red-600 hover:underline">
+                remover
+              </button>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
   )
 }

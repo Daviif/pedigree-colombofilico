@@ -2,22 +2,21 @@ import { Link } from 'react-router-dom'
 
 import { useIrmaos } from '../api/hooks'
 import { FalhaAoCarregar } from './FalhaAoCarregar'
-import { NOME_SEXO } from './ui'
 import type { PomboSummary } from '../api/types'
 
 function Grupo({ titulo, lista }: { titulo: string; lista: PomboSummary[] }) {
   if (lista.length === 0) return null
   return (
     <div>
-      <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">{titulo}</div>
+      <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">{titulo}</div>
       <ul className="mt-1 divide-y divide-slate-100">
         {lista.map((p) => (
           <li key={p.id} className="flex items-center justify-between gap-3 py-1.5 text-sm">
-            <Link to={`/pombos/${p.id}`} className="font-medium text-link hover:underline tabular-nums">
+            <Link to={`/pombos/${p.id}`} className="font-medium text-blue-700 hover:underline">
               {p.anilha}
             </Link>
             <span className="text-right text-slate-500">
-              {NOME_SEXO[p.sexo]}{p.cor ? ` · ${p.cor}` : ''}
+              {p.sexo} {p.cor ? `— ${p.cor}` : ''}
             </span>
           </li>
         ))}
@@ -36,13 +35,13 @@ export function IrmaosSection({ pomboId }: { pomboId: number }) {
   if (total === 0) return null
 
   return (
-    <section aria-labelledby="titulo-irmaos" className="rounded-[10px] border border-borda-suave bg-white p-4 shadow-sm sm:p-5">
-      <h2 id="titulo-irmaos" className="mb-3 text-[17px] font-semibold text-marinho">Irmãos</h2>
+    <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+      <h2 className="mb-3 text-lg font-medium text-slate-800">Irmãos</h2>
       <div className="space-y-4">
         <Grupo titulo="Irmãos completos (mesmo pai e mãe)" lista={irmaos.completos} />
         <Grupo titulo="Meios-irmãos (mesmo pai)" lista={irmaos.meios_paternos} />
         <Grupo titulo="Meios-irmãos (mesma mãe)" lista={irmaos.meios_maternos} />
       </div>
-    </section>
+    </div>
   )
 }

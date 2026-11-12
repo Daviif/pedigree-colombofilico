@@ -1,33 +1,7 @@
 @import "tailwindcss";
 
-/* Tokens do sistema visual (docs/ux/sistema-visual.md): identidade azul-marinho e dourado.
-   Viram classes do Tailwind: bg-marinho, text-dourado-texto, border-borda etc. */
-@theme {
-  --color-marinho: #0f1f3d;
-  --color-marinho-2: #1a3160;
-  --color-marinho-3: #24407a;
-  --color-dourado: #e3b04b;
-  --color-dourado-2: #d29c33;
-  --color-dourado-claro: #fbf3df;
-  /* dourado como TEXTO sobre fundo claro (5,9:1); #e3b04b só em botão/destaque */
-  --color-dourado-texto: #8a5a00;
-  --color-link: #1d4ed8;
-  --color-macho: #2563eb;
-  --color-femea: #db2777;
-  --color-fundo: #f4f6fa;
-  --color-borda: #cfd6e2;
-  --color-borda-suave: #e3e8f0;
-  --color-menu-texto: #cbd5e1;
-}
-
 body {
-  @apply bg-fundo text-slate-900;
-}
-
-/* Anel de foco em tudo que é clicável, só para teclado (não aparece no clique). */
-:focus-visible {
-  outline: 2px solid var(--color-link);
-  outline-offset: 2px;
+  @apply bg-slate-50 text-slate-900;
 }
 
 /* No celular, campos com fonte < 16px fazem o iOS dar zoom ao focar. */
@@ -36,11 +10,5 @@ body {
   select,
   textarea {
     font-size: 16px;
-  }
-}
-
-@keyframes brilho {
-  to {
-    background-position: -200% 0;
   }
 }

@@ -1,9 +1,7 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { mensagemDeErro, useCriarPombo, useProprietarios } from '../api/hooks'
 import type { Pombo, Sexo } from '../api/types'
-import type { PropsControle } from './ui'
-import { classeBotao, classeEntrada } from './ui'
 import { capitalizarPrimeira, limparAnilha } from '../formatadores'
 
 export function PomboSelect({
@@ -14,8 +12,6 @@ export function PomboSelect({
   label,
   sexoPadrao,
   permitirCriar = true,
-  controle,
-  invalido = false,
 }: {
   pombos: Pombo[]
   value: number | null | undefined
@@ -25,9 +21,6 @@ export function PomboSelect({
   sexoPadrao?: Sexo
   // O cadastro rápido sempre cria no plantel do usuário logado.
   permitirCriar?: boolean
-  /** Liga o campo ao rótulo/erro do Campo (acessibilidade). */
-  controle?: PropsControle
-  invalido?: boolean
 }) {
   const selecionado = pombos.find((p) => p.id === value)
   const [query, setQuery] = useState('')
@@ -39,8 +32,6 @@ export function PomboSelect({
   const [novoProprietarioId, setNovoProprietarioId] = useState<number | undefined>(undefined)
   const [erroCriar, setErroCriar] = useState<string | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const [ativo, setAtivo] = useState(0)
-  const idLista = useId()
   const criar = useCriarPombo()
   const { data: proprietarios } = useProprietarios()
 
@@ -105,37 +96,6 @@ export function PomboSelect({
     }
   }
 
-  // Itens navegáveis pelo teclado, na ordem em que aparecem (sistema visual §6: combobox).
-  const itens: { chave: string; executar: () => void }[] = [
-    { chave: 'nenhum', executar: () => selecionar(undefined) },
-    ...opcoes.map((p) => ({ chave: String(p.id), executar: () => selecionar(p.id) })),
-    ...(permitirCriar ? [{ chave: 'criar', executar: abrirCriacao }] : []),
-  ]
-  const listaAberta = aberto && !modoCriar
-
-  function teclado(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-      e.preventDefault()
-      if (!listaAberta) {
-        setAberto(true)
-        setModoCriar(false)
-        return
-      }
-      setAtivo((a) => (a + (e.key === 'ArrowDown' ? 1 : -1) + itens.length) % itens.length)
-    } else if (e.key === 'Enter' && listaAberta) {
-      e.preventDefault() // não envia o formulário
-      itens[Math.min(ativo, itens.length - 1)]?.executar()
-    } else if (e.key === 'Escape' && (aberto || modoCriar)) {
-      e.stopPropagation()
-      setAberto(false)
-      setModoCriar(false)
-    }
-  }
-
-  const opcaoId = (i: number) => `${idLista}-${i}`
-  const classeOpcao = (i: number) =>
-    `block w-full min-h-11 cursor-pointer px-3 py-2 text-left text-sm sm:min-h-0 ${i === ativo ? 'bg-blue-50' : 'hover:bg-slate-100'}`
-
   const textoExibido = selecionado
     ? `${selecionado.anilha}${selecionado.cor ? ` — ${selecionado.cor}` : ''}`
     : query
@@ -143,81 +103,62 @@ export function PomboSelect({
   return (
     <div className="relative" ref={containerRef}>
       <input
-        {...controle}
-        role="combobox"
-        aria-expanded={listaAberta}
-        aria-controls={idLista}
-        aria-autocomplete="list"
-        aria-activedescendant={listaAberta ? opcaoId(Math.min(ativo, itens.length - 1)) : undefined}
-        onKeyDown={teclado}
-        autoComplete="off"
-        placeholder={`Buscar ${label.toLowerCase()} por anilha…`}
+        placeholder={`Buscar ${label.toLowerCase()} por anilha...`}
         value={aberto ? query : textoExibido}
         onFocus={() => {
           setAberto(true)
           setModoCriar(false)
           setQuery('')
-          setAtivo(0)
         }}
-        onChange={(e) => {
-          setQuery(e.target.value)
-          setAtivo(e.target.value ? 1 : 0)
-          setAberto(true)
-        }}
-        className={classeEntrada(invalido)}
+        onChange={(e) => setQuery(e.target.value)}
+        className="w-full rounded border border-slate-300 px-2 py-2 text-sm sm:py-1"
       />
       {aberto && !modoCriar && (
-        <div id={idLista} role="listbox" aria-label={`Escolher ${label}`} className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-[10px] border border-borda-suave bg-white shadow-xl">
-          <div
-            id={opcaoId(0)}
-            role="option"
-            aria-selected={value == null}
+        <div className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded border border-slate-300 bg-white shadow-lg">
+          <button
+            type="button"
             onMouseDown={(e) => {
               e.preventDefault()
               selecionar(undefined)
             }}
-            className={`${classeOpcao(0)} text-slate-500`}
+            className="block w-full px-2 py-2 text-left sm:py-1 text-sm text-slate-500 hover:bg-slate-100"
           >
             Não cadastrado(a) no sistema
-          </div>
-          {opcoes.map((p, i) => (
-            <div
+          </button>
+          {opcoes.map((p) => (
+            <button
+              type="button"
               key={p.id}
-              id={opcaoId(i + 1)}
-              role="option"
-              aria-selected={value === p.id}
               onMouseDown={(e) => {
                 e.preventDefault()
                 selecionar(p.id)
               }}
-              className={classeOpcao(i + 1)}
+              className="block w-full px-2 py-2 text-left sm:py-1 text-sm hover:bg-slate-100"
             >
               {p.anilha} {p.cor ? `— ${p.cor}` : ''}
-            </div>
+            </button>
           ))}
           {opcoes.length === 0 && (
-            <div className="px-3 py-2 text-sm text-slate-500">Nenhum pombo encontrado</div>
+            <div className="px-2 py-1 text-sm text-slate-400">Nenhum pombo encontrado</div>
           )}
           {permitirCriar && (
-            <div
-              id={opcaoId(itens.length - 1)}
-              role="option"
-              aria-selected={false}
+            <button
+              type="button"
               onMouseDown={(e) => {
                 e.preventDefault()
                 abrirCriacao()
               }}
-              className={`${classeOpcao(itens.length - 1)} border-t border-borda-suave font-semibold text-link`}
+              className="block w-full border-t border-slate-100 px-2 py-1.5 text-left text-sm font-medium text-blue-700 hover:bg-blue-50"
             >
               + Cadastrar {label.toLowerCase()} agora
-            </div>
+            </button>
           )}
         </div>
       )}
       {aberto && modoCriar && (
         // Não é um <form>: este painel fica dentro do <form> do cadastro do pombo
         // principal, e formulários HTML não podem ser aninhados.
-        <div className="absolute z-10 mt-1 w-full space-y-2 rounded-[10px] border border-borda-suave bg-white p-3 shadow-xl">
+        <div className="absolute z-10 mt-1 w-full space-y-2 rounded border border-slate-300 bg-white p-3 shadow-lg">
           {erroCriar && <div className="rounded bg-red-50 px-2 py-1 text-xs text-red-700">{erroCriar}</div>}
           <input
             autoFocus
@@ -230,13 +171,13 @@ export function PomboSelect({
                 criarRapido()
               }
             }}
-            className={classeEntrada()}
+            className="w-full rounded border border-slate-300 px-2 py-1 text-sm"
           />
           <div className="flex flex-col gap-2 sm:flex-row">
             <select
               value={novoSexo}
               onChange={(e) => setNovoSexo(e.target.value as Sexo)}
-              className={`min-w-0 flex-1 ${classeEntrada()}`}
+              className="min-w-0 flex-1 rounded border border-slate-300 px-2 py-1 text-sm"
             >
               <option value="DESCONHECIDO">Desconhecido</option>
               {(!sexosPermitidos || sexosPermitidos.includes('M')) && <option value="M">Macho</option>}
@@ -246,13 +187,13 @@ export function PomboSelect({
               placeholder="Cor"
               value={novaCor}
               onChange={(e) => setNovaCor(capitalizarPrimeira(e.target.value))}
-              className={`min-w-0 flex-1 ${classeEntrada()}`}
+              className="min-w-0 flex-1 rounded border border-slate-300 px-2 py-1 text-sm"
             />
           </div>
           <select
             value={novoProprietarioId ?? ''}
             onChange={(e) => setNovoProprietarioId(e.target.value ? Number(e.target.value) : undefined)}
-            className={classeEntrada()}
+            className="w-full rounded border border-slate-300 px-2 py-1 text-sm"
           >
             <option value="">Sem proprietário definido</option>
             {proprietarios?.map((p) => (
@@ -269,7 +210,7 @@ export function PomboSelect({
                 e.preventDefault()
                 criarRapido()
               }}
-              className={classeBotao("escura", true)}
+              className="rounded-md bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
             >
               Cadastrar e vincular
             </button>
@@ -279,7 +220,7 @@ export function PomboSelect({
                 e.preventDefault()
                 setModoCriar(false)
               }}
-              className={classeBotao("secundaria", true)}
+              className="rounded-md border border-slate-300 px-3 py-1 text-sm text-slate-700 hover:bg-slate-50"
             >
               Voltar
             </button>
